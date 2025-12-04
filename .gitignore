@@ -1,0 +1,43 @@
+# Node modules
+node_modules/
+
+# VS Code Extension packaging files
+*.vsix
+
+# Build output
+out/
+dist/
+build/
+
+# TypeScript
+*.tsbuildinfo
+*.tscache
+*.ts-temp/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# VSCode internals
+.vscode/
+.vscode-test/
+.history/
+
+# Coverage
+coverage/
+lcov.info
+
+# Environment files
+.env
+.env.*
+*.local
+
+# OS-Generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp

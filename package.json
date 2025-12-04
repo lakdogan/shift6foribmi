@@ -1,0 +1,40 @@
+{
+  "name": "shift6-formatter",
+  "displayName": "TotalFree RPGLE Formatter",
+  "description": "Simple formatter that shifts each line by N spaces (default 6).",
+  "version": "0.0.1",
+  "publisher": "your-name",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Formatters"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "TotalFree RPGLE Formatter",
+      "properties": {
+        "shift6.spaces": {
+          "type": "number",
+          "default": 6,
+          "minimum": 0,
+          "description": "Number of spaces to add at the start of each line."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "package": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}

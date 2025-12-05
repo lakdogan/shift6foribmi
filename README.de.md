@@ -55,6 +55,10 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 
 ### V. Version und Beitraege
 
+**Maintainer**
+
+- Levent Akdogan (Lakdogan) — Autor, Architektur, Wartung.
+
 #### V.I. Changelog
 - **Version 0.1.0** (2025-12-04): Erste Veroeffentlichung. Erzwingt `**FREE` in Zeile 1, 6-Spaces-Basis, blockabhaengige Einrueckung, Semikolon-Splitting, entfernt doppelte `**FREE`.
 
@@ -67,7 +71,7 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 
 Die folgende Animation zeigt einen Formatierungslauf mit Shift6 in Visual Studio Code.
 
-![Shift6 one-click formatting demo](assets/shift6-demo.gif)
+![Shift6 one-click formatting demo](assets/demo.gif)
 
 #### Vorher -> Format Document -> Nachher (Beispiel)
 

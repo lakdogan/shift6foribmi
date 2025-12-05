@@ -2,16 +2,18 @@
   "name": "shift6foribmi",
   "displayName": "Shift6 for IBM i",
   "description": "Formatter for IBM i RPGLE free-format: align **FREE, base indent and block nesting.",
-  "version": "0.1.0",
+  "author": "Levent Akdogan (Lakdogan)",
+  "contributors": [
+    "Levent Akdogan (Lakdogan)"
+  ],
+  "version": "0.1.1",
   "publisher": "lakdogan",
   "engines": {
     "vscode": "^1.85.0"
   },
-
   "categories": [
     "Formatters"
   ],
-
   "activationEvents": [
     "onLanguage:rpgle",
     "onLanguage:rpg",
@@ -20,33 +22,48 @@
     "onLanguage:rpgleinc",
     "onCommand:editor.action.formatDocument"
   ],
-
   "main": "./out/extension.js",
-
   "contributes": {
     "languages": [
       {
         "id": "rpgle",
-        "aliases": ["RPGLE"],
-        "extensions": [".rpgle"]
+        "aliases": [
+          "RPGLE"
+        ],
+        "extensions": [
+          ".rpgle"
+        ]
       },
       {
         "id": "sqlrpgle",
-        "aliases": ["SQLRPGLE"],
-        "extensions": [".sqlrpgle"]
+        "aliases": [
+          "SQLRPGLE"
+        ],
+        "extensions": [
+          ".sqlrpgle"
+        ]
       },
       {
         "id": "rpg",
-        "aliases": ["RPG"],
-        "extensions": [".rpg", ".sqlrpg"]
+        "aliases": [
+          "RPG"
+        ],
+        "extensions": [
+          ".rpg",
+          ".sqlrpg"
+        ]
       },
       {
         "id": "rpginc",
-        "aliases": ["RPGINC"],
-        "extensions": [".rpginc", ".rpgleinc"]
+        "aliases": [
+          "RPGINC"
+        ],
+        "extensions": [
+          ".rpginc",
+          ".rpgleinc"
+        ]
       }
     ],
-
     "configuration": {
       "title": "Shift6 for IBM i",
       "properties": {
@@ -64,22 +81,19 @@
         }
       }
     },
-
     "documentFormatting": true
   },
-
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
     "package": "npm run compile"
   },
-
   "devDependencies": {
     "@types/vscode": "^1.85.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vsce": "^2.15.0"
   },
-
   "repository": {
     "type": "git",
     "url": "https://github.com/lakdogan/shift6-formatter"

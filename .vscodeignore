@@ -1,8 +1,17 @@
+# Exclude development stuff
 .vscode/**
 .vscode-test/**
-src/**
+out/test/**
 **/*.map
 node_modules/@types/**
-tsconfig.json
+
+# Do NOT exclude assets
+# assets/** must be included
+
+# Do NOT exclude src:
+# src/** must be included, because the extension needs it
+
+# These can also be excluded
+.git/**
 .vscodeignore
 .gitignore

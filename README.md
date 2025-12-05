@@ -68,6 +68,10 @@ To ensure optimal use of this extension, developers must adhere to the following
 
 ### V. Version History and Contribution
 
+**Maintainer**
+
+- Levent Akdogan (Lakdogan) — Author, architecture, maintenance.
+
 #### V.I. Change Log
 
 -   **Version 0.1.0** (2025-12-04): Initial release. Implements mandatory 6-space indentation for all RPG Free lines, excluding the initial compiler directive.
@@ -82,7 +86,7 @@ To ensure optimal use of this extension, developers must adhere to the following
 
 The following animation shows a formatting operation performed by Shift6 within Visual Studio Code.
 
-![Shift6 one-click formatting demo](assets/shift6-demo.gif)
+![Shift6 one-click formatting demo](https://github.com/lakdogan/shift6-formatter/blob/main/raw/HEAD/assets/demo.gif?raw=true)
 
 #### Before → Format Document → After (sample)
 

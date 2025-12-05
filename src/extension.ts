@@ -128,17 +128,46 @@ export function activate(context: vscode.ExtensionContext) {
 
       const linesToProcess: string[] = [];
       let splitOccurred = false;
-      for (let i = 1; i < lineCount; i++) {
+      for (let i = 0; i < lineCount; i++) {
         const original = document.lineAt(i).text;
         const trimmedUpper = original.trimStart().toUpperCase();
         if (trimmedUpper.startsWith('**FREE')) {
-          continue; // drop duplicate **FREE markers below the first line
+          // Drop the marker; keep any trailing code after **FREE
+          const idx = original.toUpperCase().indexOf('**FREE');
+          const after = original.slice(idx + 6).trimStart();
+          if (after.length === 0) {
+            continue;
+          }
+          const segments = splitStatements(after);
+          const filtered: string[] = [];
+          for (const seg of segments) {
+            const segUpper = seg.trimStart().toUpperCase();
+            if (segUpper.startsWith('**FREE')) {
+              splitOccurred = true;
+              continue;
+            }
+            filtered.push(seg);
+          }
+          if (filtered.length !== segments.length || segments.length > 1 || segments[0] !== after) {
+            splitOccurred = true;
+          }
+          linesToProcess.push(...filtered);
+          continue;
         }
         const segments = splitStatements(original);
-        if (segments.length > 1 || segments[0] !== original) {
+        const filtered: string[] = [];
+        for (const seg of segments) {
+          const segUpper = seg.trimStart().toUpperCase();
+          if (segUpper.startsWith('**FREE')) {
+            splitOccurred = true;
+            continue; // drop duplicate **FREE markers even if inline after split
+          }
+          filtered.push(seg);
+        }
+        if (filtered.length !== segments.length || segments.length > 1 || segments[0] !== original) {
           splitOccurred = true;
         }
-        linesToProcess.push(...segments);
+        linesToProcess.push(...filtered);
       }
 
       // Build result lines

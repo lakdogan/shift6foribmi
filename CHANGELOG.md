@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+- Preserve first-line code when inserting `**FREE` (marker added above existing code instead of dropping it).
+- Handle inline `**FREE` markers with trailing statements by splitting and formatting the remaining code.
+- Drop duplicate `**FREE` markers even after semicolon splitting on subsequent format runs.
 
 ## [0.1.0] - 2025-12-04
 - Renamed extension to **Shift6 for IBM i** (`shift6foribmi`).

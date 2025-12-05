@@ -2,7 +2,7 @@
   "name": "shift6foribmi",
   "displayName": "Shift6 for IBM i",
   "description": "Formatter for IBM i RPGLE free-format: align **FREE, base indent and block nesting.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "lakdogan",
   "engines": {
     "vscode": "^1.85.0"

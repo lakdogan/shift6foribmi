@@ -20,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const firstLineText = document.lineAt(0).text;
-      const normalizedFree = '**FREE';
+      const normalizedFree = '**free';
 
       const countLeadingSpaces = (text: string): number => {
         let i = 0;
@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       const lineCount = document.lineCount;
 
-      const freeNeedsTrim = firstLineText.trim().toUpperCase() !== '**FREE';
+      const freeNeedsTrim = firstLineText.trim().toLowerCase() !== normalizedFree;
 
       const closers = [
         'END-PROC',

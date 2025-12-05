@@ -84,7 +84,7 @@ end-proc;
 
 Nachher (Basis 6, Block 2):
 ```rpg
-**FREE
+**free
       // messy demo snippet
       ctl-opt dftactgrp(*no) actgrp(*new);
       dcl-s counter int(10) inz(0); dcl-s msg varchar(50);

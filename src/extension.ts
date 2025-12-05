@@ -20,10 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       const firstLineText = document.lineAt(0).text;
-      const normalizedFree = firstLineText.trimStart();
-      if (!normalizedFree.toUpperCase().startsWith('**FREE')) {
-        return [];
-      }
+      const normalizedFree = '**FREE';
 
       const countLeadingSpaces = (text: string): number => {
         let i = 0;
@@ -35,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       const lineCount = document.lineCount;
 
-      const freeNeedsTrim = firstLineText !== normalizedFree;
+      const freeNeedsTrim = firstLineText.trim().toUpperCase() !== '**FREE';
 
       const closers = [
         'END-PROC',
@@ -133,6 +130,10 @@ export function activate(context: vscode.ExtensionContext) {
       let splitOccurred = false;
       for (let i = 1; i < lineCount; i++) {
         const original = document.lineAt(i).text;
+        const trimmedUpper = original.trimStart().toUpperCase();
+        if (trimmedUpper.startsWith('**FREE')) {
+          continue; // drop duplicate **FREE markers below the first line
+        }
         const segments = splitStatements(original);
         if (segments.length > 1 || segments[0] !== original) {
           splitOccurred = true;
@@ -145,7 +146,6 @@ export function activate(context: vscode.ExtensionContext) {
       let anyChanged = false;
       let indentLevel = 0;
       let procDepth = 0;
-      let hasSeenProc = false;
 
       // First line (**FREE)
       resultLines.push(normalizedFree);
@@ -220,23 +220,6 @@ export function activate(context: vscode.ExtensionContext) {
           }
         }
 
-        // If we have seen at least one proc and are back at top-level code (non-comment),
-        // insert an automatic proc start before this line so following end-proc pairs up.
-        if (
-          hasSeenProc &&
-          procDepth === 0 &&
-          !isProcStart &&
-          !isProcEnd &&
-          trimmed.length > 0 &&
-          !trimmed.startsWith('//')
-        ) {
-          const autoProcLine = ' '.repeat(targetBaseIndent) + 'dcl-proc autoprocedure;';
-          resultLines.push(autoProcLine);
-          anyChanged = true;
-          indentLevel += 1;
-          procDepth += 1;
-        }
-
         const currentIndent = countLeadingSpaces(original);
         const effectiveTarget = targetBaseIndent + indentLevel * blockIndent;
         let newText: string;
@@ -264,7 +247,6 @@ export function activate(context: vscode.ExtensionContext) {
           indentLevel += 1;
           if (isProcStart) {
             procDepth += 1;
-            hasSeenProc = true;
           }
         }
       }

@@ -9,6 +9,7 @@
   - Duplicate `**FREE` markers are removed.
   - Inline semicolon splitting creates one statement per line; trailing `//` comments stay on the last segment.
   - Stray `;` lines attach to the previous code line if it lacks a semicolon.
+  - Excess blank lines before closers (END-PROC/ENDIF/etc.) are trimmed; multiple consecutive blanks collapse to one; trailing blanks at EOF are removed.
 
 ## Settings Regression Checks
 - Set `shift6.spaces` to `0` and verify no base padding is added.
@@ -29,4 +30,3 @@
 ## Future Automation Ideas
 - Add Jest-style unit tests around formatter logic (extract into pure functions).
 - Golden-file tests for sample inputs/outputs (compare formatted text snapshots).
-

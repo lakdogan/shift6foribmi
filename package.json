@@ -6,7 +6,7 @@
   "contributors": [
     "Levent Akdogan (Lakdogan)"
   ],
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "lakdogan",
   "engines": {
     "vscode": "^1.85.0"

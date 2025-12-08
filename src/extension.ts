@@ -172,7 +172,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       // Build result lines
-      const resultLines: string[] = [];
+      let resultLines: string[] = [];
       let anyChanged = false;
       let indentLevel = 0;
       let procDepth = 0;
@@ -279,6 +279,50 @@ export function activate(context: vscode.ExtensionContext) {
             procDepth += 1;
           }
         }
+      }
+
+      // Remove excess blank lines before closers and collapse duplicate blanks
+      const isBlank = (text: string) => text.trim().length === 0;
+      const isCloserLine = (text: string) => startsWithKeyword(text.trim().toUpperCase(), closers);
+
+      const compacted: string[] = [];
+      for (let i = 0; i < resultLines.length; i++) {
+        const line = resultLines[i];
+        if (isBlank(line)) {
+          // Look ahead to the next non-blank line
+          let k = i + 1;
+          while (k < resultLines.length && isBlank(resultLines[k])) {
+            k++;
+          }
+          const hasFollowing = k < resultLines.length;
+          if (!hasFollowing) {
+            // Trailing blanks are trimmed below; skip here
+            continue;
+          }
+          const nextLine = resultLines[k];
+          if (isCloserLine(nextLine)) {
+            // Drop blanks directly before closers like END-PROC/ENDIF/END-SELECT/etc.
+            anyChanged = true;
+            continue;
+          }
+          if (compacted.length > 0 && isBlank(compacted[compacted.length - 1])) {
+            // Collapse multiple blank lines into one
+            anyChanged = true;
+            continue;
+          }
+        }
+        compacted.push(line);
+      }
+      resultLines = compacted;
+
+      // Trim trailing blank lines (lines that are empty or whitespace only)
+      let trimmedTrailing = false;
+      while (resultLines.length > 0 && resultLines[resultLines.length - 1].trim().length === 0) {
+        resultLines.pop();
+        trimmedTrailing = true;
+      }
+      if (trimmedTrailing) {
+        anyChanged = true;
       }
 
       if (!anyChanged && !freeNeedsTrim && !splitOccurred) {

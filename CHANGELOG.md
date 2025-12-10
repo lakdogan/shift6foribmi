@@ -5,8 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
-- Normalize token spacing outside of string literals to a single space (e.g., `dcl-pi    *n;` → `dcl-pi *n;`, `if   flag = 0;` → `if flag = 0;`). 
-- Trim whitespace inside parentheses that only wrap a string literal (e.g., `(   'error hit'  )` → `('error hit')`).
+
+## [0.1.3] - 2025-12-10
+- Normalize token spacing outside of string literals to a single space (e.g., `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`).
+- Trim whitespace inside parentheses that only wrap a string literal (e.g., `(   'error hit'  )` -> `('error hit')`).
 - Added settings `shift6.collapseTokenSpaces` and `shift6.trimStringParentheses` to toggle these whitespace rules.
 - Expanded block handling: added mid/closer support for `WHEN-IS`, `WHEN-IN`, `ON-EXIT`, and `ENDON-EXIT`.
 - Added optional pre-commit hook (`.githooks/pre-commit`) running `npm run typecheck` via `scripts/pre-commit-check.js`.

@@ -96,6 +96,7 @@
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -p ./",
+    "typecheck": "tsc -p ./ --noEmit",
     "watch": "tsc -w -p ./",
     "package": "npm run compile"
   },

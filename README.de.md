@@ -32,6 +32,10 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
 - `shift6.collapseTokenSpaces` (Standard: `true`): Schaltet das Reduzieren mehrfacher Leerzeichen zwischen Tokens auf ein Leerzeichen.  
 - `shift6.trimStringParentheses` (Standard: `true`): Entfernt Leerzeichen direkt innerhalb von Klammern, wenn darin nur ein String literal steht.
 
+**C. Git Hook (optional)**
+
+- Pre-Commit-Typecheck: `git config core.hooksPath .githooks` aktiviert den Hook; er ruft `npm run typecheck` auf. Überspringbar per `SKIP_SHIFT6_PRECOMMIT=1`.
+
 ---
 
 ### III. Implementierung und Nutzung

@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Trim whitespace inside parentheses that only wrap a string literal (e.g., `(   'error hit'  )` → `('error hit')`).
 - Added settings `shift6.collapseTokenSpaces` and `shift6.trimStringParentheses` to toggle these whitespace rules.
 - Expanded block handling: added mid/closer support for `WHEN-IS`, `WHEN-IN`, `ON-EXIT`, and `ENDON-EXIT`.
+- Added optional pre-commit hook (`.githooks/pre-commit`) running `npm run typecheck` via `scripts/pre-commit-check.js`.
 
 ## [0.1.2] - 2025-12-05
 - Trim trailing blank lines and drop excess blank lines before closers (END-PROC/ENDIF/etc.); collapse multiple blank lines to a single blank.

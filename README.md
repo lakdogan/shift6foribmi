@@ -29,6 +29,13 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
     -   *Developer Value:* **Predictable Results:** Maintains code stability and prevents unnecessary file changes.
 -   **Platform Compatibility:** Specifically designed to reconcile VS Code's flexible formatting with PDM's rigid requirements.
     -   *Developer Value:* **Seamless Toolchain:** Ensures source code is valid across both local and remote environments.
+-   **Whitespace Normalization:** Collapses multiple spaces between tokens to one (e.g., `dcl-pi    *n;` → `dcl-pi *n;`, `if   flag = 0;` → `if flag = 0;`) and trims spaces inside string-only parentheses `(   'error'  )` → `('error')`.
+    -   *Developer Value:* **Cleaner Diffs:** Consistent spacing without touching string contents preserves readability and minimizes churn.
+
+**B. Settings**
+
+- `shift6.collapseTokenSpaces` (default: `true`): Steuert das Reduzieren mehrfacher Spaces zwischen Tokens auf ein Space.  
+- `shift6.trimStringParentheses` (default: `true`): Entfernt Spaces direkt innerhalb von Klammern, wenn diese nur einen String literal enthalten.
 
 ---
 

@@ -78,6 +78,16 @@
           "default": 2,
           "minimum": 0,
           "description": "Extra spaces per nested block (IF/DOW/DOU/FOR/SELECT/MONITOR/PROC/etc.)."
+        },
+        "shift6.collapseTokenSpaces": {
+          "type": "boolean",
+          "default": true,
+          "description": "Collapse multiple spaces between tokens (outside of string literals) down to a single space."
+        },
+        "shift6.trimStringParentheses": {
+          "type": "boolean",
+          "default": true,
+          "description": "Trim whitespace inside parentheses that only contain a single string literal."
         }
       }
     },

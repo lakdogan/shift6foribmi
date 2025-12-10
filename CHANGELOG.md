@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+- Normalize token spacing outside of string literals to a single space (e.g., `dcl-pi    *n;` → `dcl-pi *n;`, `if   flag = 0;` → `if flag = 0;`). 
+- Trim whitespace inside parentheses that only wrap a string literal (e.g., `(   'error hit'  )` → `('error hit')`).
+- Added settings `shift6.collapseTokenSpaces` and `shift6.trimStringParentheses` to toggle these whitespace rules.
+- Expanded block handling: added mid/closer support for `WHEN-IS`, `WHEN-IN`, `ON-EXIT`, and `ENDON-EXIT`.
 
 ## [0.1.2] - 2025-12-05
 - Trim trailing blank lines and drop excess blank lines before closers (END-PROC/ENDIF/etc.); collapse multiple blank lines to a single blank.

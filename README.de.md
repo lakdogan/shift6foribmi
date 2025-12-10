@@ -24,6 +24,13 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
   - *Mehrwert:* Lesbare Schachtelungen, ohne bestehende Struktur zu zerstoeren.
 - **Semikolon-Splitting:** Jede Anweisung endet auf eigener Zeile; Mehrfach-`;` werden bereinigt.  
   - *Mehrwert:* Klar getrennte Statements, auch wenn sie inline geschrieben wurden.
+- **Whitespace-Normalisierung:** Mehrfach-Spaces zwischen Tokens werden auf eines reduziert (z.B. `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) und Spaces in string-only Klammern werden getrimmt `(   'error'  )` -> `('error')`.  
+  - *Mehrwert:* Konsistente Lesbarkeit und kleinere Diffs, ohne String-Inhalte anzutasten.
+
+**B. Einstellungen**
+
+- `shift6.collapseTokenSpaces` (Standard: `true`): Schaltet das Reduzieren mehrfacher Leerzeichen zwischen Tokens auf ein Leerzeichen.  
+- `shift6.trimStringParentheses` (Standard: `true`): Entfernt Leerzeichen direkt innerhalb von Klammern, wenn darin nur ein String literal steht.
 
 ---
 

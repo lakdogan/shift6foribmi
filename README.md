@@ -34,12 +34,12 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
 
 **B. Settings**
 
-- `shift6.collapseTokenSpaces` (default: `true`): Steuert das Reduzieren mehrfacher Spaces zwischen Tokens auf ein Space.  
-- `shift6.trimStringParentheses` (default: `true`): Entfernt Spaces direkt innerhalb von Klammern, wenn diese nur einen String literal enthalten.
+- `shift6.collapseTokenSpaces` (default: `true`): Controls whether multiple spaces between tokens are collapsed to one.  
+- `shift6.trimStringParentheses` (default: `true`): Removes spaces directly inside parentheses when they contain only a single string literal.
 
 **C. Git Hook (optional)**
 
-- Pre-commit Typecheck: `git config core.hooksPath .githooks` aktiviert den Hook; er ruft `npm run typecheck` auf. Überspringbar per `SKIP_SHIFT6_PRECOMMIT=1`.
+- Pre-commit type check: enable the hook with `git config core.hooksPath .githooks`; it runs `npm run typecheck` and can be skipped via `SKIP_SHIFT6_PRECOMMIT=1`.
 
 ---
 

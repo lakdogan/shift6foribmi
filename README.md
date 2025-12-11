@@ -93,7 +93,19 @@ To ensure optimal use of this extension, developers must adhere to the following
 
 ---
 
-## VI. Visual Demo
+### VI. Contributing & Issue Reporting
+
+Shift6 uses structured GitHub issue templates to streamline communication and keep the development experience smooth.
+
+- 🐛 **Bug Reports:** Please include a reproducible code sample and environment details.  
+- ✨ **Feature Requests:** Clearly describe the feature and explain why it benefits the workflow.
+
+You can create a new issue here:  
+👉 https://github.com/lakdogan/shift6foribmi/issues/new/choose
+
+---
+
+## VII. Visual Demo
 
 The following animation shows a formatting operation performed by Shift6 within Visual Studio Code.
 

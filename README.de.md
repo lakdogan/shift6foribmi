@@ -78,7 +78,19 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 
 ---
 
-## VI. Visuelle Demo
+### VI. Beitraege & Issue-Meldungen
+
+Shift6 nutzt strukturierte GitHub-Issue-Templates, um die Kommunikation schlank zu halten und den Entwicklungsfluss reibungslos zu gestalten.
+
+- 🐛 **Bug Reports:** Bitte mit reproduzierbarem Codebeispiel und Umgebungsdetails.  
+- ✨ **Feature Requests:** Feature klar beschreiben und den Nutzen fuer den Workflow erlaeutern.
+
+Neues Issue anlegen:  
+👉 https://github.com/lakdogan/shift6foribmi/issues/new/choose
+
+---
+
+## VII. Visuelle Demo
 
 Die folgende Animation zeigt einen Formatierungslauf mit Shift6 in Visual Studio Code.
 

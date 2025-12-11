@@ -6,7 +6,7 @@
   "contributors": [
     "Levent Akdogan (Lakdogan)"
   ],
-  "version": "0.1.6",
+  "version": "0.1.7",
   "publisher": "lakdogan",
   "engines": {
     "vscode": "^1.85.0"
@@ -111,6 +111,6 @@
   },
   "icon": "assets/icon.png",
   "bugs": {
-  "url": "https://github.com/lakdogan/shift6foribmi/issues"
+    "url": "https://github.com/lakdogan/shift6foribmi/issues"
   }
 }

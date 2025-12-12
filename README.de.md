@@ -95,6 +95,7 @@ Neues Issue anlegen:
 Die folgende Animation zeigt einen Formatierungslauf mit Shift6 in Visual Studio Code.
 
 ![Shift6 one-click formatting demo](assets/demo.gif)
+Direkter Link (falls das Bild nicht geladen wird): https://github.com/lakdogan/shift6-formatter/blob/main/raw/HEAD/assets/demo.gif?raw=true
 
 #### Vorher -> Format Document -> Nachher (Beispiel)
 

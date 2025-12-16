@@ -31,10 +31,13 @@ const CLOSERS = [
   'ENDFOR',
   'END-FOR',
   'ENDON-EXIT',
-  'END-DS'
+  'END-DS',
+  'END-PR',
+  'END-PI',
+  'END-ENUM'
 ];
 
-const OPENERS = ['DCL-PROC', 'IF', 'DOW', 'DOU', 'MONITOR', 'FOR', 'SELECT', 'BEGSR', 'DCL-DS'];
+const OPENERS = ['DCL-PROC', 'IF', 'DOW', 'DOU', 'MONITOR', 'FOR', 'SELECT', 'BEGSR', 'DCL-DS', 'DCL-PR', 'DCL-PI', 'DCL-ENUM'];
 const MID_KEYWORDS = [
   'ELSE',
   'ELSEIF',

@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.12] - 2025-12-16
+- Added block handling for data structures by recognizing `DCL-DS` openers and `END-DS` closers for indentation.
+
 ## [0.1.8] - 2025-12-11
 - Documentation updates across READMEs and docs since 0.1.3.
 

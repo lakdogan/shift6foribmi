@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.15] - 2025-12-17
+- Added block indentation support for preprocessor conditionals (`/IF`, `/ELSE`, `/ELSEIF`, `/ENDIF`).
+
 ## [0.1.14] - 2025-12-17
 - Formatter now works for IBM i remote source members (e.g., Code for IBM i `ibmi:` / `vscode-vfs:` schemes) via scheme-agnostic registration.
 - Formatting operates purely on document text (no `fsPath` reads), covering remote and local files alike.

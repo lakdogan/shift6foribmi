@@ -29,6 +29,8 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
     -   *Developer Value:* **Predictable Results:** Maintains code stability and prevents unnecessary file changes.
 -   **Platform Compatibility:** Specifically designed to reconcile VS Code's flexible formatting with PDM's rigid requirements.
     -   *Developer Value:* **Seamless Toolchain:** Ensures source code is valid across both local and remote environments.
+-   **Local & Remote Support:** Works on local files (`file:`), unsaved editors, and IBM i remote source members (e.g., Code for IBM i `ibmi:` / `vscode-vfs:` URIs).
+    -   *Developer Value:* **Remote-first Ready:** Format members directly on the host without downloading to the workstation.
 -   **Whitespace Normalization:** Collapses multiple spaces between tokens to one (e.g., `dcl-pi    *n;` → `dcl-pi *n;`, `if   flag = 0;` → `if flag = 0;`) and trims spaces inside string-only parentheses `(   'error'  )` → `('error')`.
     -   *Developer Value:* **Cleaner Diffs:** Consistent spacing without touching string contents preserves readability and minimizes churn.
 

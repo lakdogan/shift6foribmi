@@ -59,7 +59,17 @@ const PATTERNS = [
   '**/*.rpgleinc'
 ];
 
-const LANGUAGE_IDS = ['rpgle', 'sqlrpgle', 'rpg', 'sqlrpg', 'rpginc', 'rpgleinc'];
+const LANGUAGE_IDS = ['rpgle', 'sqlrpgle', 'rpg', 'rpginc'];
+
+// --------------------------------------------------------
+// Document Helpers
+// --------------------------------------------------------
+
+function getFullDocumentRange(document: vscode.TextDocument, textLength?: number): vscode.Range {
+  const length = textLength ?? document.getText().length;
+  const end = document.positionAt(length);
+  return new vscode.Range(new vscode.Position(0, 0), end);
+}
 
 // --------------------------------------------------------
 // Utility Functions
@@ -232,16 +242,16 @@ interface PreprocessResult {
  * splits multi-statements into separate lines,
  * and prepares lines for indentation formatting.
  */
-function preprocessDocument(document: vscode.TextDocument, cfg: Shift6Config): PreprocessResult {
-  const lineCount = document.lineCount;
-  const firstLineText = lineCount > 0 ? document.lineAt(0).text : '';
+function preprocessDocument(lines: string[], cfg: Shift6Config): PreprocessResult {
+  const lineCount = lines.length;
+  const firstLineText = lineCount > 0 ? lines[0] : '';
   const freeNeedsTrim = firstLineText.trim().toLowerCase() !== cfg.normalizedFree;
 
   const linesToProcess: string[] = [];
   let splitOccurred = false;
 
   for (let i = 0; i < lineCount; i++) {
-    const original = document.lineAt(i).text;
+    const original = lines[i];
     const upper = original.trimStart().toUpperCase();
 
     // Handle **FREE declarations
@@ -494,10 +504,12 @@ function postProcessBlankLines(lines: string[]) {
 // --------------------------------------------------------
 
 function provideShift6FormattingEdits(document: vscode.TextDocument): vscode.TextEdit[] {
-  if (document.lineCount === 0) return [];
+  const fullText = document.getText();
+  if (fullText.length === 0) return [];
 
+  const lines = fullText.split(/\r?\n/);
   const cfg = getConfig();
-  const pre = preprocessDocument(document, cfg);
+  const pre = preprocessDocument(lines, cfg);
 
   let { resultLines, anyChanged } = formatCore(pre, cfg);
 
@@ -507,9 +519,7 @@ function provideShift6FormattingEdits(document: vscode.TextDocument): vscode.Tex
 
   if (!anyChanged && !pre.freeNeedsTrim && !pre.splitOccurred) return [];
 
-  const first = document.lineAt(0);
-  const last = document.lineAt(pre.lineCount - 1);
-  const range = new vscode.Range(first.range.start, last.range.end);
+  const range = getFullDocumentRange(document, fullText.length);
 
   return [vscode.TextEdit.replace(range, resultLines.join('\n'))];
 }
@@ -521,13 +531,11 @@ function provideShift6FormattingEdits(document: vscode.TextDocument): vscode.Tex
 export function activate(context: vscode.ExtensionContext) {
   const selectors: vscode.DocumentSelector = [
     ...PATTERNS.map((pattern) => ({ pattern })),
-    ...LANGUAGE_IDS.map((lang) => ({ language: lang, scheme: 'file' })),
-    ...LANGUAGE_IDS.map((lang) => ({ language: lang, scheme: 'untitled' }))
+    ...LANGUAGE_IDS.map((lang) => ({ language: lang }))
   ];
 
   const provider: vscode.DocumentFormattingEditProvider = {
     provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.TextEdit[] {
-      // call your helper here
       return provideShift6FormattingEdits(document);
     }
   };

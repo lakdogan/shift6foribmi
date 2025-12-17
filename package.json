@@ -19,7 +19,6 @@
     "onLanguage:rpg",
     "onLanguage:sqlrpgle",
     "onLanguage:rpginc",
-    "onLanguage:rpgleinc",
     "onCommand:editor.action.formatDocument"
   ],
   "main": "./out/extension.js",

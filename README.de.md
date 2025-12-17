@@ -24,6 +24,8 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
   - *Mehrwert:* Lesbare Schachtelungen, ohne bestehende Struktur zu zerstoeren.
 - **Semikolon-Splitting:** Jede Anweisung endet auf eigener Zeile; Mehrfach-`;` werden bereinigt.  
   - *Mehrwert:* Klar getrennte Statements, auch wenn sie inline geschrieben wurden.
+- **Lokal & Remote:** Funktioniert auf lokalen Dateien (`file:`), unsaved Tabs und IBM i Remote Members (z.B. Code for IBM i `ibmi:` / `vscode-vfs:` URIs).  
+  - *Mehrwert:* Direkt auf dem Host formatieren, ohne den Member herunterladen zu muessen.
 - **Whitespace-Normalisierung:** Mehrfach-Spaces zwischen Tokens werden auf eines reduziert (z.B. `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) und Spaces in string-only Klammern werden getrimmt `(   'error'  )` -> `('error')`.  
   - *Mehrwert:* Konsistente Lesbarkeit und kleinere Diffs, ohne String-Inhalte anzutasten.
 

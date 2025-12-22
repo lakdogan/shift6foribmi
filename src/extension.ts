@@ -81,6 +81,11 @@ function getFullDocumentRange(document: vscode.TextDocument, textLength?: number
 const startsWithKeyword = (upperText: string, keywords: string[]): boolean =>
   keywords.some((kw) => upperText.startsWith(kw));
 
+const containsKeywordToken = (upperText: string, keywords: string[]): boolean => {
+  const tokens = upperText.split(/[^A-Z0-9*\/-]+/).filter(Boolean);
+  return keywords.some((kw) => tokens.includes(kw));
+};
+
 const countLeadingSpaces = (text: string): number => {
   let i = 0;
   while (i < text.length && text.charAt(i) === ' ') {
@@ -402,12 +407,14 @@ function formatCore(pre: PreprocessResult, cfg: Shift6Config): FormatCoreResult 
   for (const original of pre.linesToProcess) {
     const trimmed = original.trim();
     const upper = trimmed.toUpperCase();
+    const upperNoComment = upper.split('//')[0];
 
     const isCloser = startsWithKeyword(upper, CLOSERS);
     const isMid = startsWithKeyword(upper, MID_KEYWORDS);
     const isOpener = startsWithKeyword(upper, OPENERS);
     const isProcStart = upper.startsWith('DCL-PROC');
     const isProcEnd = upper.startsWith('END-PROC') || upper.startsWith('ENDPROC');
+    const hasInlineCloser = containsKeywordToken(upperNoComment, CLOSERS);
 
     // Dedent before mid/closer lines
     if (isCloser || isMid) {
@@ -449,9 +456,11 @@ function formatCore(pre: PreprocessResult, cfg: Shift6Config): FormatCoreResult 
       indentLevel++;
     }
     if (isOpener) {
-      indentLevel++;
-      if (isProcStart) {
-        procDepth++;
+      if (!hasInlineCloser) {
+        indentLevel++;
+        if (isProcStart) {
+          procDepth++;
+        }
       }
     }
   }

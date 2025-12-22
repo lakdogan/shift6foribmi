@@ -87,7 +87,7 @@ To ensure optimal use of this extension, developers must adhere to the following
 
 #### V.I. Change Log
 
--   **Version 0.1.0** (2025-12-04): Initial release. Implements mandatory 6-space indentation for all RPG Free lines, excluding the initial compiler directive.
+-   See `CHANGELOG.md` for the full release history.
 
 #### V.II. Contributors
 

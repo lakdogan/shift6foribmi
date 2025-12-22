@@ -73,7 +73,7 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 - Levent Akdogan (Lakdogan) — Autor, Architektur, Wartung.
 
 #### V.I. Changelog
-- **Version 0.1.0** (2025-12-04): Erste Veroeffentlichung. Erzwingt `**FREE` in Zeile 1, 6-Spaces-Basis, blockabhaengige Einrueckung, Semikolon-Splitting, entfernt doppelte `**FREE`.
+- Vollstaendige Release-Historie in `CHANGELOG.md`.
 
 #### V.II. Beitragende
 - Levent Akdogan (Lakdogan) — Architektur und Wartung.

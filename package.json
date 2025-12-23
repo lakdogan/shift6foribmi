@@ -87,6 +87,22 @@
           "type": "boolean",
           "default": true,
           "description": "Trim whitespace inside parentheses that only contain a single string literal."
+        },
+        "shift6.alignPlusContinuation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Align lines that start with + to the first + operator column in the previous line."
+        },
+        "shift6.continuationColumn": {
+          "type": "number",
+          "default": 66,
+          "minimum": 1,
+          "description": "Column limit for wrapping long binary-operator expressions onto a new continuation line."
+        },
+        "shift6.joinAsteriskTokensInDecl": {
+          "type": "boolean",
+          "default": true,
+          "description": "Join tokens after * in DCL-PI/DCL-PR/DCL-PROC/CTL-OPT lines (e.g., *n, *no, *new)."
         }
       }
     },

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.17] - 2025-12-23
+- Added configurable wrapping for long binary-operator expressions (`shift6.continuationColumn`) with safe multi-split behavior.
+- Added alignment for continuation lines and improved operator spacing for `+`, `-`, `*`, `/`, `%`, including string concatenations and parentheses adjacency.
+- Added handling for `%` built-ins (e.g., `%int`, `%char`) to prevent breaking.
+- Improved joining of `*` special values and context-aware handling in `IF/WHEN/ON-ERROR` and `DCL-PI/DCL-PR/DCL-PROC/CTL-OPT`, plus new `shift6.joinAsteriskTokensInDecl`.
+- Added robust formatting for `ctl-opt` parentheses and `*` options (e.g., `*no`, `*new`, `*srcstmt`).
+- Refined `dcl-ds` block detection for inline `likeds/extname` vs. multi-line DS.
+
 ## [0.1.16] - 2025-12-22
 - Prevent block indentation from increasing after single-line open/close blocks (e.g., `DCL-DS ... END-DS;`).
 

@@ -1,7 +1,7 @@
 # Shift6 Formatter – Testing Guide
 
 ## Manual Smoke Tests
-- Open `demo.rpgle`, `demo-nested.rpgle`, and `demo-large.rpgle`.
+- Open `demo.rpgle`, `demo-nested.rpgle`, and `demo-large.rpgle` (or any `examples/test*.rpgle` files if present).
 - Run **Format Document** and confirm:
   - First line is `**free` (lowercase).
   - Base indent = `shift6.spaces` (default 6).
@@ -10,10 +10,16 @@
   - Inline semicolon splitting creates one statement per line; trailing `//` comments stay on the last segment.
   - Stray `;` lines attach to the previous code line if it lacks a semicolon.
   - Excess blank lines before closers (END-PROC/ENDIF/etc.) are trimmed; multiple consecutive blanks collapse to one; trailing blanks at EOF are removed.
+  - `ctl-opt` parentheses are trimmed (e.g., `dftactgrp( *no)` -> `dftactgrp(*no)`).
+  - `*` special values are joined in context (e.g., `if * on;` -> `if *on;`, `if * in 99;` -> `if *IN99;`).
+  - `%` built-ins are not split (e.g., `%int` stays intact).
 
 ## Settings Regression Checks
 - Set `shift6.spaces` to `0` and verify no base padding is added.
 - Set `shift6.blockIndent` to `0` and verify nesting does not increase indent.
+- Set `shift6.continuationColumn` to a small value (e.g., `45`) and confirm long expressions wrap safely without losing tokens.
+- Toggle `shift6.alignPlusContinuation` and confirm leading `+` lines align as expected.
+- Toggle `shift6.joinAsteriskTokensInDecl` and confirm `dcl-pi * n;` becomes `dcl-pi *n;` when enabled.
 
 ## Packaging Verification
 - Build: `npm run compile`

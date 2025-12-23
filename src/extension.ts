@@ -12,6 +12,9 @@ interface Shift6Config {
   normalizedFree: string;
   collapseTokenSpaces: boolean;
   trimStringParentheses: boolean;
+  alignPlusContinuation: boolean;
+  continuationColumn: number;
+  joinAsteriskTokensInDecl: boolean;
 }
 
 const CLOSERS = [
@@ -52,6 +55,7 @@ const MID_KEYWORDS = [
   '/ELSE',
   '/ELSEIF'
 ];
+const DASH_KEYWORD_PREFIX = /^(DCL|END|ON|WHEN|ELSE|CTL)-[A-Z0-9-]+$/;
 
 const PATTERNS = [
   '**/*.rpgle',
@@ -93,6 +97,518 @@ const countLeadingSpaces = (text: string): number => {
   }
   return i;
 };
+
+const isWhitespace = (ch: string): boolean => ch === ' ' || ch === '\t';
+const CONTINUATION_OPERATORS = ['+', '-', '*', '/', '%'];
+const SPECIAL_VALUES = [
+  'ON',
+  'OFF',
+  'FILE',
+  'PROGRAM',
+  'BLANK',
+  'BLANKS',
+  'ZERO',
+  'ZEROS',
+  'ZEROES',
+  'NULL',
+  'HIVAL',
+  'LOVAL',
+  'ALL',
+  'NONE',
+  'OMIT',
+  'TRUE',
+  'FALSE',
+  'INLR',
+  'PARMS',
+  'STATUS',
+  'PSSR',
+  'ENTRY',
+  'VARS',
+  'PDA',
+  'LDA',
+  'ISOPEN',
+  'INZSR',
+  'USA',
+  'ISO',
+  'EUR',
+  'JIS',
+  'JUL',
+  'MDY',
+  'DMY',
+  'YMD',
+  'HMS',
+  'JOB',
+  'USER',
+  'SYSTEM',
+  'LANGID',
+  'SRCSTMT',
+  'DATE',
+  'DAY',
+  'MONTH',
+  'YEAR',
+  'TIME',
+  'TIMESTAMP'
+];
+const SPECIAL_VALUE_KEYWORDS = new Set([
+  'IF',
+  'ELSEIF',
+  'WHEN',
+  'DOW',
+  'DOU',
+  'FOR',
+  'SELECT',
+  'MONITOR',
+  'ON-ERROR',
+  'ON-EXIT',
+  'AND',
+  'OR',
+  'NOT',
+  'XOR',
+  'DCL-PI',
+  'DCL-PR',
+  'DCL-PROC'
+]);
+const SPECIAL_VALUE_CONTEXTS = [
+  'IF',
+  'ELSEIF',
+  'WHEN',
+  'DOW',
+  'DOU',
+  'FOR',
+  'ON-ERROR',
+  'ON-EXIT'
+];
+
+const isTokenChar = (ch: string): boolean => /[A-Za-z0-9_@#$\])}\(.'"]/.test(ch);
+
+const isDashKeywordToken = (text: string, index: number): boolean => {
+  let start = index;
+  let end = index;
+  while (start > 0 && /[A-Za-z0-9*-/]/.test(text[start - 1])) start--;
+  while (end + 1 < text.length && /[A-Za-z0-9*-/]/.test(text[end + 1])) end++;
+  const token = text.slice(start, end + 1).toUpperCase();
+  return DASH_KEYWORD_PREFIX.test(token);
+};
+
+const isSlashDirectiveToken = (text: string, index: number): boolean => {
+  let start = index;
+  let end = index;
+  while (start > 0 && /[A-Za-z0-9*-/]/.test(text[start - 1])) start--;
+  while (end + 1 < text.length && /[A-Za-z0-9*-/]/.test(text[end + 1])) end++;
+  const token = text.slice(start, end + 1).toUpperCase();
+  return /^\/[A-Z][A-Z0-9_]*$/.test(token);
+};
+
+const getPrevToken = (text: string, index: number): string | null => {
+  let j = index - 1;
+  while (j >= 0 && isWhitespace(text[j])) j--;
+  if (j < 0) return null;
+  let end = j;
+  while (j >= 0 && /[A-Za-z0-9-]/.test(text[j])) j--;
+  if (end < 0) return null;
+  const token = text.slice(j + 1, end + 1).toUpperCase();
+  return token.length > 0 ? token : null;
+};
+
+const isSpecialValueToken = (text: string, index: number): boolean => {
+  let j = index + 1;
+  while (j < text.length && isWhitespace(text[j])) j++;
+  let k = j;
+  while (k < text.length && /[A-Za-z0-9_]/.test(text[k])) k++;
+  if (k <= j) return false;
+  const token = text.substring(j, k).toUpperCase();
+  if (token === 'N') {
+    const prevToken = getPrevToken(text, index);
+    if (prevToken !== null && SPECIAL_VALUE_KEYWORDS.has(prevToken)) {
+      return true;
+    }
+    for (let p = index - 1; p >= 0; p--) {
+      if (!isWhitespace(text[p])) return false;
+    }
+    return true;
+  }
+  return SPECIAL_VALUES.includes(token) || /^IN[0-9]{2}$/.test(token);
+};
+
+function getLeadingOperator(text: string): string | null {
+  const trimmed = text.trimStart();
+  if (trimmed.length === 0) return null;
+  return CONTINUATION_OPERATORS.includes(trimmed[0]) ? trimmed[0] : null;
+}
+
+function findAssignmentRhsStart(line: string): number | null {
+  const commentIndex = line.indexOf('//');
+  const codePart = commentIndex >= 0 ? line.substring(0, commentIndex) : line;
+  let inString = false;
+  let quoteChar = '';
+
+  for (let i = 0; i < codePart.length; i++) {
+    const ch = codePart[i];
+
+    if (inString) {
+      if (ch === quoteChar) {
+        if (i + 1 < codePart.length && codePart[i + 1] === quoteChar) {
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
+    if (ch === '=') {
+      const prev = i > 0 ? codePart[i - 1] : '';
+      const next = i + 1 < codePart.length ? codePart[i + 1] : '';
+      if (prev === '<' || prev === '>' || next === '=') {
+        continue;
+      }
+      return i + 2;
+    }
+  }
+
+  return null;
+}
+
+function normalizeBinaryOperatorSpacing(text: string, cfg: Shift6Config): string {
+  const trimmedStart = text.trimStart();
+  if (/^\/[A-Za-z]/.test(trimmedStart)) {
+    return text;
+  }
+  let result = '';
+  let inString = false;
+  let quoteChar = '';
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inString) {
+      result += ch;
+      if (ch === quoteChar) {
+        if (i + 1 < text.length && text[i + 1] === quoteChar) {
+          result += text[i + 1];
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      result += ch;
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
+    if (CONTINUATION_OPERATORS.includes(ch)) {
+      const prevIndex = (() => {
+        let j = i - 1;
+        while (j >= 0 && isWhitespace(text[j])) j--;
+        return j;
+      })();
+      const nextIndex = (() => {
+        let j = i + 1;
+        while (j < text.length && isWhitespace(text[j])) j++;
+        return j;
+      })();
+      const prevChar = prevIndex >= 0 ? text[prevIndex] : '';
+      const nextChar = nextIndex < text.length ? text[nextIndex] : '';
+
+      if (ch === '%' && /[A-Za-z]/.test(nextChar)) {
+        result += ch;
+        continue;
+      }
+      if (ch === '*' && isSpecialValueToken(text, i)) {
+        result += ch;
+        continue;
+      }
+      if (ch === '-' && isDashKeywordToken(text, i)) {
+        result += ch;
+        continue;
+      }
+      if (ch === '/' && isSlashDirectiveToken(text, i)) {
+        result += ch;
+        continue;
+      }
+      if (ch === '*' && (prevChar === '*' || nextChar === '*')) {
+        result += ch;
+        continue;
+      }
+      if (nextChar === '=') {
+        result += ch;
+        continue;
+      }
+
+      const isBinary = isTokenChar(prevChar) && isTokenChar(nextChar);
+      const isLeading = prevIndex < 0;
+
+      if (isBinary || isLeading) {
+        while (result.endsWith(' ')) {
+          result = result.slice(0, -1);
+        }
+        if (ch === '*' && cfg.joinAsteriskTokensInDecl) {
+          const trimmed = text.trimStart().toUpperCase();
+          if (
+            trimmed.startsWith('DCL-PI') ||
+            trimmed.startsWith('DCL-PR') ||
+            trimmed.startsWith('DCL-PROC') ||
+            trimmed.startsWith('CTL-OPT')
+          ) {
+            result += (isLeading ? '' : ' ') + ch;
+            continue;
+          }
+        }
+        result += (isLeading ? '' : ' ') + ch + ' ';
+        i = nextIndex - 1;
+        continue;
+      }
+    }
+
+    result += ch;
+  }
+
+  return result;
+}
+
+function normalizePercentBuiltins(text: string): string {
+  let result = '';
+  let inString = false;
+  let quoteChar = '';
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inString) {
+      result += ch;
+      if (ch === quoteChar) {
+        if (i + 1 < text.length && text[i + 1] === quoteChar) {
+          result += text[i + 1];
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      result += ch;
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
+    if (ch === '%') {
+      let j = i + 1;
+      while (j < text.length && isWhitespace(text[j])) j++;
+      let k = j;
+      while (k < text.length && /[A-Za-z0-9_]/.test(text[k])) k++;
+      if (k > j && j > i + 1) {
+        result += '%' + text.substring(j, k);
+        i = k - 1;
+        continue;
+      }
+    }
+
+    result += ch;
+  }
+
+  return result;
+}
+
+function normalizeSpecialValueSpacing(text: string): string {
+  let result = '';
+  let inString = false;
+  let quoteChar = '';
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inString) {
+      result += ch;
+      if (ch === quoteChar) {
+        if (i + 1 < text.length && text[i + 1] === quoteChar) {
+          result += text[i + 1];
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      result += ch;
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
+    if (ch === '*') {
+      const prevToken = getPrevToken(text, i);
+      const prevTokenAllowed = prevToken !== null && SPECIAL_VALUE_KEYWORDS.has(prevToken);
+      let j = i + 1;
+      while (j < text.length && isWhitespace(text[j])) j++;
+      let k = j;
+      while (k < text.length && /[A-Za-z0-9_]/.test(text[k])) k++;
+      if (k > j) {
+        const token = text.substring(j, k).toUpperCase();
+        if (prevTokenAllowed) {
+          if (token === 'IN') {
+            let m = k;
+            while (m < text.length && isWhitespace(text[m])) m++;
+            const inDigits = text.substring(m, m + 2);
+            if (/^[0-9]{2}$/.test(inDigits)) {
+              result += '*IN' + inDigits;
+              i = m + 1;
+              continue;
+            }
+          }
+          if (token === 'N' || SPECIAL_VALUES.includes(token)) {
+            result += '*' + text.substring(j, k);
+            i = k - 1;
+            continue;
+          }
+        }
+        const isSpecial = isSpecialValueToken(text, i);
+        if (isSpecial && j > i + 1 && prevTokenAllowed) {
+          result += '*' + text.substring(j, k);
+          i = k - 1;
+          continue;
+        }
+      }
+    }
+
+    result += ch;
+  }
+
+  return result;
+}
+
+function findSpacedBinaryOperatorColumn(line: string): number | null {
+  const commentIndex = line.indexOf('//');
+  const codePart = commentIndex >= 0 ? line.substring(0, commentIndex) : line;
+  let inString = false;
+  let quoteChar = '';
+
+  for (let i = 0; i < codePart.length; i++) {
+    const ch = codePart[i];
+
+    if (inString) {
+      if (ch === quoteChar) {
+        if (i + 1 < codePart.length && codePart[i + 1] === quoteChar) {
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
+    if (CONTINUATION_OPERATORS.includes(ch) && i > 0 && i + 1 < codePart.length) {
+      if (isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
+        return i;
+      }
+    }
+  }
+
+  return null;
+}
+
+function findLastSpacedBinaryOperatorBeforeLimit(line: string, limit: number): number | null {
+  const commentIndex = line.indexOf('//');
+  const codePart = commentIndex >= 0 ? line.substring(0, commentIndex) : line;
+  let inString = false;
+  let quoteChar = '';
+  let last: number | null = null;
+  const max = Math.min(codePart.length - 1, limit);
+
+  for (let i = 0; i <= max; i++) {
+    const ch = codePart[i];
+
+    if (inString) {
+      if (ch === quoteChar) {
+        if (i + 1 < codePart.length && codePart[i + 1] === quoteChar) {
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
+    if (CONTINUATION_OPERATORS.includes(ch) && i > 0 && i + 1 < codePart.length) {
+      if (isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
+        last = i;
+      }
+    }
+  }
+
+  return last;
+}
+
+function findFirstSpacedBinaryOperatorAfterLimit(line: string, limit: number): number | null {
+  const commentIndex = line.indexOf('//');
+  const codePart = commentIndex >= 0 ? line.substring(0, commentIndex) : line;
+  let inString = false;
+  let quoteChar = '';
+  const start = Math.max(0, limit + 1);
+
+  for (let i = start; i < codePart.length; i++) {
+    const ch = codePart[i];
+
+    if (inString) {
+      if (ch === quoteChar) {
+        if (i + 1 < codePart.length && codePart[i + 1] === quoteChar) {
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
+    if (CONTINUATION_OPERATORS.includes(ch) && i > 0 && i + 1 < codePart.length) {
+      if (isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
+        return i;
+      }
+    }
+  }
+
+  return null;
+}
 
 /** Trims inner whitespace when parentheses contain only a single string literal */
 function trimStringOnlyParentheses(text: string): string {
@@ -167,6 +683,19 @@ function getConfig(): Shift6Config {
   const trimStringParentheses = vscode.workspace
     .getConfiguration()
     .get<boolean>('shift6.trimStringParentheses', true);
+  const alignPlusContinuation = vscode.workspace
+    .getConfiguration()
+    .get<boolean>('shift6.alignPlusContinuation', true);
+  const continuationColumnRaw = vscode.workspace
+    .getConfiguration()
+    .get<number | string>('shift6.continuationColumn', 66);
+  const continuationColumnValue = Number(continuationColumnRaw);
+  const continuationColumn = Number.isFinite(continuationColumnValue)
+    ? Math.max(1, Math.floor(continuationColumnValue))
+    : 66;
+  const joinAsteriskTokensInDecl = vscode.workspace
+    .getConfiguration()
+    .get<boolean>('shift6.joinAsteriskTokensInDecl', true);
 
   return {
     spaces,
@@ -174,7 +703,10 @@ function getConfig(): Shift6Config {
     blockIndent,
     normalizedFree: '**free',
     collapseTokenSpaces,
-    trimStringParentheses
+    trimStringParentheses,
+    alignPlusContinuation,
+    continuationColumn,
+    joinAsteriskTokensInDecl
   };
 }
 
@@ -257,6 +789,9 @@ function preprocessDocument(lines: string[], cfg: Shift6Config): PreprocessResul
 
   const linesToProcess: string[] = [];
   let splitOccurred = false;
+  let pendingContinuation: string | null = null;
+  let continuationIndent = '';
+  const continuationColumnLimit = cfg.continuationColumn;
 
   for (let i = 0; i < lineCount; i++) {
     const original = lines[i];
@@ -284,8 +819,122 @@ function preprocessDocument(lines: string[], cfg: Shift6Config): PreprocessResul
         splitOccurred = true;
         continue;
       }
-      linesToProcess.push(seg);
+      if (pendingContinuation !== null) {
+        const pending = pendingContinuation;
+        const trimmedSeg = seg.trim();
+        const leadingOp = getLeadingOperator(trimmedSeg);
+        if (leadingOp) {
+          const merged: string = pending + ' ' + leadingOp + ' ' + trimmedSeg.substring(1).trimStart();
+          const recombined = normalizeOperatorSpacing(merged, cfg);
+          if (recombined.length > continuationColumnLimit) {
+            const lastOp = findLastSpacedBinaryOperatorBeforeLimit(recombined, continuationColumnLimit);
+            const splitAt =
+              lastOp !== null
+                ? lastOp
+                : findFirstSpacedBinaryOperatorAfterLimit(recombined, continuationColumnLimit);
+            if (splitAt !== null && splitAt > 1) {
+              const opChar = recombined[splitAt];
+              const left = recombined.substring(0, splitAt - 1);
+              if (left.trim().length === 0) {
+                break;
+              }
+              const right = recombined.substring(splitAt + 2);
+              linesToProcess.push(left);
+              linesToProcess.push(continuationIndent + opChar + ' ' + right.trimStart());
+              pendingContinuation = null;
+              continuationIndent = '';
+              splitOccurred = true;
+              continue;
+            }
+          }
+          const opColumn = findSpacedBinaryOperatorColumn(recombined);
+          if (opColumn !== null && opColumn >= continuationColumnLimit) {
+            linesToProcess.push(pending);
+            linesToProcess.push(continuationIndent + leadingOp + ' ' + trimmedSeg.substring(1).trimStart());
+            pendingContinuation = null;
+            continuationIndent = '';
+            splitOccurred = true;
+            continue;
+          }
+          pendingContinuation = merged;
+          if (i === lineCount - 1) {
+            linesToProcess.push(pendingContinuation);
+            pendingContinuation = null;
+          }
+          splitOccurred = true;
+          continue;
+        } else {
+          linesToProcess.push(pending);
+          pendingContinuation = null;
+          continuationIndent = '';
+        }
+      }
+
+      let normalized = normalizeOperatorSpacing(seg, cfg);
+      let didSplit = false;
+      let splitIterations = 0;
+      let prevLength = normalized.length;
+      while (normalized.length > continuationColumnLimit) {
+        splitIterations++;
+        if (splitIterations > 200) {
+          break;
+        }
+        const indentMatch = normalized.match(/^(\s*)/);
+        continuationIndent = indentMatch ? indentMatch[1] : '';
+        const lastOpBeforeLimit = findLastSpacedBinaryOperatorBeforeLimit(normalized, continuationColumnLimit);
+        const splitAt =
+          lastOpBeforeLimit !== null
+            ? lastOpBeforeLimit
+            : findFirstSpacedBinaryOperatorAfterLimit(normalized, continuationColumnLimit);
+        if (splitAt !== null && splitAt > 1) {
+          const opChar = normalized[splitAt];
+          const left = normalized.substring(0, splitAt - 1);
+          if (left.trim().length === 0) {
+            break;
+          }
+          const right = normalized.substring(splitAt + 2);
+          linesToProcess.push(left);
+          normalized = continuationIndent + opChar + ' ' + right.trimStart();
+          splitOccurred = true;
+          didSplit = true;
+          if (normalized.length >= prevLength) {
+            break;
+          }
+          prevLength = normalized.length;
+          continue;
+        }
+        break;
+      }
+
+      if (didSplit) {
+        linesToProcess.push(normalized);
+        continue;
+      } else {
+        const opColumn = findSpacedBinaryOperatorColumn(normalized);
+        if (opColumn !== null && opColumn >= continuationColumnLimit) {
+          const indentMatch = normalized.match(/^(\s*)/);
+          continuationIndent = indentMatch ? indentMatch[1] : '';
+          const lastOpIndex = findLastSpacedBinaryOperatorBeforeLimit(
+            normalized,
+            normalized.length - 1
+          );
+          if (lastOpIndex !== null && lastOpIndex > 1) {
+            const opChar = normalized[lastOpIndex];
+            const left = normalized.substring(0, lastOpIndex - 1);
+            const right = normalized.substring(lastOpIndex + 2);
+            linesToProcess.push(left);
+            pendingContinuation = continuationIndent + opChar + ' ' + right.trimStart();
+            splitOccurred = true;
+            continue;
+          }
+        }
+        linesToProcess.push(seg);
+      }
     }
+  }
+
+  if (pendingContinuation !== null) {
+    linesToProcess.push(pendingContinuation);
   }
 
   return {
@@ -311,6 +960,11 @@ function preprocessDocument(lines: string[], cfg: Shift6Config): PreprocessResul
  */
 function normalizeOperatorSpacing(line: string, cfg: Shift6Config): string {
   const trimmedStart = line.trimStart();
+  const isCtlOptLine = trimmedStart.toUpperCase().startsWith('CTL-OPT');
+  const isDeclLine = (() => {
+    const upper = trimmedStart.toUpperCase();
+    return upper.startsWith('DCL-PI') || upper.startsWith('DCL-PR') || upper.startsWith('DCL-PROC');
+  })();
 
   // Leave pure comment lines untouched
   if (trimmedStart.startsWith('//')) {
@@ -330,6 +984,52 @@ function normalizeOperatorSpacing(line: string, cfg: Shift6Config): string {
   // Trim spaces around string-only parentheses: (   'text'   ) -> ('text')
   if (cfg.trimStringParentheses) {
     rest = trimStringOnlyParentheses(rest);
+  }
+
+  // Trim spaces inside ctl-opt parentheses: ( *no ) -> (*no)
+  if (isCtlOptLine) {
+    rest = rest.replace(/\(\s+([^)]+?)\)/g, '($1)');
+    rest = rest.replace(/\(([^)]+?)\s+\)/g, '($1)');
+  }
+
+  // Join builtins like %int, %char, %trim (no space after %)
+  rest = normalizePercentBuiltins(rest);
+
+  // Normalize spacing around binary arithmetic operators (+, -, *, /, %)
+  rest = normalizeBinaryOperatorSpacing(rest, cfg);
+
+  // Join leading * tokens inside declaration bodies (e.g., "* n;" -> "*n;")
+  if (cfg.joinAsteriskTokensInDecl) {
+    rest = rest.replace(/(^|[(\s])\*\s+([A-Za-z0-9_]+)/, '$1*$2');
+  }
+
+  // Join * tokens after DCL-PI/DCL-PR/DCL-PROC keywords (e.g., "dcl-pi * n;" -> "dcl-pi *n;")
+  if (cfg.joinAsteriskTokensInDecl && isDeclLine) {
+    rest = rest.replace(/(\bDCL-(?:PI|PR|PROC)\b)\s+\*\s+([A-Za-z0-9_]+)/i, '$1 *$2');
+  }
+
+  // Join RPG special values like *Program, *File, *On, *Off (no space after *)
+  rest = normalizeSpecialValueSpacing(rest);
+
+  // Ensure multiplication uses spaces around * when between tokens
+  if (!isDeclLine) {
+    rest = rest.replace(/([A-Za-z0-9_)\]])\s*\*\s*([A-Za-z0-9_\(])/g, '$1 * $2');
+  }
+
+  // Force-join special values in common contexts (e.g., "if * on" -> "if *on")
+  const contextPattern = new RegExp(
+    `\\b(${SPECIAL_VALUE_CONTEXTS.join('|')})\\s+\\*\\s+(${SPECIAL_VALUES.join('|')})\\b`,
+    'gi'
+  );
+  rest = rest.replace(contextPattern, '$1 *$2');
+  rest = rest.replace(/\b(IF|ELSEIF|WHEN|DOW|DOU|FOR|ON-ERROR|ON-EXIT)\s+\*\s+IN\s*([0-9]{2})\b/gi, '$1 *IN$2');
+
+  // Normalize ctl-opt parentheses after operator spacing (e.g., (* no ) -> (*no))
+  if (isCtlOptLine) {
+    rest = rest.replace(/\(\s*([^)]+?)\s*\)/g, (_match, inner: string) => {
+      const joined = inner.replace(/\*\s+([A-Za-z0-9_]+)/g, '*$1');
+      return `(${joined})`;
+    });
   }
 
   // --- 1) Protect relational operators with placeholders --------------------
@@ -397,6 +1097,7 @@ function formatCore(pre: PreprocessResult, cfg: Shift6Config): FormatCoreResult 
   let anyChanged = false;
   let indentLevel = 0;
   let procDepth = 0;
+  let continuationOperatorColumn: number | null = null;
 
   // Always enforce **FREE as first line
   resultLines.push(cfg.normalizedFree);
@@ -415,6 +1116,11 @@ function formatCore(pre: PreprocessResult, cfg: Shift6Config): FormatCoreResult 
     const isProcStart = upper.startsWith('DCL-PROC');
     const isProcEnd = upper.startsWith('END-PROC') || upper.startsWith('ENDPROC');
     const hasInlineCloser = containsKeywordToken(upperNoComment, CLOSERS);
+    const isInlineDclDs =
+      upper.startsWith('DCL-DS') &&
+      trimmed.endsWith(';') &&
+      !containsKeywordToken(upperNoComment, ['END-DS', 'ENDDS']) &&
+      /\b(LIKEDS|EXTNAME)\b/i.test(upperNoComment);
 
     // Dedent before mid/closer lines
     if (isCloser || isMid) {
@@ -446,9 +1152,57 @@ function formatCore(pre: PreprocessResult, cfg: Shift6Config): FormatCoreResult 
       anyChanged = true;
     }
 
+    const trimmedStart = newText.trimStart();
+    const isCommentOnly = trimmedStart.startsWith('//');
+    const leadingOperator = getLeadingOperator(newText);
+
+    if (cfg.alignPlusContinuation && leadingOperator && continuationOperatorColumn !== null) {
+      const desiredIndent = Math.max(target, continuationOperatorColumn);
+      const aligned = ' '.repeat(desiredIndent) + trimmedStart;
+      if (aligned !== newText) {
+        newText = aligned;
+        anyChanged = true;
+      }
+    }
+
     resultLines.push(newText);
     if (newText !== original) {
       anyChanged = true;
+    }
+
+    if (cfg.alignPlusContinuation) {
+      if (isCommentOnly) {
+        continuationOperatorColumn = null;
+      } else {
+        const commentIndex = newText.indexOf('//');
+        const codePart = commentIndex >= 0 ? newText.substring(0, commentIndex) : newText;
+        const endsStatement = codePart.trimEnd().endsWith(';');
+
+        if (leadingOperator) {
+          if (continuationOperatorColumn === null) {
+            const opIndex = newText.indexOf(leadingOperator);
+            continuationOperatorColumn = opIndex >= 0 ? opIndex : null;
+          }
+        } else {
+          const opColumn = findSpacedBinaryOperatorColumn(newText);
+          if (opColumn !== null && !endsStatement) {
+            const rhsStart = findAssignmentRhsStart(newText);
+            const alignColumn = rhsStart !== null ? Math.max(0, rhsStart - 2) : opColumn;
+            continuationOperatorColumn = alignColumn;
+          } else {
+            const rhsStart = findAssignmentRhsStart(newText);
+            if (rhsStart !== null && !endsStatement) {
+              continuationOperatorColumn = Math.max(0, rhsStart - 2);
+            } else {
+              continuationOperatorColumn = null;
+            }
+          }
+        }
+
+        if (endsStatement) {
+          continuationOperatorColumn = null;
+        }
+      }
     }
 
     // Increase indent for next line (openers/mid-clauses)
@@ -456,7 +1210,7 @@ function formatCore(pre: PreprocessResult, cfg: Shift6Config): FormatCoreResult 
       indentLevel++;
     }
     if (isOpener) {
-      if (!hasInlineCloser) {
+      if (!hasInlineCloser && !isInlineDclDs) {
         indentLevel++;
         if (isProcStart) {
           procDepth++;
@@ -516,24 +1270,30 @@ function postProcessBlankLines(lines: string[]) {
 // --------------------------------------------------------
 
 function provideShift6FormattingEdits(document: vscode.TextDocument): vscode.TextEdit[] {
-  const fullText = document.getText();
-  if (fullText.length === 0) return [];
+  try {
+    const fullText = document.getText();
+    if (fullText.length === 0) return [];
 
-  const lines = fullText.split(/\r?\n/);
-  const cfg = getConfig();
-  const pre = preprocessDocument(lines, cfg);
+    const lines = fullText.split(/\r?\n/);
+    const cfg = getConfig();
+    const pre = preprocessDocument(lines, cfg);
 
-  let { resultLines, anyChanged } = formatCore(pre, cfg);
+    let { resultLines, anyChanged } = formatCore(pre, cfg);
 
-  const post = postProcessBlankLines(resultLines);
-  resultLines = post.resultLines;
-  anyChanged ||= post.anyChanged;
+    const post = postProcessBlankLines(resultLines);
+    resultLines = post.resultLines;
+    anyChanged ||= post.anyChanged;
 
-  if (!anyChanged && !pre.freeNeedsTrim && !pre.splitOccurred) return [];
+    if (!anyChanged && !pre.freeNeedsTrim && !pre.splitOccurred) return [];
 
-  const range = getFullDocumentRange(document, fullText.length);
+    const range = getFullDocumentRange(document, fullText.length);
 
-  return [vscode.TextEdit.replace(range, resultLines.join('\n'))];
+    return [vscode.TextEdit.replace(range, resultLines.join('\n'))];
+  } catch (error) {
+    // Use vscode window for errors to avoid console typing issues in TS config.
+    vscode.window.showErrorMessage(`Shift6 formatter error: ${String(error)}`);
+    return [];
+  }
 }
 
 // --------------------------------------------------------

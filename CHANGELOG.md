@@ -13,6 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Improved joining of `*` special values and context-aware handling in `IF/WHEN/ON-ERROR` and `DCL-PI/DCL-PR/DCL-PROC/CTL-OPT`, plus new `shift6.joinAsteriskTokensInDecl`.
 - Added robust formatting for `ctl-opt` parentheses and `*` options (e.g., `*no`, `*new`, `*srcstmt`).
 - Refined `dcl-ds` block detection for inline `likeds/extname` vs. multi-line DS.
+- Refactored formatter into tokenizer, context analyzer, and rule pipeline modules for scalability.
+- Added config schema normalization and shared config typing.
+- Added rule test harness with `test:rules` and expanded coverage for core formatting cases.
+- Added trimming of leading/trailing whitespace inside parentheses (outside strings).
+- Documented functions across the codebase with purpose comments for maintainability.
 
 ## [0.1.16] - 2025-12-22
 - Prevent block indentation from increasing after single-line open/close blocks (e.g., `DCL-DS ... END-DS;`).

@@ -113,7 +113,8 @@
     "compile": "tsc -p ./",
     "typecheck": "tsc -p ./ --noEmit",
     "watch": "tsc -w -p ./",
-    "package": "npm run compile"
+    "package": "npm run compile",
+    "test:rules": "npm run compile && node out/scripts/rule-tests.js"
   },
   "devDependencies": {
     "@types/vscode": "^1.85.0",

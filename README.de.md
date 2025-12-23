@@ -4,7 +4,7 @@
 
 ### I. Zusammenfassung
 
-Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wie es der IBM i Compiler erwartet: `**FREE` steht in Zeile 1, alle weiteren Zeilen erhalten den nötigen 6-Spaces-Offset. Das spart manuelle Arbeit, verhindert Formatierungsfehler und hält den Code auch auf dem Green Screen lesbar. Zusätzlich sorgt der Formatter dafür, dass IBM i-Entwickler den vollständigen Code sehen (auch die in PDM/SEU ausgeblendeten ersten 5 Spalten), indem er den notwendigen 5 + 1-Spaces-Offset setzt: fünf für die ausgeblendeten Spalten und ein zusätzliches Space für bessere Lesbarkeit beim Schreiben von RPG-Free-Membern in VS Code.
+Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wie es der IBM i Compiler erwartet: `**FREE` steht in Zeile 1, alle weiteren Zeilen erhalten den noetigen 6-Spaces-Offset. Das spart manuelle Arbeit, verhindert Formatierungsfehler und haelt den Code auch auf dem Green Screen lesbar. Zusaetzlich sorgt der Formatter dafuer, dass IBM i-Entwickler den vollstaendigen Code sehen (auch die in PDM/SEU ausgeblendeten ersten 5 Spalten), indem er den notwendigen 5 + 1-Spaces-Offset setzt: fuenf fuer die ausgeblendeten Spalten und ein zusaetzliches Space fuer bessere Lesbarkeit beim Schreiben von RPG-Free-Membern in VS Code.
 
 
 
@@ -12,7 +12,7 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
 
 ### II. Kernfunktionen und Nutzen
 
-**A. Feature-Übersicht**
+**A. Feature-Uebersicht**
 
 - **Ein-Klick-Formatierung:** Shortcut oder Kontextmenue formatiert das gesamte Dokument.  
   - *Mehrwert:* Schneller Workflow, keine manuelle Zeilenkorrektur.
@@ -41,7 +41,7 @@ Neu in 0.1.17: Zeilenumbruch fuer lange Ausdruecke und `*`-Special-Values im Kon
 
 **C. Git Hook (optional)**
 
-- Pre-Commit-Typecheck: `git config core.hooksPath .githooks` aktiviert den Hook; er ruft `npm run typecheck` auf. Überspringbar per `SKIP_SHIFT6_PRECOMMIT=1`.
+- Pre-Commit-Typecheck: `git config core.hooksPath .githooks` aktiviert den Hook; er ruft `npm run typecheck` auf. Ueberspringbar per `SKIP_SHIFT6_PRECOMMIT=1`.
 
 ---
 
@@ -49,7 +49,7 @@ Neu in 0.1.17: Zeilenumbruch fuer lange Ausdruecke und `*`-Special-Values im Kon
 
 #### A. Installation
 1. VSIX beziehen/bauen (z.B. `shift6foribmi-0.1.0.vsix`).
-2. In VS Code: Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) öffnen.
+2. In VS Code: Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) oeffnen.
 3. `Extensions: Install from VSIX...` ausfuehren und die Datei waehlen.
 
 #### B. Ausfuehrung
@@ -60,7 +60,7 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 - **Kontextmenue:** Rechtsklick im Editor -> **Format Document**.
 - **Command Palette:** `Ctrl` + `Shift` + `P` -> **Format Document**.
 
-> Wenn mehrere Formatter installiert sind, **Format Document With…** waehlen und **Shift6 Formatter** auswaehlen.
+> Wenn mehrere Formatter installiert sind, **Format Document With...** waehlen und **Shift6 Formatter** auswaehlen.
 
 ---
 
@@ -69,19 +69,21 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 > **Arbeitsstandard:** In VS Code immer in Spalte 1 beginnen. Shift6 fuegt beim Formatieren den 6-Spaces-Offset hinzu.  
 > **Green-Screen-Lesbarkeit:** Falls ohne VS Code am Green Screen nachgebessert wird, bleibt der Code dank 6-Spaces-Offset lesbar (erste 5 Spalten sind dort ausgeblendet).
 
+> **Schnelle Rule-Checks:** `npm run test:rules` fuer einen schnellen Sanity-Check der Kernregeln.
+
 ---
 
 ### V. Version und Beitraege
 
 **Maintainer**
 
-- Levent Akdogan (Lakdogan) — Autor, Architektur, Wartung.
+- Levent Akdogan (Lakdogan) - Autor, Architektur, Wartung.
 
 #### V.I. Changelog
 - Vollstaendige Release-Historie in `CHANGELOG.md`.
 
 #### V.II. Beitragende
-- Levent Akdogan (Lakdogan) — Architektur und Wartung.
+- Levent Akdogan (Lakdogan) - Architektur und Wartung.
 
 ---
 
@@ -89,11 +91,11 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 
 Shift6 nutzt strukturierte GitHub-Issue-Templates, um die Kommunikation schlank zu halten und den Entwicklungsfluss reibungslos zu gestalten.
 
-- 🐛 **Bug Reports:** Bitte mit reproduzierbarem Codebeispiel und Umgebungsdetails.  
-- ✨ **Feature Requests:** Feature klar beschreiben und den Nutzen fuer den Workflow erlaeutern.
+- **Bug Reports:** Bitte mit reproduzierbarem Codebeispiel und Umgebungsdetails.  
+- **Feature Requests:** Feature klar beschreiben und den Nutzen fuer den Workflow erlaeutern.
 
 Neues Issue anlegen:  
-👉 https://github.com/lakdogan/shift6foribmi/issues/new/choose
+https://github.com/lakdogan/shift6foribmi/issues/new/choose
 
 ---
 

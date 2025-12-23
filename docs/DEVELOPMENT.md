@@ -3,6 +3,11 @@
 ## Project Layout
 - `src/extension.ts` - main formatter implementation.
 - `out/extension.js` - transpiled output (built via `tsc`/`vsce`).
+- `src/format/tokenize/*` - lightweight tokenizer for line analysis.
+- `src/format/context/*` - context analyzer (openers/closers/indent tracking).
+- `src/format/rules/*` - rule pipeline for line formatting.
+- `src/config/schema.ts` - config defaults and normalization.
+- `src/scripts/rule-tests.ts` - fast rule-level sanity tests.
 - `assets/demo.gif` - demo animation used in README.
 - `demo*.rpgle` - sample inputs for quick manual checks.
 - `examples/test*.rpgle` - extended sample inputs for manual checks (if present).
@@ -11,6 +16,7 @@
 ## Build & Package
 - Install deps once: `npm install`
 - Compile TypeScript: `npm run compile`
+- Run rule tests: `npm run test:rules`
 - Package VSIX (keeps relative GIF links):
   `npx -y vsce@latest package --no-rewrite-relative-links --out shift6foribmi-local.vsix`
 

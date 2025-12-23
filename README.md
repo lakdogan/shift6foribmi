@@ -31,7 +31,7 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
     -   *Developer Value:* **Seamless Toolchain:** Ensures source code is valid across both local and remote environments.
 -   **Local & Remote Support:** Works on local files (`file:`), unsaved editors, and IBM i remote source members (e.g., Code for IBM i `ibmi:` / `vscode-vfs:` URIs).
     -   *Developer Value:* **Remote-first Ready:** Format members directly on the host without downloading to the workstation.
--   **Whitespace Normalization:** Collapses multiple spaces between tokens to one (e.g., `dcl-pi    *n;` → `dcl-pi *n;`, `if   flag = 0;` → `if flag = 0;`) and trims spaces inside string-only parentheses `(   'error'  )` → `('error')`.
+-   **Whitespace Normalization:** Collapses multiple spaces between tokens to one (e.g., `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) and trims spaces inside string-only parentheses `(   'error'  )` -> `('error')`.
     -   *Developer Value:* **Cleaner Diffs:** Consistent spacing without touching string contents preserves readability and minimizes churn.
 
 **B. Settings**
@@ -66,11 +66,11 @@ Formatting can be executed immediately on any open RPG Free source file:
     -   **Windows / Linux:** `Shift` + `Alt` + `F`
     -   **macOS:** `Shift` + `Option` + `F`
 -   **Context Menu**
-    -   Right-click in editor → **"Format Document"**
+    -   Right-click in editor -> **"Format Document"**
 -   **Command Palette**
-    -   `Ctrl` + `Shift` + `P` → **"Format Document"**
+    -   `Ctrl` + `Shift` + `P` -> **"Format Document"**
 
-> **Note on Multiple Formatters:** If alternative formatters are active, use **"Format Document With…"** to explicitly select the **Shift6 Formatter**.
+> **Note on Multiple Formatters:** If alternative formatters are active, use **"Format Document With..."** to explicitly select the **Shift6 Formatter**.
 
 ---
 
@@ -82,13 +82,15 @@ To ensure optimal use of this extension, developers must adhere to the following
 
 > **Green Screen Readability:** If you need to fix code manually on the green screen (without VS Code access), the 6-space offset preserves readability because the first 5 columns are not shown there. The formatter ensures the source stays legible in that environment.
 
+> **Quick Rule Checks:** Run `npm run test:rules` for a fast sanity check of core formatting rules.
+
 ---
 
 ### V. Version History and Contribution
 
 **Maintainer**
 
-- Levent Akdogan (Lakdogan) — Author, architecture, maintenance.
+- Levent Akdogan (Lakdogan) - Author, architecture, maintenance.
 
 #### V.I. Change Log
 
@@ -104,11 +106,11 @@ To ensure optimal use of this extension, developers must adhere to the following
 
 Shift6 uses structured GitHub issue templates to streamline communication and keep the development experience smooth.
 
-- 🐛 **Bug Reports:** Please include a reproducible code sample and environment details.  
-- ✨ **Feature Requests:** Clearly describe the feature and explain why it benefits the workflow.
+- **Bug Reports:** Please include a reproducible code sample and environment details.  
+- **Feature Requests:** Clearly describe the feature and explain why it benefits the workflow.
 
 You can create a new issue here:  
-👉 https://github.com/lakdogan/shift6foribmi/issues/new/choose
+https://github.com/lakdogan/shift6foribmi/issues/new/choose
 
 ---
 
@@ -119,7 +121,7 @@ The following animation shows a formatting operation performed by Shift6 within 
 ![Shift6 one-click formatting demo](https://github.com/lakdogan/shift6-formatter/blob/main/raw/HEAD/assets/demo.gif?raw=true)
 Direct link (if the image does not load): https://github.com/lakdogan/shift6-formatter/blob/main/raw/HEAD/assets/demo.gif?raw=true
 
-#### Before → Format Document → After (sample)
+#### Before -> Format Document -> After (sample)
 
 Before:
 ```rpg

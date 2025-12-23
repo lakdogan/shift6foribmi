@@ -1,4 +1,4 @@
-# Shift6 Formatter – Testing Guide
+# Shift6 Formatter - Testing Guide
 
 ## Manual Smoke Tests
 - Open `demo.rpgle`, `demo-nested.rpgle`, and `demo-large.rpgle` (or any `examples/test*.rpgle` files if present).
@@ -12,7 +12,8 @@
   - Excess blank lines before closers (END-PROC/ENDIF/etc.) are trimmed; multiple consecutive blanks collapse to one; trailing blanks at EOF are removed.
   - `ctl-opt` parentheses are trimmed (e.g., `dftactgrp( *no)` -> `dftactgrp(*no)`).
   - `*` special values are joined in context (e.g., `if * on;` -> `if *on;`, `if * in 99;` -> `if *IN99;`).
-  - `%` built-ins are not split (e.g., `%int` stays intact).
+  - `%` built-ins are not split (e.g., `%int` stays intact) and spaces directly inside parentheses are trimmed.
+  - General parentheses trimming removes leading/trailing spaces inside `(...)` outside strings.
 
 ## Settings Regression Checks
 - Set `shift6.spaces` to `0` and verify no base padding is added.
@@ -20,6 +21,9 @@
 - Set `shift6.continuationColumn` to a small value (e.g., `45`) and confirm long expressions wrap safely without losing tokens.
 - Toggle `shift6.alignPlusContinuation` and confirm leading `+` lines align as expected.
 - Toggle `shift6.joinAsteriskTokensInDecl` and confirm `dcl-pi * n;` becomes `dcl-pi *n;` when enabled.
+
+## Rule Tests (fast)
+- Run `npm run test:rules` to validate core formatting cases without launching VS Code.
 
 ## Packaging Verification
 - Build: `npm run compile`

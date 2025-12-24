@@ -36,6 +36,37 @@ export const findFirstSpacedBinaryOperatorAfterLimit = (
   inString = false;
   quoteChar = '';
   const start = Math.max(0, limit + 1);
+  let depth = 0;
+
+  for (let i = 0; i < Math.min(start, codePart.length); i++) {
+    const ch = codePart[i];
+    if (inString) {
+      if (ch === quoteChar) {
+        if (i + 1 < codePart.length && codePart[i + 1] === quoteChar) {
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
+    if (ch === '(') {
+      depth++;
+      continue;
+    }
+    if (ch === ')' && depth > 0) {
+      depth--;
+      continue;
+    }
+  }
 
   for (let i = start; i < codePart.length; i++) {
     const ch = codePart[i];
@@ -58,8 +89,17 @@ export const findFirstSpacedBinaryOperatorAfterLimit = (
       continue;
     }
 
+    if (ch === '(') {
+      depth++;
+      continue;
+    }
+    if (ch === ')' && depth > 0) {
+      depth--;
+      continue;
+    }
+
     if (CONTINUATION_OPERATORS.includes(ch) && i > 0 && i + 1 < codePart.length) {
-      if (isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
+      if (depth === 0 && isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
         return i;
       }
     }

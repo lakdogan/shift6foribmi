@@ -36,6 +36,7 @@ export const findLastSpacedBinaryOperatorBeforeLimit = (
   inString = false;
   quoteChar = '';
   let last: number | null = null;
+  let depth = 0;
   const max = Math.min(codePart.length - 1, limit);
 
   for (let i = 0; i <= max; i++) {
@@ -59,8 +60,17 @@ export const findLastSpacedBinaryOperatorBeforeLimit = (
       continue;
     }
 
+    if (ch === '(') {
+      depth++;
+      continue;
+    }
+    if (ch === ')' && depth > 0) {
+      depth--;
+      continue;
+    }
+
     if (CONTINUATION_OPERATORS.includes(ch) && i > 0 && i + 1 < codePart.length) {
-      if (isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
+      if (depth === 0 && isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
         last = i;
       }
     }

@@ -193,6 +193,34 @@ const cases: Case[] = [
     config: {
       fixMultilineStringLiterals: false
     }
+  },
+  {
+    name: 'special-value-spacing-after-operators',
+    input: [
+      '**free',
+      'return * on;',
+      'return * off;',
+      'if(*in99 = * on);',
+      'if(*in05 = * off);'
+    ].join('\n'),
+    mustInclude: ['return *on;', 'return *off;', 'if(*IN99 = *on);', 'if(*IN05 = *off);']
+  },
+  {
+    name: 'percent-builtin-no-space',
+    input: ['**free', 'r = %char(% timestamp());'].join('\n'),
+    mustInclude: ['r = %char(%timestamp());']
+  },
+  {
+    name: 'wrap-long-literal-new-line',
+    input: [
+      '**free',
+      "msg = 'A' + 'B' + 'This is a very long literal that should split when it starts a new line due to column limits.';"
+    ].join('\n'),
+    mustInclude: ["+ 'literal that should split"],
+    config: {
+      wrapLongStrings: true,
+      continuationColumn: 50
+    }
   }
 ];
 

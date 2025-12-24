@@ -1,6 +1,7 @@
 import { Shift6Config } from '../../config';
 import { SPECIAL_VALUE_CONTEXTS, SPECIAL_VALUES } from './constants';
 import {
+  isSpecialValueToken,
   normalizeBinaryOperatorSpacing,
   normalizePercentBuiltins,
   normalizeSpecialValueSpacing
@@ -131,7 +132,16 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
 
   if (!isDeclLine) {
     rest = applyOutsideStrings(rest, (segment) =>
-      segment.replace(/([A-Za-z0-9_)\]])\s*\*\s*([A-Za-z0-9_\(])/g, '$1 * $2')
+      segment.replace(
+        /([A-Za-z0-9_)\]])\s*\*\s*([A-Za-z0-9_\(])/g,
+        (match: string, left: string, right: string, offset: number) => {
+          const starIndex = offset + match.indexOf('*');
+          if (isSpecialValueToken(segment, starIndex)) {
+            return left + ' *' + right;
+          }
+          return left + ' * ' + right;
+        }
+      )
     );
   }
 
@@ -184,6 +194,9 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
   rest = applyOutsideStrings(rest, (segment) => segment.replace(/\s+;/g, ';'));
 
   rest = normalizePercentBuiltins(rest);
+  rest = applyOutsideStrings(rest, (segment) =>
+    segment.replace(/%\s+([A-Za-z0-9_]+)/g, '%$1')
+  );
   rest = trimSpacesInsideParenthesesOutsideStrings(rest);
 
   rest = applyOutsideStrings(rest, (segment) =>

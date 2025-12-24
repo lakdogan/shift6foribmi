@@ -34,10 +34,13 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
 - `shift6.collapseTokenSpaces` (Standard: `true`): Schaltet das Reduzieren mehrfacher Leerzeichen zwischen Tokens auf ein Leerzeichen.  
 - `shift6.trimStringParentheses` (Standard: `true`): Entfernt Leerzeichen direkt innerhalb von Klammern, wenn darin nur ein String literal steht.  
 - `shift6.alignPlusContinuation` (Standard: `true`): Richtet Zeilen, die mit `+` beginnen, unter dem ersten `+` der vorherigen Zeile aus.  
-- `shift6.continuationColumn` (Standard: `66`): Spaltengrenze, ab der lange Ausdruecke mit Operatoren in eine neue Fortsetzungszeile umgebrochen werden.
+- `shift6.continuationColumn` (Standard: `66`, Minimum: `40`): Spaltengrenze, ab der lange Ausdruecke mit Operatoren in eine neue Fortsetzungszeile umgebrochen werden.
 - `shift6.joinAsteriskTokensInDecl` (Standard: `true`): Verbindet Tokens nach `*` in `DCL-PI`/`DCL-PR`/`DCL-PROC`/`CTL-OPT`-Zeilen (z.B. `*n`, `*no`, `*new`).
+- `shift6.wrapLongStrings` (Standard: `false`): Lange String-Literale in Konkatenationen umbrechen (nur an Leerzeichen).
+- `shift6.fixMultilineStringLiterals` (Standard: `true`): Multi-Line-String-Literale (mit einfachen Quotes) in explizite Konkatenationen umwandeln.
+- `shift6.concatStyle` (Standard: `compact`): Style fuer String-Konkatenationen (`compact` oder `one-per-line`).
 
-Neu in 0.1.17: Zeilenumbruch fuer lange Ausdruecke und `*`-Special-Values im Kontext.
+Neu in 0.1.18: String-Konkatenations-Styles, optionales Long-String-Wrapping, Multiline-String-Normalisierung, verbesserte Continuations.
 
 **C. Git Hook (optional)**
 

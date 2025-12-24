@@ -15,6 +15,9 @@ export function getConfig(): Shift6Config {
     trimStringParentheses: cfg.get<boolean>(CONFIG_KEYS.trimStringParentheses),
     alignPlusContinuation: cfg.get<boolean>(CONFIG_KEYS.alignPlusContinuation),
     continuationColumn: cfg.get<number | string>(CONFIG_KEYS.continuationColumn),
-    joinAsteriskTokensInDecl: cfg.get<boolean>(CONFIG_KEYS.joinAsteriskTokensInDecl)
+    joinAsteriskTokensInDecl: cfg.get<boolean>(CONFIG_KEYS.joinAsteriskTokensInDecl),
+    wrapLongStrings: cfg.get<boolean>(CONFIG_KEYS.wrapLongStrings),
+    fixMultilineStringLiterals: cfg.get<boolean>(CONFIG_KEYS.fixMultilineStringLiterals),
+    concatStyle: cfg.get<string>(CONFIG_KEYS.concatStyle)
   });
 }

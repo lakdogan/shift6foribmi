@@ -8,4 +8,7 @@ export interface Shift6Config {
   alignPlusContinuation: boolean;
   continuationColumn: number;
   joinAsteriskTokensInDecl: boolean;
+  wrapLongStrings: boolean;
+  fixMultilineStringLiterals: boolean;
+  concatStyle: 'compact' | 'one-per-line';
 }

@@ -96,13 +96,29 @@
         "shift6.continuationColumn": {
           "type": "number",
           "default": 66,
-          "minimum": 1,
+          "minimum": 40,
           "description": "Column limit for wrapping long binary-operator expressions onto a new continuation line."
         },
         "shift6.joinAsteriskTokensInDecl": {
           "type": "boolean",
           "default": true,
           "description": "Join tokens after * in DCL-PI/DCL-PR/DCL-PROC/CTL-OPT lines (e.g., *n, *no, *new)."
+        },
+        "shift6.wrapLongStrings": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically wrap long single string literals into concatenated continuation lines."
+        },
+        "shift6.fixMultilineStringLiterals": {
+          "type": "boolean",
+          "default": true,
+          "description": "Normalize multi-line single-quote literals into explicit concatenated strings."
+        },
+        "shift6.concatStyle": {
+          "type": "string",
+          "enum": ["compact", "one-per-line"],
+          "default": "compact",
+          "description": "Control how string concatenations are wrapped across lines."
         }
       }
     },

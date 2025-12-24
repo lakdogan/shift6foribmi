@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.18] - 2025-12-24
+- Added string concatenation wrapping mode config (`shift6.concatStyle`) with `compact` (default) or `one-per-line`.
+- Added optional long string literal wrapping in concatenations (`shift6.wrapLongStrings`) with safe word-boundary splits.
+- Added multi-line single-quote literal normalization (`shift6.fixMultilineStringLiterals`) to convert pasted strings into concatenations.
+- Improved continuation handling: merge trailing `+` lines with following literals and pack concatenations greedily within the column limit.
+- Made continuation wrapping account for effective indentation when evaluating column limits.
+- Hardened inline statement splitting and comment detection to ignore semicolons and `//` inside strings.
+- Ensured operator/asterisk normalization and spacing changes only apply outside string literals; preserved literal contents.
+- Fixed spacing around `%` built-ins after operators (e.g., `+ %char(...)`).
+- Trim spaces before semicolons in formatted code.
+- Added rule-test coverage for string concatenation wrapping.
+- Enforced minimum `shift6.continuationColumn` of 40 via config normalization and schema metadata.
+
 ## [0.1.17] - 2025-12-23
 - Added configurable wrapping for long binary-operator expressions (`shift6.continuationColumn`) with safe multi-split behavior.
 - Added alignment for continuation lines and improved operator spacing for `+`, `-`, `*`, `/`, `%`, including string concatenations and parentheses adjacency.

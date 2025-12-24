@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.19] - 2025-12-24
+- Fixed special value joining for `*on`, `*off`, and `*INxx` after operators and `RETURN`.
+- Normalized stray spaces after `%` built-ins (e.g., `% timestamp()` -> `%timestamp()`).
+- Prevented continuation splitting inside parentheses to avoid breaking expressions.
+
 ## [0.1.18] - 2025-12-24
 - Added string concatenation wrapping mode config (`shift6.concatStyle`) with `compact` (default) or `one-per-line`.
 - Added optional long string literal wrapping in concatenations (`shift6.wrapLongStrings`) with safe word-boundary splits.

@@ -349,8 +349,12 @@ function wrapConcatenatedLine(
 
   const tryAppendSegment = (segment: string): boolean => {
     if (currentSegments.length === 0) {
-      currentSegments.push(segment);
-      return true;
+      const candidate = linePrefix + segment;
+      if (candidate.length <= columnLimit) {
+        currentSegments.push(segment);
+        return true;
+      }
+      return false;
     }
     const candidate = linePrefix + currentSegments.join(' + ') + ' + ' + segment;
     if (candidate.length <= columnLimit) {

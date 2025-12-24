@@ -7,6 +7,7 @@ export const findSpacedBinaryOperatorColumn = (line: string): number | null => {
   const codePart = commentIndex >= 0 ? line.substring(0, commentIndex) : line;
   let inString = false;
   let quoteChar = '';
+  let depth = 0;
 
   for (let i = 0; i < codePart.length; i++) {
     const ch = codePart[i];
@@ -29,8 +30,17 @@ export const findSpacedBinaryOperatorColumn = (line: string): number | null => {
       continue;
     }
 
+    if (ch === '(') {
+      depth++;
+      continue;
+    }
+    if (ch === ')' && depth > 0) {
+      depth--;
+      continue;
+    }
+
     if (CONTINUATION_OPERATORS.includes(ch) && i > 0 && i + 1 < codePart.length) {
-      if (isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
+      if (depth === 0 && isWhitespace(codePart[i - 1]) && isWhitespace(codePart[i + 1])) {
         return i;
       }
     }

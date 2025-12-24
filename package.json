@@ -6,7 +6,7 @@
   "contributors": [
     "Levent Akdogan (Lakdogan)"
   ],
-  "version": "0.1.16",
+  "version": "0.1.17",
   "publisher": "lakdogan",
   "engines": {
     "vscode": "^1.85.0"
@@ -116,7 +116,10 @@
         },
         "shift6.concatStyle": {
           "type": "string",
-          "enum": ["compact", "one-per-line"],
+          "enum": [
+            "compact",
+            "one-per-line"
+          ],
           "default": "compact",
           "description": "Control how string concatenations are wrapped across lines."
         }

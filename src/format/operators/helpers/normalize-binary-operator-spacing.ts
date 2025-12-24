@@ -79,7 +79,9 @@ export const normalizeBinaryOperatorSpacing = (text: string, cfg: Shift6Config):
         continue;
       }
 
-      const isBinary = isTokenChar(prevChar) && isTokenChar(nextChar);
+      const isBuiltinStart = nextChar === '%' && /[A-Za-z]/.test(text[nextIndex + 1] || '');
+      const isBinary =
+        isTokenChar(prevChar) && (isTokenChar(nextChar) || isBuiltinStart);
       const isLeading = prevIndex < 0;
 
       if (isBinary || isLeading) {

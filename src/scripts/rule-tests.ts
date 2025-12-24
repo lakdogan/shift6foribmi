@@ -1,4 +1,4 @@
-import { normalizeConfig } from '../config/schema';
+import { normalizeConfig, Shift6ConfigInput } from '../config/schema';
 import { formatCore } from '../format/format-core';
 import { postProcessBlankLines } from '../format/postprocess';
 import { preprocessDocument } from '../format/preprocess';
@@ -16,6 +16,7 @@ interface Case {
   name: string;
   input: string;
   mustInclude: string[];
+  config?: Shift6ConfigInput;
 }
 
 const cases: Case[] = [
@@ -120,13 +121,85 @@ const cases: Case[] = [
     name: 'parentheses-trim',
     input: ['**free', 'x = inz(             2      );', 'y = inz(         2);'].join('\n'),
     mustInclude: ['x = inz(2);', 'y = inz(2);']
+  },
+  {
+    name: 'string-wrap-concat',
+    input: [
+      '**free',
+      "msg='User='+%trim(user)+';Action='+%trim(action)+';Status='+%trim(status)+';Timestamp='+%char(%timestamp())+';Details='+",
+      "'Some very long detail text that should show how continuation lines get aligned and made readable by the formatter in a consistent way';"
+    ].join('\n'),
+    mustInclude: [
+      "msg = 'User=' + %trim(user) + ';Action=' + %trim(action)",
+      "+ ';Details=' + 'Some",
+      "+ 'detail text that should show how continuation lines get",
+      "+ 'aligned and made readable by the formatter in a",
+      "+ 'consistent way';"
+    ],
+    config: {
+      wrapLongStrings: true
+    }
+  },
+  {
+    name: 'multiline-string-normalization',
+    input: ['**free', "msg = 'Hello", 'World\';', 'dsply(msg);'].join('\n'),
+    mustInclude: ["msg = 'Hello'", "+ 'World';"]
+  },
+  {
+    name: 'wrap-leading-plus-literal',
+    input: [
+      '**free',
+      "msg = 'A'",
+      "+ 'This is a very long literal that should wrap when the column limit is small.';"
+    ].join('\n'),
+    mustInclude: ["+ 'This is a very long literal"],
+    config: {
+      wrapLongStrings: true,
+      continuationColumn: 50
+    }
+  },
+  {
+    name: 'concat-one-per-line',
+    input: ['**free', "msg = 'A' + 'B' + 'C';"].join('\n'),
+    mustInclude: ["msg = 'A'", "+ 'B'", "+ 'C';"],
+    config: {
+      concatStyle: 'one-per-line'
+    }
+  },
+  {
+    name: 'continuation-column-indent-aware',
+    input: [
+      '**free',
+      'dcl-proc Test;',
+      '  dcl-s msg varchar(2000);',
+      "  msg = 'A' + 'B' + 'C' + 'D' + 'E' + 'F';",
+      'end-proc;'
+    ].join('\n'),
+    mustInclude: ["msg = 'A' + 'B' + 'C'", "+ 'D' + 'E' + 'F';"],
+    config: {
+      continuationColumn: 50,
+      wrapLongStrings: false
+    }
+  },
+  {
+    name: 'trim-space-before-semicolon',
+    input: ['**free', 'if a = b ;'].join('\n'),
+    mustInclude: ['if a = b;']
+  },
+  {
+    name: 'multiline-string-disabled',
+    input: ['**free', "msg = 'Hello", 'World\';'].join('\n'),
+    mustInclude: ["msg = 'Hello", 'World\';'],
+    config: {
+      fixMultilineStringLiterals: false
+    }
   }
 ];
 
 // Execute the full formatting pipeline on a single test case.
 function runCase(testCase: Case): string {
   const lines = testCase.input.split(/\r?\n/);
-  const cfg = normalizeConfig({});
+  const cfg = normalizeConfig(testCase.config ?? {});
   const pre = preprocessDocument(lines, cfg);
   const core = formatCore(pre, cfg);
   const post = postProcessBlankLines(core.resultLines);

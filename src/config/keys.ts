@@ -5,5 +5,8 @@ export const CONFIG_KEYS = {
   trimStringParentheses: 'shift6.trimStringParentheses',
   alignPlusContinuation: 'shift6.alignPlusContinuation',
   continuationColumn: 'shift6.continuationColumn',
-  joinAsteriskTokensInDecl: 'shift6.joinAsteriskTokensInDecl'
+  joinAsteriskTokensInDecl: 'shift6.joinAsteriskTokensInDecl',
+  wrapLongStrings: 'shift6.wrapLongStrings',
+  fixMultilineStringLiterals: 'shift6.fixMultilineStringLiterals',
+  concatStyle: 'shift6.concatStyle'
 } as const;

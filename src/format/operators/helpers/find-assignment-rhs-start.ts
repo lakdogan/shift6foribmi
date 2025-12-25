@@ -1,40 +1,23 @@
+import { findCommentIndexOutsideStrings, scanOutsideStrings } from '../../utils/string-scan';
+
 // Locate the column where assignment RHS begins, ignoring ==, <=, >=.
 export const findAssignmentRhsStart = (line: string): number | null => {
-  const commentIndex = line.indexOf('//');
+  const commentIndex = findCommentIndexOutsideStrings(line);
   const codePart = commentIndex >= 0 ? line.substring(0, commentIndex) : line;
-  let inString = false;
-  let quoteChar = '';
+  let rhsStart: number | null = null;
 
-  for (let i = 0; i < codePart.length; i++) {
-    const ch = codePart[i];
-
-    if (inString) {
-      if (ch === quoteChar) {
-        if (i + 1 < codePart.length && codePart[i + 1] === quoteChar) {
-          i++;
-          continue;
-        }
-        inString = false;
-        quoteChar = '';
-      }
-      continue;
-    }
-
-    if (ch === '\'' || ch === '"') {
-      inString = true;
-      quoteChar = ch;
-      continue;
-    }
-
+  scanOutsideStrings(codePart, (ch, index) => {
     if (ch === '=') {
-      const prev = i > 0 ? codePart[i - 1] : '';
-      const next = i + 1 < codePart.length ? codePart[i + 1] : '';
+      const prev = index > 0 ? codePart[index - 1] : '';
+      const next = index + 1 < codePart.length ? codePart[index + 1] : '';
       if (prev === '<' || prev === '>' || next === '=') {
-        continue;
+        return false;
       }
-      return i + 2;
+      rhsStart = index + 2;
+      return true;
     }
-  }
+    return false;
+  });
 
-  return null;
+  return rhsStart;
 };

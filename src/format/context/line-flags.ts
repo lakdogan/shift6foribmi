@@ -3,6 +3,17 @@ import { containsKeywordToken, startsWithKeyword } from '../utils';
 import { LineFlags } from './types';
 import { LineInfo } from './line-info';
 
+const getLastSignificantToken = (
+  info: LineInfo
+): { type: string; value: string } | null => {
+  for (let i = info.tokens.length - 1; i >= 0; i--) {
+    const token = info.tokens[i];
+    if (token.type === 'whitespace' || token.type === 'comment') continue;
+    return token;
+  }
+  return null;
+};
+
 // Derive structural flags (openers/closers/mids) from tokenized line info.
 export function getLineFlags(info: LineInfo): LineFlags {
   const upper = info.upper;
@@ -23,6 +34,13 @@ export function getLineFlags(info: LineInfo): LineFlags {
     info.trimmed.endsWith(';') &&
     !containsKeywordToken(upperNoComment, ['END-DS', 'ENDDS']) &&
     /\b(LIKEDS|EXTNAME)\b/i.test(upperNoComment);
+  const lastToken = getLastSignificantToken(info);
+  const endsStatement =
+    !info.isCommentOnly &&
+    Boolean(lastToken && lastToken.type === 'punctuation' && lastToken.value === ';');
+  const endsWithAssignment =
+    !info.isCommentOnly &&
+    Boolean(lastToken && lastToken.type === 'operator' && lastToken.value === '=');
 
   return {
     isCloser,
@@ -32,6 +50,8 @@ export function getLineFlags(info: LineInfo): LineFlags {
     isProcEnd,
     hasInlineCloser,
     isInlineDclDs,
-    isCommentOnly: info.isCommentOnly
+    isCommentOnly: info.isCommentOnly,
+    endsStatement,
+    endsWithAssignment
   };
 }

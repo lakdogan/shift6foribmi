@@ -51,6 +51,56 @@ export const transformOutsideStrings = (text: string, handler: OutsideHandler): 
   return result;
 };
 
+export interface StringTransformContext {
+  inString: boolean;
+  quoteChar: string;
+  result: string;
+  index: number;
+}
+
+// Accumulate a result while iterating characters outside strings.
+export const reduceOutsideStrings = <T>(
+  text: string,
+  initial: T,
+  reducer: (state: T, ch: string, index: number, ctx: StringTransformContext) => T
+): T => {
+  let state = initial;
+  let result = '';
+  let inString = false;
+  let quoteChar = '';
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const ctx: StringTransformContext = { inString, quoteChar, result, index: i };
+    if (inString) {
+      result += ch;
+      state = reducer(state, ch, i, { ...ctx, result });
+      if (ch === quoteChar) {
+        if (i + 1 < text.length && text[i + 1] === quoteChar) {
+          result += text[i + 1];
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      result += ch;
+      inString = true;
+      quoteChar = ch;
+      state = reducer(state, ch, i, { ...ctx, inString, quoteChar, result });
+      continue;
+    }
+
+    state = reducer(state, ch, i, { ...ctx, result });
+  }
+
+  return state;
+};
+
 // Transform full segments outside string literals while preserving string contents.
 export const transformSegmentsOutsideStrings = (text: string, transform: SegmentTransform): string => {
   let result = '';

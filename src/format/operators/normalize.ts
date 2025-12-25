@@ -28,6 +28,8 @@ import {
   normalizePercentBuiltinArgs,
   normalizePercentBuiltinNames
 } from './normalize-helpers/percent';
+import { normalizeAsteriskSpacing } from './normalize-helpers/asterisk-spacing';
+import { trimSpaceBeforeSemicolon } from './normalize-helpers/semicolon-spacing';
 
 const applyOutsideStrings = transformSegmentsOutsideStrings;
 
@@ -74,18 +76,7 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
   rest = normalizeSpecialValueSpacing(rest);
 
   if (!isDeclLine) {
-    rest = applyOutsideStrings(rest, (segment) =>
-      segment.replace(
-        /([A-Za-z0-9_)\]])\s*\*\s*([A-Za-z0-9_\(])/g,
-        (match: string, left: string, right: string, offset: number) => {
-          const starIndex = offset + match.indexOf('*');
-          if (isSpecialValueToken(segment, starIndex)) {
-            return left + ' *' + right;
-          }
-          return left + ' * ' + right;
-        }
-      )
-    );
+    rest = applyOutsideStrings(rest, normalizeAsteriskSpacing);
   }
 
   const contextPattern = new RegExp(
@@ -106,7 +97,7 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
     rest = collapseExtraSpacesOutsideStrings(rest);
   }
 
-  rest = applyOutsideStrings(rest, (segment) => segment.replace(/\s+;/g, ';'));
+  rest = applyOutsideStrings(rest, trimSpaceBeforeSemicolon);
 
   rest = normalizePercentBuiltins(rest);
   rest = applyOutsideStrings(rest, normalizePercentBuiltinNames);

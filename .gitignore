@@ -44,3 +44,6 @@ Thumbs.db
 
 # Demo RPGLE files
 *.rpgle
+
+# Local agent instructions
+AGENT.md

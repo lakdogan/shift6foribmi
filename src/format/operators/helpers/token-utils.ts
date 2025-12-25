@@ -1,4 +1,8 @@
-import { isWhitespace } from './is-whitespace';
+// Determine if a character belongs to a token for operator spacing decisions.
+export const isTokenChar = (ch: string): boolean => /[A-Za-z0-9_@#$\])}\(.'"]/.test(ch);
+
+// Treat spaces and tabs as whitespace for parsing helpers.
+export const isWhitespace = (ch: string): boolean => ch === ' ' || ch === '\t';
 
 // Get the previous word-like token before the given index.
 export const getPrevToken = (text: string, index: number): string | null => {

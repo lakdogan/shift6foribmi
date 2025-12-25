@@ -1,7 +1,6 @@
 import { SPECIAL_VALUES, SPECIAL_VALUE_KEYWORDS } from '../constants';
-import { getPrevToken } from './get-prev-token';
-import { isSpecialValueToken } from './is-special-value-token';
-import { isWhitespace } from './is-whitespace';
+import { isSpecialValueToken } from './keyword-tokens';
+import { getPrevToken, isWhitespace } from './token-utils';
 
 // Join *special values like *on, *off, *in99 in appropriate contexts.
 export const normalizeSpecialValueSpacing = (text: string): string => {

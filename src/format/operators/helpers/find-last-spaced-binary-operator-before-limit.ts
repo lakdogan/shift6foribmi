@@ -1,5 +1,5 @@
 import { CONTINUATION_OPERATORS } from '../constants';
-import { isWhitespace } from './is-whitespace';
+import { isWhitespace } from './token-utils';
 
 // Locate the last spaced binary operator before a column limit.
 export const findLastSpacedBinaryOperatorBeforeLimit = (

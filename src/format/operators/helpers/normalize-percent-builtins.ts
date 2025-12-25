@@ -1,4 +1,4 @@
-import { isWhitespace } from './is-whitespace';
+import { isWhitespace } from './token-utils';
 
 // Extract raw builtin argument text while respecting nested parens and strings.
 const extractBuiltinArgs = (text: string, startIndex: number): { content: string; end: number } => {

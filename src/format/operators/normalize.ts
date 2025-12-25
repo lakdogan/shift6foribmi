@@ -13,25 +13,17 @@ import {
   trimStringOnlyParentheses
 } from './steps';
 import { findCommentIndexOutsideStrings } from '../utils/string-scan';
-import { transformSegmentsOutsideStrings } from './helpers/string-transform';
-import { applyOperatorReplacements } from './normalize-helpers/operator-replacements';
-import { applySpecialValueContextSpacing } from './normalize-helpers/special-value-context';
 import {
-  joinAsteriskTokensInDecl,
-  joinDeclReturnAsterisk
-} from './normalize-helpers/decl-asterisk-join';
-import {
-  normalizeCtlOptAsteriskTokens,
-  normalizeCtlOptParentheses
-} from './normalize-helpers/ctl-opt';
-import {
-  normalizePercentBuiltinArgs,
-  normalizePercentBuiltinNames
-} from './normalize-helpers/percent';
-import { normalizeAsteriskSpacing } from './normalize-helpers/asterisk-spacing';
-import { trimSpaceBeforeSemicolon } from './normalize-helpers/semicolon-spacing';
-
-const applyOutsideStrings = transformSegmentsOutsideStrings;
+  applyCtlOptAsteriskSpacing,
+  applyCtlOptParentheses,
+  applyDeclAsteriskJoins,
+  applyNonDeclAsteriskSpacing,
+  applyOperatorSpacingReplacements,
+  applyPercentBuiltinArgs,
+  applyPercentBuiltinNames,
+  applySemicolonSpacing,
+  applySpecialValueContext
+} from './normalize-helpers/pipeline';
 
 // Apply all operator-level normalizations for a single line.
 export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): string {
@@ -58,52 +50,38 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
     rest = trimStringOnlyParentheses(rest);
   }
 
-  if (isCtlOptLine) {
-    rest = applyOutsideStrings(rest, normalizeCtlOptParentheses);
-  }
+  rest = applyCtlOptParentheses(rest, isCtlOptLine);
 
   rest = normalizePercentBuiltins(rest);
   rest = normalizeBinaryOperatorSpacing(rest, cfg);
 
-  if (cfg.joinAsteriskTokensInDecl) {
-    rest = applyOutsideStrings(rest, joinAsteriskTokensInDecl);
-  }
-
-  if (cfg.joinAsteriskTokensInDecl && isDeclLine) {
-    rest = applyOutsideStrings(rest, joinDeclReturnAsterisk);
-  }
+  rest = applyDeclAsteriskJoins(rest, cfg, isDeclLine);
 
   rest = normalizeSpecialValueSpacing(rest);
 
-  if (!isDeclLine) {
-    rest = applyOutsideStrings(rest, normalizeAsteriskSpacing);
-  }
+  rest = applyNonDeclAsteriskSpacing(rest, isDeclLine);
 
   const contextPattern = new RegExp(
     `\\b(${SPECIAL_VALUE_CONTEXTS.join('|')})\\s+\\*\\s+(${SPECIAL_VALUES.join('|')})\\b`,
     'gi'
   );
-  rest = applyOutsideStrings(rest, (segment) =>
-    applySpecialValueContextSpacing(segment, contextPattern)
-  );
+  rest = applySpecialValueContext(rest, contextPattern);
 
-  if (isCtlOptLine) {
-    rest = applyOutsideStrings(rest, normalizeCtlOptAsteriskTokens);
-  }
+  rest = applyCtlOptAsteriskSpacing(rest, isCtlOptLine);
 
-  rest = applyOutsideStrings(rest, applyOperatorReplacements);
+  rest = applyOperatorSpacingReplacements(rest);
 
   if (cfg.collapseTokenSpaces) {
     rest = collapseExtraSpacesOutsideStrings(rest);
   }
 
-  rest = applyOutsideStrings(rest, trimSpaceBeforeSemicolon);
+  rest = applySemicolonSpacing(rest);
 
   rest = normalizePercentBuiltins(rest);
-  rest = applyOutsideStrings(rest, normalizePercentBuiltinNames);
+  rest = applyPercentBuiltinNames(rest);
   rest = trimSpacesInsideParenthesesOutsideStrings(rest);
 
-  rest = applyOutsideStrings(rest, normalizePercentBuiltinArgs);
+  rest = applyPercentBuiltinArgs(rest);
 
   const trimmedRest = rest.replace(/[ \t]+$/g, '');
   const commentSpacer = commentPart && trimmedRest.length > 0 ? ' ' : '';

@@ -47,6 +47,7 @@ export const buildNormalizeSteps = (ctx: NormalizeStepContext): NormalizeStep[] 
   steps.push((text) => applyOperatorSpacingReplacements(text));
   steps.push(applyIf(ctx.cfg.collapseTokenSpaces, (text) => collapseExtraSpacesOutsideStrings(text)));
   steps.push((text) => applySemicolonSpacing(text));
+  // Second pass to catch %builtins introduced by earlier replacements.
   steps.push((text) => normalizePercentBuiltins(text));
   steps.push((text) => applyPercentBuiltinNames(text));
   steps.push((text) => trimSpacesInsideParenthesesOutsideStrings(text));

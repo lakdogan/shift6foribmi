@@ -14,6 +14,8 @@ import {
 } from './steps';
 import { findCommentIndexOutsideStrings } from '../utils/string-scan';
 import { transformSegmentsOutsideStrings } from './helpers/string-transform';
+import { applyOperatorReplacements } from './normalize-helpers/operator-replacements';
+import { applySpecialValueContextSpacing } from './normalize-helpers/special-value-context';
 
 const applyOutsideStrings = transformSegmentsOutsideStrings;
 
@@ -85,12 +87,7 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
     'gi'
   );
   rest = applyOutsideStrings(rest, (segment) =>
-    segment
-      .replace(contextPattern, '$1 *$2')
-      .replace(
-        /\b(IF|ELSEIF|WHEN|DOW|DOU|FOR|ON-ERROR|ON-EXIT)\s+\*\s+IN\s*([0-9]{2})\b/gi,
-        '$1 *IN$2'
-      )
+    applySpecialValueContextSpacing(segment, contextPattern)
   );
 
   if (isCtlOptLine) {
@@ -102,39 +99,7 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
     );
   }
 
-  rest = applyOutsideStrings(rest, (segment) => {
-    let next = segment;
-    next = next.replace(/\s*<=\s*/g, ' __LE__ ');
-    next = next.replace(/\s*>=\s*/g, ' __GE__ ');
-    next = next.replace(/\s*<>\s*/g, ' __NE__ ');
-    next = next.replace(/\s*([+\-*/%])\s*=\s*/g, ' __CASSIGN_$1__ ');
-    next = next.replace(/\s*<\s*/g, ' < ');
-    next = next.replace(/\s*>\s*/g, ' > ');
-    next = next.replace(/\s*=\s*/g, ' = ');
-    next = next.replace(/__LE__/g, ' <= ');
-    next = next.replace(/__GE__/g, ' >= ');
-    next = next.replace(/__NE__/g, ' <> ');
-    next = next.replace(/__CASSIGN_([+\-*/%])__/g, ' $1= ');
-    next = next.replace(/\s+([+\-*/%]=)/g, ' $1');
-    next = next.replace(/([+\-*/%]=)\s+/g, '$1 ');
-    next = next.replace(
-      /\s*\b(AND|OR|NOT|XOR)\b\s*/gi,
-      (match: string, op: string, offset: number, source: string) => {
-        const before = source.slice(0, offset);
-        const atStart = before.trim().length === 0;
-        return (atStart ? '' : ' ') + op + ' ';
-      }
-    );
-    next = next.replace(
-      /\s*(\*AND|\*OR|\*NOT|\*XOR)\s*/gi,
-      (match: string, op: string, offset: number, source: string) => {
-        const before = source.slice(0, offset);
-        const atStart = before.trim().length === 0;
-        return (atStart ? '' : ' ') + op + ' ';
-      }
-    );
-    return next;
-  });
+  rest = applyOutsideStrings(rest, applyOperatorReplacements);
 
   if (cfg.collapseTokenSpaces) {
     rest = collapseExtraSpacesOutsideStrings(rest);

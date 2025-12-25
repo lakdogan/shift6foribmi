@@ -1,6 +1,6 @@
 import type { Shift6Config } from '../../../../config';
 import { wrapConcatenatedLine } from '../../support/concat-wrap';
-import { hasTrailingPlusOutsideStrings } from '../../support/string-scan';
+import { hasTrailingPlusOutsideStrings } from '../../../utils/string-scan';
 import type { ContinuationState } from '../../support/types';
 import { clearPending } from './state';
 

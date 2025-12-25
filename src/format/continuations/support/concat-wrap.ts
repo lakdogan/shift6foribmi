@@ -1,4 +1,9 @@
-import { findCommentIndexOutsideStrings, parseStringLiteralSegment, splitBySpacedPlusOutsideStrings, splitLiteralContentToFit } from './string-scan';
+import {
+  findCommentIndexOutsideStrings,
+  parseStringLiteralSegment,
+  splitBySpacedPlusOutsideStrings,
+  splitLiteralContentToFit
+} from '../../utils/string-scan';
 
 // Wrap a string literal into continuation lines, keeping suffix on the last chunk.
 const splitBareLiteralIntoLines = (

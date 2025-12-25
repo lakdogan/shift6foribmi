@@ -12,75 +12,10 @@ import {
   trimSpacesInsideParenthesesOutsideStrings,
   trimStringOnlyParentheses
 } from './steps';
+import { findCommentIndexOutsideStrings } from '../utils/string-scan';
+import { transformSegmentsOutsideStrings } from './helpers/string-transform';
 
-const applyOutsideStrings = (text: string, transform: (segment: string) => string): string => {
-  let result = '';
-  let inString = false;
-  let quoteChar = '';
-  let segmentStart = 0;
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (inString) {
-      result += ch;
-      if (ch === quoteChar) {
-        if (i + 1 < text.length && text[i + 1] === quoteChar) {
-          result += text[i + 1];
-          i++;
-          continue;
-        }
-        inString = false;
-        quoteChar = '';
-        segmentStart = i + 1;
-      }
-      continue;
-    }
-
-    if (ch === '\'' || ch === '"') {
-      result += transform(text.substring(segmentStart, i));
-      result += ch;
-      inString = true;
-      quoteChar = ch;
-      continue;
-    }
-  }
-
-  if (!inString) {
-    result += transform(text.substring(segmentStart));
-  }
-
-  return result;
-};
-
-const findCommentIndexOutsideStrings = (text: string): number => {
-  let inString = false;
-  let quoteChar = '';
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (inString) {
-      if (ch === quoteChar) {
-        if (i + 1 < text.length && text[i + 1] === quoteChar) {
-          i++;
-          continue;
-        }
-        inString = false;
-        quoteChar = '';
-      }
-      continue;
-    }
-    if (ch === '\'' || ch === '"') {
-      inString = true;
-      quoteChar = ch;
-      continue;
-    }
-    if (ch === '/' && i + 1 < text.length && text[i + 1] === '/') {
-      return i;
-    }
-  }
-
-  return -1;
-};
+const applyOutsideStrings = transformSegmentsOutsideStrings;
 
 // Apply all operator-level normalizations for a single line.
 export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): string {

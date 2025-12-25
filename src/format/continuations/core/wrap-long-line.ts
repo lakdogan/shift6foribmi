@@ -8,7 +8,7 @@ import {
 import { getEffectiveColumnLimit } from '../support/column-limit';
 import { wrapConcatenatedLine } from '../support/concat-wrap';
 import { splitBooleanAssignmentLine } from '../support/logical-split';
-import { hasTrailingPlusOutsideStrings } from '../support/string-scan';
+import { hasTrailingPlusOutsideStrings } from '../../utils/string-scan';
 import type { ContinuationState } from '../support/types';
 
 // Split long binary-operator lines across continuation lines within column limits.

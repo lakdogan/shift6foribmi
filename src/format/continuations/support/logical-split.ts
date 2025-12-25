@@ -1,5 +1,5 @@
 import { findAssignmentRhsStart } from '../../operators';
-import { findCommentIndexOutsideStrings } from './string-scan';
+import { findCommentIndexOutsideStrings } from '../../utils/string-scan';
 
 const LOGICAL_OPERATORS = ['AND', 'OR', 'XOR'];
 

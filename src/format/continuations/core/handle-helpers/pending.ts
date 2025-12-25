@@ -6,7 +6,7 @@ import {
   hasTrailingPlusOutsideStrings,
   lineEndsStatement,
   lineHasStringConcat
-} from '../../support/string-scan';
+} from '../../../utils/string-scan';
 import type { ContinuationState } from '../../support/types';
 import { clearPending, setPendingFromSegment } from './state';
 

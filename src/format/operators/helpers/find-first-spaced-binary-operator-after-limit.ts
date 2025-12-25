@@ -1,5 +1,5 @@
 import { CONTINUATION_OPERATORS } from '../constants';
-import { isWhitespace } from './is-whitespace';
+import { isWhitespace } from './token-utils';
 
 // Find the first spaced binary operator after a column limit.
 export const findFirstSpacedBinaryOperatorAfterLimit = (

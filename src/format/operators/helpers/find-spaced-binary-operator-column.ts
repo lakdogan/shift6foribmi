@@ -1,5 +1,5 @@
 import { CONTINUATION_OPERATORS } from '../constants';
-import { isWhitespace } from './is-whitespace';
+import { isWhitespace } from './token-utils';
 
 // Find a binary operator that already has spaces on both sides.
 export const findSpacedBinaryOperatorColumn = (line: string): number | null => {

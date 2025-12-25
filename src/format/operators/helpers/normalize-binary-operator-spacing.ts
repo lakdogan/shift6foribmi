@@ -1,10 +1,7 @@
 import { Shift6Config } from '../../../config';
 import { CONTINUATION_OPERATORS } from '../constants';
-import { isDashKeywordToken } from './is-dash-keyword-token';
-import { isSlashDirectiveToken } from './is-slash-directive-token';
-import { isSpecialValueToken } from './is-special-value-token';
-import { isTokenChar } from './is-token-char';
-import { isWhitespace } from './is-whitespace';
+import { isDashKeywordToken, isSlashDirectiveToken, isSpecialValueToken } from './keyword-tokens';
+import { isTokenChar, isWhitespace } from './token-utils';
 
 // Enforce spacing around binary operators while respecting RPGLE token exceptions.
 export const normalizeBinaryOperatorSpacing = (text: string, cfg: Shift6Config): string => {

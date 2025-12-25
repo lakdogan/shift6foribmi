@@ -6,10 +6,9 @@ import {
 } from '../../../operators';
 import { getEffectiveColumnLimit } from '../../support/column-limit';
 import type { ContinuationState } from '../../support/types';
-import { trySplitByOperator } from './split';
 import type { SplitAttempt } from './types';
 import { clearPending } from './state';
-import { tryWrapConcatenation } from './wrap';
+import { tryWrapOrSplit } from './wrap-split';
 
 // Handle a pending line followed by a leading operator segment.
 export const handleLeadingOperatorSegment = (
@@ -29,26 +28,16 @@ export const handleLeadingOperatorSegment = (
   const recombined = normalizeOperatorSpacing(merged, cfg);
   const continuationColumnLimit = getEffectiveColumnLimit(recombined, targetIndent, cfg);
 
-  if (
-    tryWrapConcatenation(
-      recombined,
-      continuationColumnLimit,
-      cfg,
-      state,
-      targetIndent,
-      producedLines
-    )
-  ) {
-    return 'handled';
-  }
-
-  const splitAttempt = trySplitByOperator(
+  const wrapSplitResult = tryWrapOrSplit(
     recombined,
     continuationColumnLimit,
+    cfg,
     state,
+    targetIndent,
     producedLines
   );
-  if (splitAttempt !== 'none') return splitAttempt;
+  if (wrapSplitResult === 'wrapped') return 'handled';
+  if (wrapSplitResult !== 'none') return wrapSplitResult;
 
   const opColumn = findSpacedBinaryOperatorColumn(recombined);
   if (opColumn !== null && opColumn >= continuationColumnLimit) {

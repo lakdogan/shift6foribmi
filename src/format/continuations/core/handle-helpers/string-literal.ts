@@ -10,8 +10,7 @@ import {
 import type { ContinuationState } from '../../support/types';
 import type { SplitAttempt } from './types';
 import { clearPending } from './state';
-import { trySplitByOperator } from './split';
-import { tryWrapConcatenation } from './wrap';
+import { tryWrapOrSplit } from './wrap-split';
 
 // Handle a pending line followed by a string literal segment.
 export const handleStringLiteralSegment = (
@@ -40,26 +39,16 @@ export const handleStringLiteralSegment = (
       cfg
     );
 
-    if (
-      tryWrapConcatenation(
-        recombined,
-        continuationColumnLimit,
-        cfg,
-        state,
-        targetIndent,
-        producedLines
-      )
-    ) {
-      return 'split';
-    }
-
-    const splitAttempt = trySplitByOperator(
+    const wrapSplitResult = tryWrapOrSplit(
       recombined,
       continuationColumnLimit,
+      cfg,
       state,
+      targetIndent,
       producedLines
     );
-    if (splitAttempt !== 'none') return splitAttempt;
+    if (wrapSplitResult === 'wrapped') return 'split';
+    if (wrapSplitResult !== 'none') return wrapSplitResult;
 
     state.pendingContinuation = merged;
     state.pendingTargetIndent = targetIndent;
@@ -80,26 +69,16 @@ export const handleStringLiteralSegment = (
       cfg
     );
 
-    if (
-      tryWrapConcatenation(
-        recombined,
-        continuationColumnLimit,
-        cfg,
-        state,
-        targetIndent,
-        producedLines
-      )
-    ) {
-      return 'split';
-    }
-
-    const splitAttempt = trySplitByOperator(
+    const wrapSplitResult = tryWrapOrSplit(
       recombined,
       continuationColumnLimit,
+      cfg,
       state,
+      targetIndent,
       producedLines
     );
-    if (splitAttempt !== 'none') return splitAttempt;
+    if (wrapSplitResult === 'wrapped') return 'split';
+    if (wrapSplitResult !== 'none') return wrapSplitResult;
 
     state.pendingContinuation = merged;
     state.pendingTargetIndent = pendingTargetIndent;

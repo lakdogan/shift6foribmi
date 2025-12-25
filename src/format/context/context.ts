@@ -5,7 +5,8 @@ export function initFormatContext(): FormatContext {
   return {
     indentLevel: 0,
     procDepth: 0,
-    continuationOperatorColumn: null
+    continuationOperatorColumn: null,
+    pendingAssignmentContinuation: false
   };
 }
 
@@ -34,6 +35,7 @@ export function updateContextBeforeLine(ctx: FormatContext, flags: LineFlags): F
 export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): FormatContext {
   let indentLevel = ctx.indentLevel;
   let procDepth = ctx.procDepth;
+  let pendingAssignmentContinuation = ctx.pendingAssignmentContinuation;
 
   if (flags.isMid) {
     indentLevel++;
@@ -50,6 +52,11 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
   return {
     ...ctx,
     indentLevel,
-    procDepth
+    procDepth,
+    pendingAssignmentContinuation: flags.endsStatement
+      ? false
+      : flags.endsWithAssignment
+        ? true
+        : pendingAssignmentContinuation
   };
 }

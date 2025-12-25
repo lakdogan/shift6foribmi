@@ -7,7 +7,8 @@ export const indentationRule: Rule = {
   id: 'indentation',
   apply(state, ctx, cfg): RuleResult {
     const currentIndent = countLeadingSpaces(state.current);
-    const target = cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent;
+    const continuationOffset = ctx.pendingAssignmentContinuation ? cfg.blockIndent : 0;
+    const target = cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent + continuationOffset;
 
     let newText = state.current;
     if (currentIndent < target) {

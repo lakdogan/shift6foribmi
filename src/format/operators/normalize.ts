@@ -182,8 +182,22 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
     next = next.replace(/__CASSIGN_([+\-*/%])__/g, ' $1= ');
     next = next.replace(/\s+([+\-*/%]=)/g, ' $1');
     next = next.replace(/([+\-*/%]=)\s+/g, '$1 ');
-    next = next.replace(/\s*\b(AND|OR|NOT|XOR)\b\s*/gi, ' $1 ');
-    next = next.replace(/\s*(\*AND|\*OR|\*NOT|\*XOR)\s*/gi, ' $1 ');
+    next = next.replace(
+      /\s*\b(AND|OR|NOT|XOR)\b\s*/gi,
+      (match: string, op: string, offset: number, source: string) => {
+        const before = source.slice(0, offset);
+        const atStart = before.trim().length === 0;
+        return (atStart ? '' : ' ') + op + ' ';
+      }
+    );
+    next = next.replace(
+      /\s*(\*AND|\*OR|\*NOT|\*XOR)\s*/gi,
+      (match: string, op: string, offset: number, source: string) => {
+        const before = source.slice(0, offset);
+        const atStart = before.trim().length === 0;
+        return (atStart ? '' : ' ') + op + ' ';
+      }
+    );
     return next;
   });
 
@@ -203,5 +217,7 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
     segment.replace(/(%[A-Za-z0-9_]+)\(\s*([^)]+?)\s*\)/g, '$1($2)')
   );
 
-  return indent + rest + commentPart;
+  const trimmedRest = rest.replace(/[ \t]+$/g, '');
+  const commentSpacer = commentPart && trimmedRest.length > 0 ? ' ' : '';
+  return indent + trimmedRest + commentSpacer + commentPart;
 }

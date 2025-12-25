@@ -39,13 +39,12 @@ export const flushPending = (
 export const tryStartPending = (
   seg: string,
   state: ContinuationState,
-  cfg: Shift6Config,
   targetIndent: number
 ): boolean => {
   if (
     !lineEndsStatement(seg) &&
     !getLeadingOperator(seg.trim()) &&
-    lineHasStringConcat(seg, cfg)
+    lineHasStringConcat(seg)
   ) {
     setPendingFromSegment(state, seg, targetIndent);
     return true;

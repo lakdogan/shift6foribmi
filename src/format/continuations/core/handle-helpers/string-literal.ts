@@ -70,7 +70,7 @@ export const handleStringLiteralSegment = (
     return 'split';
   }
 
-  if (!lineEndsStatement(pending) && lineHasStringConcat(pending, cfg)) {
+  if (!lineEndsStatement(pending) && lineHasStringConcat(pending)) {
     const merged = pending + ' + ' + trimmedSeg;
     const recombined = normalizeOperatorSpacing(merged, cfg);
     const pendingTargetIndent = state.pendingTargetIndent ?? targetIndent;

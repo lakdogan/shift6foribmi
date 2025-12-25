@@ -1,38 +1,24 @@
-import type { Shift6Config } from '../../../../config';
 import { findCommentIndexOutsideStrings } from './comments';
+import { scanStringAware } from './scan';
 
 // Check if a line contains both a string literal and a '+' outside strings.
-export const lineHasStringConcat = (text: string, _cfg: Shift6Config): boolean => {
+export const lineHasStringConcat = (text: string): boolean => {
   const commentIndex = findCommentIndexOutsideStrings(text);
   const codePart = commentIndex >= 0 ? text.substring(0, commentIndex) : text;
-  let inString = false;
-  let quoteChar = '';
   let hasLiteral = false;
   let hasPlus = false;
-
-  for (let i = 0; i < codePart.length; i++) {
-    const ch = codePart[i];
-    if (inString) {
-      if (ch === quoteChar) {
-        if (i + 1 < codePart.length && codePart[i + 1] === quoteChar) {
-          i++;
-          continue;
-        }
-        inString = false;
-        quoteChar = '';
+  scanStringAware(
+    codePart,
+    (ch) => {
+      if (ch === '+') {
+        hasPlus = true;
       }
-      continue;
-    }
-    if (ch === '\'' || ch === '"') {
-      inString = true;
-      quoteChar = ch;
+      return false;
+    },
+    () => {
       hasLiteral = true;
-      continue;
     }
-    if (ch === '+') {
-      hasPlus = true;
-    }
-  }
+  );
 
   return hasLiteral && hasPlus;
 };

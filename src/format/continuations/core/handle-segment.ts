@@ -21,7 +21,7 @@ export function handleContinuationSegment(
   const producedLines: string[] = [];
 
   if (state.pendingContinuation === null) {
-    if (tryStartPending(seg, state, cfg, targetIndent)) {
+    if (tryStartPending(seg, state, targetIndent)) {
       splitOccurred = true;
       return makeResult(true, producedLines, state, splitOccurred);
     }

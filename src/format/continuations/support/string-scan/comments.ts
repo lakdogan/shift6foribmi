@@ -1,30 +1,16 @@
+import { scanOutsideStrings } from './scan';
+
 // Find '//' comment start while ignoring string literals.
 export const findCommentIndexOutsideStrings = (text: string): number => {
-  let inString = false;
-  let quoteChar = '';
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (inString) {
-      if (ch === quoteChar) {
-        if (i + 1 < text.length && text[i + 1] === quoteChar) {
-          i++;
-          continue;
-        }
-        inString = false;
-        quoteChar = '';
-      }
-      continue;
+  let commentIndex = -1;
+  scanOutsideStrings(text, (ch, index) => {
+    if (ch === '/' && index + 1 < text.length && text[index + 1] === '/') {
+      commentIndex = index;
+      return true;
     }
-    if (ch === '\'' || ch === '"') {
-      inString = true;
-      quoteChar = ch;
-      continue;
-    }
-    if (ch === '/' && i + 1 < text.length && text[i + 1] === '/') {
-      return i;
-    }
-  }
-  return -1;
+    return false;
+  });
+  return commentIndex;
 };
 
 // Check if a line ends with ';' outside of inline comments.

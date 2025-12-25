@@ -1,3 +1,4 @@
+import { transformOutsideStrings } from './string-transform';
 import { isWhitespace } from './token-utils';
 
 // Extract raw builtin argument text while respecting nested parens and strings.
@@ -48,56 +49,25 @@ const extractBuiltinArgs = (text: string, startIndex: number): { content: string
 
 // Join %builtin names and trim surrounding argument whitespace.
 export const normalizePercentBuiltins = (text: string): string => {
-  let result = '';
-  let inString = false;
-  let quoteChar = '';
-
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-
-    if (inString) {
-      result += ch;
-      if (ch === quoteChar) {
-        if (i + 1 < text.length && text[i + 1] === quoteChar) {
-          result += text[i + 1];
-          i++;
-          continue;
-        }
-        inString = false;
-        quoteChar = '';
+  return transformOutsideStrings(text, (ch, index, fullText) => {
+    if (ch !== '%') return null;
+    let j = index + 1;
+    while (j < fullText.length && isWhitespace(fullText[j])) j++;
+    let k = j;
+    while (k < fullText.length && /[A-Za-z0-9_]/.test(fullText[k])) k++;
+    if (k > j) {
+      const name = '%' + fullText.substring(j, k);
+      let m = k;
+      while (m < fullText.length && isWhitespace(fullText[m])) m++;
+      if (m < fullText.length && fullText[m] === '(') {
+        const parsed = extractBuiltinArgs(fullText, m);
+        return {
+          append: name + '(' + parsed.content + ')',
+          advance: parsed.end - index
+        };
       }
-      continue;
+      return { append: name, advance: k - 1 - index };
     }
-
-    if (ch === '\'' || ch === '"') {
-      result += ch;
-      inString = true;
-      quoteChar = ch;
-      continue;
-    }
-
-    if (ch === '%') {
-      let j = i + 1;
-      while (j < text.length && isWhitespace(text[j])) j++;
-      let k = j;
-      while (k < text.length && /[A-Za-z0-9_]/.test(text[k])) k++;
-      if (k > j) {
-        result += '%' + text.substring(j, k);
-        let m = k;
-        while (m < text.length && isWhitespace(text[m])) m++;
-        if (m < text.length && text[m] === '(') {
-          const parsed = extractBuiltinArgs(text, m);
-          result += '(' + parsed.content + ')';
-          i = parsed.end;
-          continue;
-        }
-        i = k - 1;
-        continue;
-      }
-    }
-
-    result += ch;
-  }
-
-  return result;
+    return null;
+  });
 };

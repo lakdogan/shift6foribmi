@@ -16,6 +16,18 @@ import { findCommentIndexOutsideStrings } from '../utils/string-scan';
 import { transformSegmentsOutsideStrings } from './helpers/string-transform';
 import { applyOperatorReplacements } from './normalize-helpers/operator-replacements';
 import { applySpecialValueContextSpacing } from './normalize-helpers/special-value-context';
+import {
+  joinAsteriskTokensInDecl,
+  joinDeclReturnAsterisk
+} from './normalize-helpers/decl-asterisk-join';
+import {
+  normalizeCtlOptAsteriskTokens,
+  normalizeCtlOptParentheses
+} from './normalize-helpers/ctl-opt';
+import {
+  normalizePercentBuiltinArgs,
+  normalizePercentBuiltinNames
+} from './normalize-helpers/percent';
 
 const applyOutsideStrings = transformSegmentsOutsideStrings;
 
@@ -45,24 +57,18 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
   }
 
   if (isCtlOptLine) {
-    rest = applyOutsideStrings(rest, (segment) =>
-      segment.replace(/\(\s+([^)]+?)\)/g, '($1)').replace(/\(([^)]+?)\s+\)/g, '($1)')
-    );
+    rest = applyOutsideStrings(rest, normalizeCtlOptParentheses);
   }
 
   rest = normalizePercentBuiltins(rest);
   rest = normalizeBinaryOperatorSpacing(rest, cfg);
 
   if (cfg.joinAsteriskTokensInDecl) {
-    rest = applyOutsideStrings(rest, (segment) =>
-      segment.replace(/(^|[(\s])\*\s+([A-Za-z0-9_]+)/, '$1*$2')
-    );
+    rest = applyOutsideStrings(rest, joinAsteriskTokensInDecl);
   }
 
   if (cfg.joinAsteriskTokensInDecl && isDeclLine) {
-    rest = applyOutsideStrings(rest, (segment) =>
-      segment.replace(/(\bDCL-(?:PI|PR|PROC)\b)\s+\*\s+([A-Za-z0-9_]+)/i, '$1 *$2')
-    );
+    rest = applyOutsideStrings(rest, joinDeclReturnAsterisk);
   }
 
   rest = normalizeSpecialValueSpacing(rest);
@@ -91,12 +97,7 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
   );
 
   if (isCtlOptLine) {
-    rest = applyOutsideStrings(rest, (segment) =>
-      segment.replace(/\(\s*([^)]+?)\s*\)/g, (_match, inner: string) => {
-        const joined = inner.replace(/\*\s+([A-Za-z0-9_]+)/g, '*$1');
-        return `(${joined})`;
-      })
-    );
+    rest = applyOutsideStrings(rest, normalizeCtlOptAsteriskTokens);
   }
 
   rest = applyOutsideStrings(rest, applyOperatorReplacements);
@@ -108,14 +109,10 @@ export function normalizeOperatorSpacing(line: string, cfg: Shift6Config): strin
   rest = applyOutsideStrings(rest, (segment) => segment.replace(/\s+;/g, ';'));
 
   rest = normalizePercentBuiltins(rest);
-  rest = applyOutsideStrings(rest, (segment) =>
-    segment.replace(/%\s+([A-Za-z0-9_]+)/g, '%$1')
-  );
+  rest = applyOutsideStrings(rest, normalizePercentBuiltinNames);
   rest = trimSpacesInsideParenthesesOutsideStrings(rest);
 
-  rest = applyOutsideStrings(rest, (segment) =>
-    segment.replace(/(%[A-Za-z0-9_]+)\(\s*([^)]+?)\s*\)/g, '$1($2)')
-  );
+  rest = applyOutsideStrings(rest, normalizePercentBuiltinArgs);
 
   const trimmedRest = rest.replace(/[ \t]+$/g, '');
   const commentSpacer = commentPart && trimmedRest.length > 0 ? ' ' : '';

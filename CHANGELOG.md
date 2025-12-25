@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.20] - 2025-12-25
+- Modularized continuation handling into core/support submodules with smaller focused helpers.
+- Split preprocess helpers (multiline normalization, statement splitting, segment processing) into separate files.
+- Centralized string scanning utilities and reused them across continuations, preprocess, and operator helpers.
+- Refactored operator helpers: consolidated token utilities and spaced-operator scanning logic.
+- Built a normalize pipeline with dedicated helper steps for ctl-opt, percent builtins, asterisk rules, and operator replacements.
+- Split rule tests into per-case files with shared types and an index loader.
+- Added architecture guide with module overview and maintenance guidelines.
+
 ## [0.1.19] - 2025-12-24
 - Fixed special value joining for `*on`, `*off`, and `*INxx` after operators and `RETURN`.
 - Normalized stray spaces after `%` built-ins (e.g., `% timestamp()` -> `%timestamp()`).

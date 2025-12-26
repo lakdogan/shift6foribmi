@@ -12,7 +12,7 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'describe s1 into :desc;',
+    'describe S1 into :desc;',
     'allocate desc cursor for :stmt;',
     'deallocate desc;'
   ]

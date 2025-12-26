@@ -1125,15 +1125,15 @@ const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
 
   if (upper.startsWith('DESCRIBE ')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(9).trimStart());
-    return [baseIndent + `describe ${rest.toLowerCase()};`];
+    return [baseIndent + `describe ${rest};`];
   }
   if (upper.startsWith('ALLOCATE ')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(9).trimStart());
-    return [baseIndent + `allocate ${rest.toLowerCase()};`];
+    return [baseIndent + `allocate ${rest};`];
   }
   if (upper.startsWith('DEALLOCATE ')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(11).trimStart());
-    return [baseIndent + `deallocate ${rest.toLowerCase()};`];
+    return [baseIndent + `deallocate ${rest};`];
   }
   if (upper.startsWith('PREPARE ') || upper.startsWith('EXECUTE ') || upper.startsWith('EXECUTE IMMEDIATE')) {
     return formatPrepareExecute(cleaned, baseIndent, ' '.repeat(baseIndent.length * 2));

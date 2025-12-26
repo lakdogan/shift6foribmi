@@ -957,6 +957,11 @@ const formatHostAndConnection = (text: string, baseIndent: string): string[] => 
     const rest = normalizeSqlWhitespace(cleaned.slice('set current'.length).trimStart());
     return [baseIndent + `set current ${rest};`];
   }
+  if (upper.startsWith('SET OPTION')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice('set option'.length).trimStart())
+      .replace(/\*\s+([A-Z0-9_]+)/gi, '*$1');
+    return [baseIndent + `set option ${rest};`];
+  }
   if (upper.startsWith('SET CONNECTION')) {
     const rest = normalizeSqlWhitespace(cleaned.slice('set connection'.length).trimStart());
     return [baseIndent + `set connection ${rest};`];

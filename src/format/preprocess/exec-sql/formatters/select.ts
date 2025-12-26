@@ -182,11 +182,18 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
       continue;
     }
     if (keyword === 'for read only') {
-      lines.push(baseIndent + 'for read only' + suffix);
+      const withHint = restClause.toUpperCase().startsWith('WITH ')
+        ? ` ${normalizeSqlWhitespace(restClause)}`
+        : '';
+      lines.push(baseIndent + `for read only${withHint}` + suffix);
       continue;
     }
     if (keyword === 'for fetch only') {
       lines.push(baseIndent + 'fetch only' + suffix);
+      continue;
+    }
+    if (keyword === 'with') {
+      lines.push(baseIndent + `with ${normalizeSqlWhitespace(restClause)}` + suffix);
       continue;
     }
 

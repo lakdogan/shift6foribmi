@@ -777,6 +777,9 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
           }
           continue;
         }
+      } else if (action.toUpperCase().startsWith('DELETE')) {
+        lines.push(nestedIndent + 'delete');
+        continue;
       }
       lines.push(nestedIndent + normalizeSqlWhitespace(action).toLowerCase());
       continue;

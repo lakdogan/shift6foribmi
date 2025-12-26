@@ -455,6 +455,98 @@ const formatCommitRollback = (text: string, baseIndent: string): string[] => {
   return [baseIndent + `${normalized};`];
 };
 
+const formatMerge = (text: string, baseIndent: string, nestedIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  const mergeMatch = upper.match(/^MERGE\s+INTO\s+/);
+  if (!mergeMatch) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const rest = cleaned.slice(mergeMatch[0].length).trimStart();
+  let remaining = rest;
+  const usingIndex = findKeywordIndex(remaining, 'USING');
+  if (usingIndex < 0) {
+    return [baseIndent + cleaned + ';'];
+  }
+  const targetPart = remaining.slice(0, usingIndex).trim();
+  remaining = remaining.slice(usingIndex + 5).trimStart();
+
+  const onIndex = findKeywordIndex(remaining, 'ON');
+  if (onIndex < 0) {
+    return [baseIndent + cleaned + ';'];
+  }
+  const usingPart = remaining.slice(0, onIndex).trim();
+  remaining = remaining.slice(onIndex + 2).trimStart();
+
+  const lines: string[] = [];
+  lines.push(baseIndent + `merge into ${targetPart}`);
+  lines.push(baseIndent + `using ${usingPart}`);
+
+  const whenIndex = findKeywordIndex(remaining, 'WHEN');
+  if (whenIndex < 0) {
+    lines.push(baseIndent + `on ${normalizeSqlExpression(remaining)};`);
+    return lines;
+  }
+
+  const onPart = remaining.slice(0, whenIndex).trim();
+  lines.push(baseIndent + `on ${normalizeSqlExpression(onPart)}`);
+  remaining = remaining.slice(whenIndex).trimStart();
+
+  const whenBlocks = remaining
+    .split(/\b(?=WHEN\s+(MATCHED|NOT)\b)/i)
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+
+  for (let i = 0; i < whenBlocks.length; i++) {
+    const block = whenBlocks[i];
+    const upperBlock = block.toUpperCase();
+    if (upperBlock.startsWith('WHEN MATCHED')) {
+      const thenIndex = findKeywordIndex(block, 'THEN');
+      const action = thenIndex >= 0 ? block.slice(thenIndex + 4).trimStart() : '';
+      lines.push(baseIndent + 'when matched then');
+      if (action.toUpperCase().startsWith('UPDATE')) {
+        const updateText = action.slice(6).trimStart();
+        const setIndex = findKeywordIndex(updateText, 'SET');
+        if (setIndex >= 0) {
+          const setText = updateText.slice(setIndex + 3).trimStart();
+          const assignments = splitTopLevel(setText, ',').map(normalizeSqlExpression);
+          lines.push(nestedIndent + 'update');
+          lines.push(nestedIndent + 'set');
+          for (let j = 0; j < assignments.length; j++) {
+            const suffix = j < assignments.length - 1 ? ',' : '';
+            lines.push(' '.repeat(nestedIndent.length * 2) + assignments[j] + suffix);
+          }
+          continue;
+        }
+      }
+      lines.push(nestedIndent + normalizeSqlWhitespace(action).toLowerCase());
+      continue;
+    }
+
+    if (upperBlock.startsWith('WHEN NOT MATCHED')) {
+      const thenIndex = findKeywordIndex(block, 'THEN');
+      const action = thenIndex >= 0 ? block.slice(thenIndex + 4).trimStart() : '';
+      lines.push(baseIndent + 'when not matched then');
+      if (action.toUpperCase().startsWith('INSERT')) {
+        const insertText = action.slice(6).trimStart();
+        const formatted = formatInsert(`insert ${insertText}`, nestedIndent, ' '.repeat(nestedIndent.length * 2));
+        for (const line of formatted) {
+          lines.push(line);
+        }
+        continue;
+      }
+      lines.push(nestedIndent + normalizeSqlWhitespace(action).toLowerCase());
+    }
+  }
+
+  if (lines.length > 0) {
+    lines[lines.length - 1] = lines[lines.length - 1].replace(/;?$/, ';');
+  }
+
+  return lines;
+};
+
 const formatInsert = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -547,6 +639,9 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   }
   if (upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK')) {
     return formatCommitRollback(normalized, baseIndent);
+  }
+  if (upper.startsWith('MERGE ')) {
+    return formatMerge(normalized, baseIndent, nestedIndent);
   }
   if (upper.startsWith('GET DIAGNOSTICS')) {
     const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());

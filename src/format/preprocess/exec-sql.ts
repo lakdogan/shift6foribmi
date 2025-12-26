@@ -908,13 +908,15 @@ const formatDeclareCursor = (
   }
 
   const cursorName = rest.slice(0, cursorIndex).trim();
+  const cursorOptions = rest.slice(cursorIndex + 6, forIndex).trim();
   const afterFor = rest.slice(forIndex + 3).trimStart();
   if (!cursorName) {
     return [baseIndent + cleaned + ';'];
   }
 
   const lines: string[] = [];
-  lines.push(baseIndent + `declare ${cursorName} cursor for`);
+  const optionsText = cursorOptions ? ` ${normalizeSqlWhitespace(cursorOptions)}` : '';
+  lines.push(baseIndent + `declare ${cursorName} cursor${optionsText} for`);
   if (afterFor.length === 0) {
     lines[lines.length - 1] = lines[lines.length - 1] + ';';
     return lines;

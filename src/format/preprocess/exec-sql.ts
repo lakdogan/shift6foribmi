@@ -877,8 +877,17 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
     const upperBlock = block.toUpperCase();
     if (upperBlock.startsWith('WHEN MATCHED')) {
       const thenIndex = findKeywordIndex(block, 'THEN');
+      const header = thenIndex >= 0 ? block.slice(0, thenIndex).trim() : block.trim();
       const action = thenIndex >= 0 ? block.slice(thenIndex + 4).trimStart() : '';
-      lines.push(baseIndent + 'when matched then');
+      const conditionRaw = header.slice('WHEN MATCHED'.length).trimStart();
+      const condition = conditionRaw.toUpperCase().startsWith('AND ')
+        ? normalizeSqlExpression(conditionRaw.slice(4))
+        : conditionRaw.length > 0
+          ? normalizeSqlExpression(conditionRaw)
+          : '';
+      lines.push(
+        baseIndent + `when matched${condition ? ` and ${condition}` : ''} then`
+      );
       if (action.toUpperCase().startsWith('UPDATE')) {
         const updateText = action.slice(6).trimStart();
         const setIndex = findKeywordIndex(updateText, 'SET');
@@ -897,14 +906,26 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
         lines.push(nestedIndent + 'delete');
         continue;
       }
-      lines.push(nestedIndent + normalizeSqlWhitespace(action).toLowerCase());
+      lines.push(nestedIndent + normalizeSqlWhitespace(action));
       continue;
     }
 
     if (upperBlock.startsWith('WHEN NOT MATCHED')) {
       const thenIndex = findKeywordIndex(block, 'THEN');
+      const header = thenIndex >= 0 ? block.slice(0, thenIndex).trim() : block.trim();
       const action = thenIndex >= 0 ? block.slice(thenIndex + 4).trimStart() : '';
-      lines.push(baseIndent + 'when not matched then');
+      const restHeader = header.slice('WHEN NOT MATCHED'.length).trimStart();
+      const byMatch = restHeader.match(/^BY\s+(TARGET|SOURCE)\b/i);
+      const byPart = byMatch ? ` by ${byMatch[1].toLowerCase()}` : '';
+      const conditionSource = byMatch ? restHeader.slice(byMatch[0].length).trimStart() : restHeader;
+      const condition = conditionSource.toUpperCase().startsWith('AND ')
+        ? normalizeSqlExpression(conditionSource.slice(4))
+        : conditionSource.length > 0
+          ? normalizeSqlExpression(conditionSource)
+          : '';
+      lines.push(
+        baseIndent + `when not matched${byPart}${condition ? ` and ${condition}` : ''} then`
+      );
       if (action.toUpperCase().startsWith('INSERT')) {
         const insertText = action.slice(6).trimStart();
         const formatted = formatInsert(`insert ${insertText}`, nestedIndent, ' '.repeat(nestedIndent.length * 2));
@@ -913,7 +934,7 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
         }
         continue;
       }
-      lines.push(nestedIndent + normalizeSqlWhitespace(action).toLowerCase());
+      lines.push(nestedIndent + normalizeSqlWhitespace(action));
     }
   }
 

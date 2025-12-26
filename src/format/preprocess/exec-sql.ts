@@ -645,12 +645,12 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
     }
 
     if (keyword === 'fetch') {
-      lines.push(baseIndent + `fetch ${normalizeSqlWhitespace(rest).toLowerCase()}` + suffix);
+      lines.push(baseIndent + `fetch ${normalizeSqlWhitespace(rest)}` + suffix);
       continue;
     }
 
     if (keyword === 'offset') {
-      lines.push(baseIndent + `offset ${normalizeSqlWhitespace(rest).toLowerCase()}` + suffix);
+      lines.push(baseIndent + `offset ${normalizeSqlWhitespace(rest)}` + suffix);
       continue;
     }
 

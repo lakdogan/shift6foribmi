@@ -40,6 +40,7 @@ import execSqlValues from './exec-sql-values';
 import execSqlCteMulti from './exec-sql-cte-multi';
 import execSqlExecImmediateUsing from './exec-sql-exec-immediate-using';
 import execSqlFetchVariants from './exec-sql-fetch-variants';
+import execSqlWhenever from './exec-sql-whenever';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -82,5 +83,6 @@ export const cases: Case[] = [
   execSqlValues,
   execSqlCteMulti,
   execSqlExecImmediateUsing,
-  execSqlFetchVariants
+  execSqlFetchVariants,
+  execSqlWhenever
 ];

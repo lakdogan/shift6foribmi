@@ -34,7 +34,8 @@ export const splitSqlStatements = (text: string): string[] => {
 
   const isWordChar = (ch: string): boolean => /[A-Za-z0-9_]/.test(ch);
 
-  const peekNextWord = (from: number): string => {
+  const peekNextWords = (from: number, count: number): string[] => {
+    const words: string[] = [];
     for (let i = from; i < text.length; i++) {
       const ch = text[i];
       if (ch === '\'' || ch === '"') {
@@ -55,21 +56,30 @@ export const splitSqlStatements = (text: string): string[] => {
       if (isWordChar(ch)) {
         let j = i + 1;
         while (j < text.length && isWordChar(text[j])) j++;
-        return text.slice(i, j).toUpperCase();
+        words.push(text.slice(i, j).toUpperCase());
+        i = j - 1;
+        if (words.length >= count) return words;
       }
     }
-    return '';
+    return words;
   };
 
   const flushWord = (endIndex: number) => {
     if (!currentWord) return;
     const upper = currentWord.toUpperCase();
     if (upper === 'BEGIN') {
-      const nextWord = peekNextWord(endIndex);
-      if (nextWord !== 'DECLARE') {
-        blockDepth++;
+      const [nextWord, nextNext] = peekNextWords(endIndex, 2);
+      if (nextWord === 'DECLARE' && nextNext === 'SECTION') {
+        currentWord = '';
+        return;
       }
+      blockDepth++;
     } else if (upper === 'END') {
+      const [nextWord] = peekNextWords(endIndex, 1);
+      if (nextWord && ['IF', 'CASE', 'LOOP', 'FOR', 'WHILE', 'REPEAT'].includes(nextWord)) {
+        currentWord = '';
+        return;
+      }
       if (blockDepth > 0) blockDepth--;
     }
     currentWord = '';

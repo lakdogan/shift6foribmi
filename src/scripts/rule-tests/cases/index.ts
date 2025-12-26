@@ -57,6 +57,7 @@ import execSqlFetchRowset from './exec-sql-fetch-rowset';
 import execSqlDeclareCursorOptions from './exec-sql-declare-cursor-options';
 import execSqlPrepareWithOptions from './exec-sql-prepare-with-options';
 import execSqlValuesInto from './exec-sql-values-into';
+import execSqlSavepoint from './exec-sql-savepoint';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -116,5 +117,6 @@ export const cases: Case[] = [
   execSqlFetchRowset,
   execSqlDeclareCursorOptions,
   execSqlPrepareWithOptions,
-  execSqlValuesInto
+  execSqlValuesInto,
+  execSqlSavepoint
 ];

@@ -1163,6 +1163,10 @@ const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
     const rest = normalizeSqlWhitespace(cleaned.slice(11).trimStart());
     return [baseIndent + `deallocate ${rest};`];
   }
+  if (upper.startsWith('LOCK TABLE')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice('lock table'.length).trimStart());
+    return [baseIndent + `lock table ${rest};`];
+  }
   if (upper.startsWith('PREPARE ') || upper.startsWith('EXECUTE ') || upper.startsWith('EXECUTE IMMEDIATE')) {
     return formatPrepareExecute(cleaned, baseIndent, ' '.repeat(baseIndent.length * 2));
   }

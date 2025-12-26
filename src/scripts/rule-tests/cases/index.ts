@@ -99,6 +99,7 @@ import execSqlHostConnectionBlock from './exec-sql-host-connection-block';
 import execSqlJoinDedup from './exec-sql-join-dedup';
 import execSqlDdlSchema from './exec-sql-ddl-schema';
 import execSqlDb2iHints from './exec-sql-db2i-hints';
+import execSqlSelectAdvanced from './exec-sql-select-advanced';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -200,5 +201,6 @@ export const cases: Case[] = [
   execSqlHostConnectionBlock,
   execSqlJoinDedup,
   execSqlDdlSchema,
-  execSqlDb2iHints
+  execSqlDb2iHints,
+  execSqlSelectAdvanced
 ];

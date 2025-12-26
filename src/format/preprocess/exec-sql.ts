@@ -1073,7 +1073,21 @@ const formatOpenCloseFetch = (
 
   if (upper.startsWith('OPEN ')) {
     const rest = cleaned.slice(5).trimStart();
-    return [baseIndent + `open ${normalizeSqlWhitespace(rest)};`];
+    const usingIndex = findKeywordIndex(rest, 'USING');
+    if (usingIndex < 0) {
+      return [baseIndent + `open ${normalizeSqlWhitespace(rest)};`];
+    }
+    const cursorName = rest.slice(0, usingIndex).trim();
+    const argsText = rest.slice(usingIndex + 5).trimStart();
+    const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
+    const lines: string[] = [];
+    lines.push(baseIndent + `open ${normalizeSqlWhitespace(cursorName)}`);
+    lines.push(baseIndent + 'using');
+    for (let i = 0; i < args.length; i++) {
+      const suffix = i < args.length - 1 ? ',' : ';';
+      lines.push(nestedIndent + args[i] + suffix);
+    }
+    return lines;
   }
   if (upper.startsWith('CLOSE ')) {
     const rest = cleaned.slice(6).trimStart();

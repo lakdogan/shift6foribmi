@@ -20,6 +20,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added rule-test support for negative assertions (`mustExclude`) and a join-dedup case.
 - Modularized exec sql formatter into small utils and per-statement formatters with a dispatcher.
 - Added function header comments across exec sql modules for maintainability.
+- Prevented statement splitting inside `BEGIN ... END` procedural SQL blocks.
+- Added exec sql test coverage for expressions/functions (e.g., LISTAGG/XMLAGG/JSON_OBJECT/JSON_ARRAY).
+- Added exec sql test coverage for PSM blocks and stored routine bodies (BEGIN/END, IF/RETURN).
+- Added exec sql test coverage for triggers with inline bodies.
+- Added exec sql test coverage for window/OLAP functions with OVER/PARTITION BY.
+- Added exec sql test coverage for subqueries in FROM/JOIN and EXISTS clauses.
+- Added exec sql test coverage for JSON/XML functions and XMLTABLE usage.
+- Added exec sql test coverage for DB2-i DDL options (RCDFMT/CCSID/for system name).
+- Added exec sql test coverage for special registers (SET CURRENT ... / CURRENT ...).
 
 ## [0.1.20] - 2025-12-25
 - Modularized continuation handling into core/support submodules with smaller focused helpers.

@@ -951,6 +951,10 @@ const formatHostAndConnection = (text: string, baseIndent: string): string[] => 
     const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());
     return [baseIndent + `connect ${rest};`];
   }
+  if (upper.startsWith('SET CURRENT')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice('set current'.length).trimStart());
+    return [baseIndent + `set current ${rest};`];
+  }
   if (upper.startsWith('SET CONNECTION')) {
     const rest = normalizeSqlWhitespace(cleaned.slice('set connection'.length).trimStart());
     return [baseIndent + `set connection ${rest};`];

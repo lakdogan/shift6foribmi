@@ -12,9 +12,9 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'describe input s1 into :indesc;',
-    'describe output s1 into :outdesc;',
-    'allocate c1 cursor for :stmt;'
+    'describe input S1 into :inDesc;',
+    'describe output S1 into :outDesc;',
+    'allocate C1 cursor for :stmt;'
   ]
 };
 

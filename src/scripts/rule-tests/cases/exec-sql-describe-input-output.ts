@@ -12,8 +12,8 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'describe input s1 into :indesc;',
-    'describe output s1 into :outdesc;',
+    'describe input S1 into :inDesc;',
+    'describe output S1 into :outDesc;',
     'describe s1;'
   ]
 };

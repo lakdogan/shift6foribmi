@@ -7,6 +7,7 @@ interface ExecSqlNormalizeResult {
   changed: boolean;
 }
 
+// Normalize exec sql blocks into formatted statements.
 export const normalizeExecSqlBlocks = (
   lines: string[],
   cfg: Shift6Config

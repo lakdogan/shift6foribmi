@@ -1,5 +1,6 @@
 import { findMatchingParenIndex } from './find';
 
+// Parse WITH CTE blocks into named bodies and remainder SQL.
 export const parseWithClauses = (
   text: string
 ): { ctes: { name: string; body: string }[]; remainder: string } => {

@@ -6,6 +6,7 @@ import {
   findKeywordIndex
 } from '../utils';
 
+// Format PREPARE/EXECUTE/EXECUTE IMMEDIATE statements.
 export const formatPrepareExecute = (
   text: string,
   baseIndent: string,

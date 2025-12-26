@@ -1,5 +1,6 @@
 import { splitSetOperations, trimTrailingSemicolon } from '../utils';
 
+// Format UNION/INTERSECT/EXCEPT blocks within a SELECT statement.
 export const formatSelectSetOperations = (
   remainder: string,
   baseIndent: string,

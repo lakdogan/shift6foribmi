@@ -1,3 +1,4 @@
+// Normalize whitespace while preserving SQL string literals.
 export const normalizeSqlWhitespace = (text: string): string => {
   let out = '';
   let inString = false;
@@ -46,12 +47,15 @@ export const normalizeSqlWhitespace = (text: string): string => {
   return out.trim();
 };
 
+// Collapse spaced identifier paths like SCHEMA / TABLE.
 export const normalizeSqlIdentifierPath = (text: string): string =>
   text.replace(/\s*\/\s*/g, '/');
 
+// Join star-prefixed tokens (e.g., * cs -> *cs).
 export const normalizeStarTokens = (text: string): string =>
   text.replace(/\*\s+([A-Za-z][A-Za-z0-9_]*)/g, '*$1');
 
+// Normalize SQL expressions with consistent operator spacing.
 export const normalizeSqlExpression = (text: string): string => {
   const compact = normalizeSqlWhitespace(text);
   let out = '';
@@ -147,11 +151,13 @@ export const normalizeSqlExpression = (text: string): string => {
   return out.trim();
 };
 
+// Remove a trailing semicolon from a SQL fragment.
 export const stripTrailingSemicolon = (text: string): string => {
   const trimmed = text.trimEnd();
   return trimmed.endsWith(';') ? trimmed.slice(0, -1).trimEnd() : trimmed;
 };
 
+// Remove a trailing semicolon from the last formatted line.
 export const trimTrailingSemicolon = (lines: string[]): string[] => {
   if (lines.length === 0) return lines;
   const last = lines[lines.length - 1];

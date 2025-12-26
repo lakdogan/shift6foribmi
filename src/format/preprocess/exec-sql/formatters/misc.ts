@@ -8,6 +8,7 @@ import {
 } from '../utils';
 import { formatPrepareExecute } from './prepare';
 
+// Format CALL statements with argument lists.
 export const formatCall = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -35,6 +36,7 @@ export const formatCall = (text: string, baseIndent: string, nestedIndent: strin
   return lines;
 };
 
+// Format SET statements with token normalization.
 export const formatSet = (text: string, baseIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -52,6 +54,7 @@ export const formatSet = (text: string, baseIndent: string): string[] => {
   return [baseIndent + `set ${withStarTokens};`];
 };
 
+// Format COMMIT/ROLLBACK statements as lowercase.
 export const formatCommitRollback = (text: string, baseIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -61,6 +64,7 @@ export const formatCommitRollback = (text: string, baseIndent: string): string[]
   return formatLowercasedStatement(cleaned, baseIndent);
 };
 
+// Format DESCRIBE/ALLOCATE/DEALLOCATE and related statements.
 export const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -95,10 +99,12 @@ export const formatAllocateDescribe = (text: string, baseIndent: string): string
   return [baseIndent + cleaned + ';'];
 };
 
+// Format simple SQL statements as lowercase.
 export const formatSimpleSqlStatement = (text: string, baseIndent: string): string[] => {
   return formatLowercasedStatement(text, baseIndent);
 };
 
+// Normalize and lowercase a single SQL statement.
 const formatLowercasedStatement = (text: string, baseIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const normalized = normalizeSqlWhitespace(cleaned).toLowerCase();

@@ -1,5 +1,6 @@
 import { scanStringAware } from '../../../utils/string-scan';
 
+// Find the matching closing parenthesis for a given open index.
 export const findMatchingParenIndex = (text: string, startIndex: number): number | null => {
   let depth = 0;
   let matchIndex: number | null = null;
@@ -20,6 +21,7 @@ export const findMatchingParenIndex = (text: string, startIndex: number): number
   return matchIndex;
 };
 
+// Find a keyword index outside parentheses and identifiers.
 export const findKeywordIndex = (text: string, keyword: string): number => {
   const upper = text.toUpperCase();
   const token = keyword.toUpperCase();

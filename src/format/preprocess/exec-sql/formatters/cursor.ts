@@ -7,6 +7,7 @@ import {
 } from '../utils';
 import { formatSelect } from './select';
 
+// Format DECLARE CURSOR statements with options and SELECT body.
 export const formatDeclareCursor = (
   text: string,
   baseIndent: string,
@@ -40,6 +41,7 @@ export const formatDeclareCursor = (
   return lines;
 };
 
+// Format OPEN/CLOSE/FETCH cursor statements.
 export const formatOpenCloseFetch = (
   text: string,
   baseIndent: string,

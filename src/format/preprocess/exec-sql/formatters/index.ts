@@ -11,6 +11,7 @@ import { formatDeclareCursor, formatOpenCloseFetch } from './cursor';
 import { formatHostAndConnection } from './host';
 import { formatValuesStatement } from './values';
 
+// Dispatch SQL statements to the correct formatter.
 export const formatSqlStatement = (text: string, indentStep: number): string[] => {
   const baseIndent = ' '.repeat(indentStep);
   const nestedIndent = ' '.repeat(indentStep * 2);

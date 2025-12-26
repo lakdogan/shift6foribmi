@@ -11,6 +11,7 @@ import { formatSelect } from './select';
 import { formatValuesRows } from './values';
 import { formatInsert } from './insert';
 
+// Format MERGE statements with WHEN MATCHED/NOT MATCHED actions.
 export const formatMerge = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();

@@ -1,5 +1,6 @@
 import { scanStringAware } from '../../../utils/string-scan';
 
+// Split a string on delimiters outside parentheses.
 export const splitTopLevel = (text: string, delimiter: string): string[] => {
   const parts: string[] = [];
   let depth = 0;
@@ -24,6 +25,7 @@ export const splitTopLevel = (text: string, delimiter: string): string[] => {
   return parts.map((part) => part.trim()).filter((part) => part.length > 0);
 };
 
+// Split multiple SQL statements by semicolons outside strings.
 export const splitSqlStatements = (text: string): string[] => {
   const statements: string[] = [];
   let start = 0;

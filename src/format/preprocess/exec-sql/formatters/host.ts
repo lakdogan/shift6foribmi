@@ -3,6 +3,7 @@ import {
   stripTrailingSemicolon
 } from '../utils';
 
+// Format host variables and connection control statements.
 export const formatHostAndConnection = (text: string, baseIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();

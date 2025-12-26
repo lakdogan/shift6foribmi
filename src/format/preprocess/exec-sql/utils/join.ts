@@ -10,6 +10,7 @@ export const JOIN_KEYWORDS = [
   'JOIN'
 ];
 
+// Split JOIN chains into discrete segments.
 export const splitJoinSegments = (text: string): { keyword: string; segment: string }[] => {
   const upper = text.toUpperCase();
   const positions: { index: number; keyword: string }[] = [];

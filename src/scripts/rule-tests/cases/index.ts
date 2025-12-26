@@ -100,6 +100,7 @@ import execSqlJoinDedup from './exec-sql-join-dedup';
 import execSqlDdlSchema from './exec-sql-ddl-schema';
 import execSqlDb2iHints from './exec-sql-db2i-hints';
 import execSqlSelectAdvanced from './exec-sql-select-advanced';
+import execSqlDmlSpecials from './exec-sql-dml-specials';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -202,5 +203,6 @@ export const cases: Case[] = [
   execSqlJoinDedup,
   execSqlDdlSchema,
   execSqlDb2iHints,
-  execSqlSelectAdvanced
+  execSqlSelectAdvanced,
+  execSqlDmlSpecials
 ];

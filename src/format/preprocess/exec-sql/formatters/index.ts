@@ -11,6 +11,7 @@ import { formatDeclareCursor, formatOpenCloseFetch } from './cursor';
 import { formatHostAndConnection } from './host';
 import { formatValuesStatement } from './values';
 import { formatDdlStatement } from './ddl';
+import { formatWithStatement } from './with';
 
 // Dispatch SQL statements to the correct formatter.
 export const formatSqlStatement = (text: string, indentStep: number): string[] => {
@@ -22,7 +23,10 @@ export const formatSqlStatement = (text: string, indentStep: number): string[] =
   if (upper.startsWith('INSERT ')) {
     return formatInsert(normalized, baseIndent, nestedIndent);
   }
-  if (upper.startsWith('SELECT ') || upper.startsWith('WITH ')) {
+  if (upper.startsWith('WITH ')) {
+    return formatWithStatement(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('SELECT ')) {
     return formatSelect(normalized, baseIndent, nestedIndent);
   }
   if (upper.startsWith('UPDATE ')) {

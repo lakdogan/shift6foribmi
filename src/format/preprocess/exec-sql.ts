@@ -409,6 +409,87 @@ const splitSelectClauses = (text: string): string[] => {
   return clauses.filter((clause) => clause.length > 0);
 };
 
+const splitJoinSegments = (text: string): { keyword: string; segment: string }[] => {
+  const upper = text.toUpperCase();
+  const joinKeywords = [
+    'LEFT OUTER JOIN',
+    'RIGHT OUTER JOIN',
+    'FULL OUTER JOIN',
+    'LEFT JOIN',
+    'RIGHT JOIN',
+    'FULL JOIN',
+    'INNER JOIN',
+    'CROSS JOIN',
+    'JOIN'
+  ];
+  const positions: { index: number; keyword: string }[] = [];
+  let depth = 0;
+
+  scanStringAware(text, (ch, index) => {
+    if (ch === '(') {
+      depth++;
+      return;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      return;
+    }
+    if (depth !== 0) return;
+
+    for (const keyword of joinKeywords) {
+      if (!upper.startsWith(keyword, index)) continue;
+      const before = index > 0 ? upper[index - 1] : ' ';
+      const afterIndex = index + keyword.length;
+      const after = afterIndex < upper.length ? upper[afterIndex] : ' ';
+      if (/[A-Z0-9_]/.test(before) || /[A-Z0-9_]/.test(after)) continue;
+      positions.push({ index, keyword });
+      return;
+    }
+  });
+
+  positions.sort((a, b) => a.index - b.index);
+  if (positions.length === 0) return [{ keyword: 'FROM', segment: text.trim() }];
+
+  const segments: { keyword: string; segment: string }[] = [];
+  const firstJoinIndex = positions[0].index;
+  segments.push({ keyword: 'FROM', segment: text.slice(0, firstJoinIndex).trim() });
+  for (let i = 0; i < positions.length; i++) {
+    const start = positions[i].index;
+    const end = i + 1 < positions.length ? positions[i + 1].index : text.length;
+    const keyword = positions[i].keyword;
+    const segment = text.slice(start + keyword.length).trim();
+    segments.push({ keyword, segment });
+  }
+  return segments;
+};
+
+const formatFromClause = (rest: string, baseIndent: string): string[] => {
+  const segments = splitJoinSegments(rest);
+  if (segments.length === 1) {
+    return [baseIndent + `from ${normalizeSqlExpression(rest)}`];
+  }
+
+  const lines: string[] = [];
+  const first = segments[0];
+  lines.push(baseIndent + `from ${normalizeSqlExpression(first.segment)}`);
+  for (let i = 1; i < segments.length; i++) {
+    const keyword = segments[i].keyword.toLowerCase();
+    const segment = segments[i].segment;
+    const onIndex = findKeywordIndex(segment, 'ON');
+    if (onIndex >= 0) {
+      const tablePart = segment.slice(0, onIndex).trim();
+      const condition = segment.slice(onIndex + 2).trimStart();
+      lines.push(
+        baseIndent +
+          `${keyword} ${normalizeSqlExpression(tablePart)} on ${normalizeSqlExpression(condition)}`
+      );
+    } else {
+      lines.push(baseIndent + `${keyword} ${normalizeSqlExpression(segment)}`);
+    }
+  }
+  return lines;
+};
+
 const formatSelect = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -542,6 +623,15 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
 
     if (keyword === 'where' || keyword === 'having') {
       lines.push(baseIndent + ` ${keyword} ${normalizeSqlExpression(rest)}`.trim() + suffix);
+      continue;
+    }
+
+    if (keyword === 'from') {
+      const fromLines = formatFromClause(rest, baseIndent);
+      lines.push(...fromLines.map((line) => line + (isLast ? ';' : '')));
+      if (isLast) {
+        return lines;
+      }
       continue;
     }
 

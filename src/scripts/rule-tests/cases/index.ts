@@ -95,6 +95,7 @@ import execSqlDmlEdgeVariants from './exec-sql-dml-edge-variants';
 import execSqlSelectEdgeVariants from './exec-sql-select-edge-variants';
 import execSqlSessionTransactionBlock from './exec-sql-session-transaction-block';
 import execSqlCursorBlock from './exec-sql-cursor-block';
+import execSqlHostConnectionBlock from './exec-sql-host-connection-block';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -192,5 +193,6 @@ export const cases: Case[] = [
   execSqlDmlEdgeVariants,
   execSqlSelectEdgeVariants,
   execSqlSessionTransactionBlock,
-  execSqlCursorBlock
+  execSqlCursorBlock,
+  execSqlHostConnectionBlock
 ];

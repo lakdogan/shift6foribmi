@@ -869,20 +869,38 @@ const formatPrepareExecute = (
 
   if (upper.startsWith('EXECUTE ')) {
     const rest = cleaned.slice(7).trimStart();
+    const intoIndex = findKeywordIndex(rest, 'INTO');
     const usingIndex = findKeywordIndex(rest, 'USING');
-    if (usingIndex < 0) {
+    if (intoIndex < 0 && usingIndex < 0) {
       return [baseIndent + `execute ${normalizeSqlWhitespace(rest)};`];
     }
-    const stmtName = rest.slice(0, usingIndex).trim();
-    const argsText = rest.slice(usingIndex + 5).trimStart();
-    const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
     const lines: string[] = [];
+    const stmtEnd = [intoIndex, usingIndex].filter((i) => i >= 0).sort((a, b) => a - b)[0];
+    const stmtName = rest.slice(0, stmtEnd).trim();
     lines.push(baseIndent + `execute ${stmtName}`);
-    lines.push(baseIndent + 'using');
-    for (let i = 0; i < args.length; i++) {
-      const suffix = i < args.length - 1 ? ',' : ';';
-      lines.push(nestedIndent + args[i] + suffix);
+
+    if (intoIndex >= 0) {
+      const intoText = rest.slice(intoIndex + 4, usingIndex > intoIndex ? usingIndex : undefined).trimStart();
+      const targets = splitTopLevel(intoText, ',').map(normalizeSqlExpression);
+      lines.push(baseIndent + 'into');
+      for (let i = 0; i < targets.length; i++) {
+        const suffix = i < targets.length - 1 ? ',' : '';
+        lines.push(nestedIndent + targets[i] + suffix);
+      }
     }
+
+    if (usingIndex >= 0) {
+      const argsText = rest.slice(usingIndex + 5).trimStart();
+      const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
+      lines.push(baseIndent + 'using');
+      for (let i = 0; i < args.length; i++) {
+        const suffix = i < args.length - 1 ? ',' : ';';
+        lines.push(nestedIndent + args[i] + suffix);
+      }
+      return lines;
+    }
+
+    lines[lines.length - 1] = lines[lines.length - 1] + ';';
     return lines;
   }
 

@@ -182,6 +182,34 @@ const findMatchingParenIndex = (text: string, startIndex: number): number | null
   return matchIndex;
 };
 
+const findKeywordIndex = (text: string, keyword: string): number => {
+  const upper = text.toUpperCase();
+  const token = keyword.toUpperCase();
+  let depth = 0;
+  let match = -1;
+
+  scanStringAware(text, (ch, index) => {
+    if (ch === '(') {
+      depth++;
+      return;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      return;
+    }
+    if (depth !== 0) return;
+    if (!upper.startsWith(token, index)) return;
+    const before = index > 0 ? upper[index - 1] : ' ';
+    const afterIndex = index + token.length;
+    const after = afterIndex < upper.length ? upper[afterIndex] : ' ';
+    if (/[A-Z0-9_]/.test(before) || /[A-Z0-9_]/.test(after)) return;
+    match = index;
+    return true;
+  });
+
+  return match;
+};
+
 const splitSqlStatements = (text: string): string[] => {
   const statements: string[] = [];
   let start = 0;
@@ -304,6 +332,76 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
   return lines;
 };
 
+const formatUpdate = (text: string, baseIndent: string, nestedIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  const updateMatch = upper.match(/^UPDATE\s+/);
+  if (!updateMatch) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const rest = cleaned.slice(updateMatch[0].length).trimStart();
+  const setIndex = findKeywordIndex(rest, 'SET');
+  if (setIndex < 0) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const tablePart = rest.slice(0, setIndex).trim();
+  if (tablePart.length === 0) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  let afterSet = rest.slice(setIndex + 3).trimStart();
+  const whereIndex = findKeywordIndex(afterSet, 'WHERE');
+  const setText = whereIndex >= 0 ? afterSet.slice(0, whereIndex).trim() : afterSet.trim();
+  const whereText = whereIndex >= 0 ? afterSet.slice(whereIndex + 5).trimStart() : '';
+
+  const assignments = splitTopLevel(setText, ',').map(normalizeSqlExpression);
+  const lines: string[] = [];
+  lines.push(baseIndent + `update ${tablePart}`);
+  lines.push(baseIndent + 'set');
+  for (let i = 0; i < assignments.length; i++) {
+    const suffix = i < assignments.length - 1 ? ',' : '';
+    lines.push(nestedIndent + assignments[i] + suffix);
+  }
+
+  if (whereText.length > 0) {
+    lines.push(baseIndent + `where ${normalizeSqlExpression(whereText)};`);
+    return lines;
+  }
+
+  lines[lines.length - 1] = lines[lines.length - 1] + ';';
+  return lines;
+};
+
+const formatDelete = (text: string, baseIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  const deleteMatch = upper.match(/^DELETE\s+(FROM\s+)?/);
+  if (!deleteMatch) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const rest = cleaned.slice(deleteMatch[0].length).trimStart();
+  if (rest.length === 0) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const whereIndex = findKeywordIndex(rest, 'WHERE');
+  const tablePart = whereIndex >= 0 ? rest.slice(0, whereIndex).trim() : rest.trim();
+  const whereText = whereIndex >= 0 ? rest.slice(whereIndex + 5).trimStart() : '';
+
+  const lines: string[] = [];
+  lines.push(baseIndent + `delete from ${tablePart}`);
+  if (whereText.length > 0) {
+    lines.push(baseIndent + `where ${normalizeSqlExpression(whereText)};`);
+    return lines;
+  }
+
+  lines[lines.length - 1] = lines[lines.length - 1] + ';';
+  return lines;
+};
+
 const formatInsert = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -381,6 +479,12 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   }
   if (upper.startsWith('SELECT ')) {
     return formatSelect(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('UPDATE ')) {
+    return formatUpdate(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('DELETE ')) {
+    return formatDelete(normalized, baseIndent);
   }
   if (upper.startsWith('GET DIAGNOSTICS')) {
     const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());

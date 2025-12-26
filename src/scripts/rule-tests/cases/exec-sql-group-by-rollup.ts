@@ -10,7 +10,7 @@ const testCase: Case = {
   mustInclude: [
     'group by',
     'rollup(ID),',
-    'cube(REGION, TYPE);'
+    'cube(REGION,TYPE);'
   ]
 };
 

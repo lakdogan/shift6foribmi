@@ -2,6 +2,7 @@ import { Shift6Config } from '../config';
 import { initContinuationState } from './continuations';
 import { initFormatContext } from './context';
 import { normalizeMultilineStringLiterals } from './preprocess/normalize-multiline';
+import { normalizeExecSqlBlocks } from './preprocess/exec-sql';
 import { processSegment } from './preprocess/process-segment';
 import { splitStatements } from './preprocess/split-statements';
 
@@ -22,6 +23,10 @@ export function preprocessDocument(lines: string[], cfg: Shift6Config): Preproce
     workingLines = normalized.lines;
     splitOccurred = normalized.changed;
   }
+
+  const execSqlNormalized = normalizeExecSqlBlocks(workingLines, cfg);
+  workingLines = execSqlNormalized.lines;
+  if (execSqlNormalized.changed) splitOccurred = true;
 
   const lineCount = workingLines.length;
   const firstLineText = lineCount > 0 ? workingLines[0] : '';

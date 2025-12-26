@@ -19,6 +19,7 @@ export function getLineFlags(info: LineInfo): LineFlags {
   const upper = info.upper;
   const upperNoComment = info.upperNoComment;
   const leading = info.leadingKeyword ?? '';
+  const trimmedUpper = info.trimmed.toUpperCase();
 
   const isCloser =
     (leading.length > 0 && CLOSERS.includes(leading)) || startsWithKeyword(upper, CLOSERS);
@@ -28,6 +29,8 @@ export function getLineFlags(info: LineInfo): LineFlags {
     (leading.length > 0 && OPENERS.includes(leading)) || startsWithKeyword(upper, OPENERS);
   const isProcStart = upper.startsWith('DCL-PROC');
   const isProcEnd = upper.startsWith('END-PROC') || upper.startsWith('ENDPROC');
+  const isExecSqlStart = /^EXEC\s+SQL\b/.test(trimmedUpper);
+  const isExecSqlEnd = /^END-EXEC\b/.test(trimmedUpper) || /^END\s+EXEC\b/.test(trimmedUpper);
   const hasInlineCloser = containsKeywordToken(upperNoComment, CLOSERS);
   const isInlineDclDs =
     upper.startsWith('DCL-DS') &&
@@ -48,6 +51,8 @@ export function getLineFlags(info: LineInfo): LineFlags {
     isOpener,
     isProcStart,
     isProcEnd,
+    isExecSqlStart,
+    isExecSqlEnd,
     hasInlineCloser,
     isInlineDclDs,
     isCommentOnly: info.isCommentOnly,

@@ -1,0 +1,466 @@
+import type { Shift6Config } from '../../config';
+import { scanStringAware } from '../utils/string-scan';
+
+interface ExecSqlNormalizeResult {
+  lines: string[];
+  changed: boolean;
+}
+
+const EXEC_SQL_START = /^\s*EXEC\s+SQL\b/i;
+const END_EXEC = /\bEND-EXEC\b|\bEND\s+EXEC\b/i;
+
+const normalizeSqlWhitespace = (text: string): string => {
+  let out = '';
+  let inString = false;
+  let quoteChar = '';
+  let pendingSpace = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      out += ch;
+      if (ch === quoteChar) {
+        if (i + 1 < text.length && text[i + 1] === quoteChar) {
+          out += text[i + 1];
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      if (pendingSpace && out.length > 0 && !out.endsWith(' ')) {
+        out += ' ';
+      }
+      pendingSpace = false;
+      inString = true;
+      quoteChar = ch;
+      out += ch;
+      continue;
+    }
+
+    if (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
+      pendingSpace = true;
+      continue;
+    }
+
+    if (pendingSpace && out.length > 0 && !out.endsWith(' ')) {
+      out += ' ';
+    }
+    pendingSpace = false;
+    out += ch;
+  }
+
+  return out.trim();
+};
+
+const normalizeSqlExpression = (text: string): string => {
+  const compact = normalizeSqlWhitespace(text);
+  let out = '';
+  let inString = false;
+  let quoteChar = '';
+
+  const nextNonSpace = (start: number): string => {
+    for (let i = start; i < compact.length; i++) {
+      const ch = compact[i];
+      if (ch !== ' ') return ch;
+    }
+    return '';
+  };
+
+  const lastNonSpace = () => {
+    for (let i = out.length - 1; i >= 0; i--) {
+      const ch = out[i];
+      if (ch !== ' ') return ch;
+    }
+    return '';
+  };
+
+  for (let i = 0; i < compact.length; i++) {
+    const ch = compact[i];
+    if (inString) {
+      out += ch;
+      if (ch === quoteChar) {
+        if (i + 1 < compact.length && compact[i + 1] === quoteChar) {
+          out += compact[i + 1];
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      inString = true;
+      quoteChar = ch;
+      out += ch;
+      continue;
+    }
+
+    if (ch === '=' || ch === '+' || ch === '-' || ch === '*') {
+      const prev = lastNonSpace();
+      const next = nextNonSpace(i + 1);
+      const nextIsSpace = compact[i + 1] === ' ';
+      if (
+        ch === '=' &&
+        (prev === '<' || prev === '>' || prev === '!' || prev === '=' || next === '=')
+      ) {
+        out += ch;
+        continue;
+      }
+      if ((ch === '+' || ch === '-' || ch === '*') && (prev === '' || prev === '(' || prev === ',')) {
+        out += ch;
+        continue;
+      }
+      if (out.length > 0 && !out.endsWith(' ')) {
+        out += ' ';
+      }
+      out += ch;
+      if (!nextIsSpace && next !== '' && next !== ' ') {
+        out += ' ';
+      }
+      continue;
+    }
+
+    out += ch;
+  }
+
+  return out.trim();
+};
+
+const stripTrailingSemicolon = (text: string): string => {
+  const trimmed = text.trimEnd();
+  return trimmed.endsWith(';') ? trimmed.slice(0, -1).trimEnd() : trimmed;
+};
+
+const splitTopLevel = (text: string, delimiter: string): string[] => {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+
+  scanStringAware(text, (ch, index) => {
+    if (ch === '(') {
+      depth++;
+      return;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      return;
+    }
+    if (ch === delimiter && depth === 0) {
+      parts.push(text.slice(start, index));
+      start = index + 1;
+    }
+  });
+
+  parts.push(text.slice(start));
+  return parts.map((part) => part.trim()).filter((part) => part.length > 0);
+};
+
+const findMatchingParenIndex = (text: string, startIndex: number): number | null => {
+  let depth = 0;
+  let matchIndex: number | null = null;
+  scanStringAware(text, (ch, index) => {
+    if (index < startIndex) return;
+    if (ch === '(') {
+      depth++;
+      return;
+    }
+    if (ch === ')') {
+      depth--;
+      if (depth === 0) {
+        matchIndex = index;
+        return true;
+      }
+    }
+  });
+  return matchIndex;
+};
+
+const splitSqlStatements = (text: string): string[] => {
+  const statements: string[] = [];
+  let start = 0;
+  scanStringAware(text, (ch, index) => {
+    if (ch === ';') {
+      const piece = text.slice(start, index).trim();
+      if (piece.length > 0) statements.push(piece);
+      start = index + 1;
+    }
+  });
+  const tail = text.slice(start).trim();
+  if (tail.length > 0) statements.push(tail);
+  return statements;
+};
+
+const formatValuesRows = (
+  valuesText: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] => {
+  const cleaned = stripTrailingSemicolon(valuesText);
+  const rows = splitTopLevel(cleaned, ',');
+  if (rows.length <= 1) {
+    const row = rows.length === 1 ? rows[0] : cleaned;
+    const inner = row.startsWith('(') && row.endsWith(')')
+      ? row.slice(1, -1)
+      : row;
+    const items = splitTopLevel(inner, ',').map(normalizeSqlExpression);
+    const lines = [baseIndent + 'values ('];
+    for (let i = 0; i < items.length; i++) {
+      const suffix = i < items.length - 1 ? ',' : '';
+      lines.push(nestedIndent + items[i] + suffix);
+    }
+    lines.push(baseIndent + ');');
+    return lines;
+  }
+
+  const formattedRows = rows.map((row) => {
+    const inner = row.startsWith('(') && row.endsWith(')')
+      ? row.slice(1, -1)
+      : row;
+    const items = splitTopLevel(inner, ',').map(normalizeSqlExpression);
+    return '(' + items.join(', ') + ')';
+  });
+
+  const lines = [baseIndent + 'values'];
+  for (let i = 0; i < formattedRows.length; i++) {
+    const suffix = i < formattedRows.length - 1 ? ',' : ';';
+    lines.push(nestedIndent + formattedRows[i] + suffix);
+  }
+  return lines;
+};
+
+const formatSelect = (text: string, baseIndent: string, nestedIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  const selectMatch = upper.match(/^SELECT\s+(DISTINCT\s+)?/);
+  if (!selectMatch) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const distinct = Boolean(selectMatch[1]);
+  const afterSelect = cleaned.slice(selectMatch[0].length);
+
+  const fromIndex = (() => {
+    let depth = 0;
+    let index = -1;
+    scanStringAware(afterSelect, (ch, i) => {
+      if (ch === '(') {
+        depth++;
+        return;
+      }
+      if (ch === ')') {
+        depth = Math.max(0, depth - 1);
+        return;
+      }
+      if (depth !== 0) return;
+      if (afterSelect.slice(i).toUpperCase().startsWith('FROM ')) {
+        index = i;
+        return true;
+      }
+    });
+    return index;
+  })();
+
+  const columnsText = fromIndex >= 0 ? afterSelect.slice(0, fromIndex).trim() : afterSelect.trim();
+  const remainder = fromIndex >= 0 ? afterSelect.slice(fromIndex).trim() : '';
+
+  const columns = splitTopLevel(columnsText, ',').map(normalizeSqlExpression);
+  const lines = [baseIndent + (distinct ? 'select distinct' : 'select')];
+  for (let i = 0; i < columns.length; i++) {
+    const suffix = i < columns.length - 1 ? ',' : '';
+    lines.push(nestedIndent + columns[i] + suffix);
+  }
+
+  if (remainder.length === 0) {
+    lines[lines.length - 1] = lines[lines.length - 1] + ';';
+    return lines;
+  }
+
+  const clauses = remainder.split(/\b(?=FROM|WHERE|FETCH)\b/i).map((part) => part.trim());
+  const visibleClauses = clauses.filter((clause) => clause.length > 0);
+  for (let i = 0; i < visibleClauses.length; i++) {
+    const clause = normalizeSqlWhitespace(visibleClauses[i]);
+    const match = clause.match(/^(FROM|WHERE|FETCH)\b/i);
+    if (!match) continue;
+    const keyword = match[1].toLowerCase();
+    const rest = clause.slice(match[0].length).trimStart();
+    const normalizedRest =
+      keyword === 'fetch'
+        ? normalizeSqlWhitespace(rest).toLowerCase()
+        : keyword === 'where'
+          ? normalizeSqlExpression(rest)
+          : normalizeSqlWhitespace(rest);
+    const isLast = i === visibleClauses.length - 1;
+    const suffix = isLast ? ';' : '';
+    lines.push(baseIndent + [keyword, normalizedRest].filter(Boolean).join(' ') + suffix);
+  }
+
+  return lines;
+};
+
+const formatInsert = (text: string, baseIndent: string, nestedIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  const insertMatch = upper.match(/^INSERT\s+INTO\s+/);
+  if (!insertMatch) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const afterInsert = cleaned.slice(insertMatch[0].length).trimStart();
+  const tableMatch = afterInsert.match(/^([^\s(]+)\s*(.*)$/);
+  if (!tableMatch) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const tableName = tableMatch[1];
+  let remainder = tableMatch[2]?.trimStart() ?? '';
+
+  const lines: string[] = [];
+  let columns: string[] | null = null;
+
+  if (remainder.startsWith('(')) {
+    const closingIndex = findMatchingParenIndex(remainder, 0);
+    if (closingIndex !== null) {
+      const inner = remainder.slice(1, closingIndex);
+      columns = splitTopLevel(inner, ',').map(normalizeSqlWhitespace);
+      remainder = remainder.slice(closingIndex + 1).trimStart();
+    }
+  }
+
+  if (columns && columns.length > 0) {
+    lines.push(baseIndent + `insert into ${tableName} (`);
+    for (let i = 0; i < columns.length; i++) {
+      const suffix = i < columns.length - 1 ? ',' : '';
+      lines.push(nestedIndent + columns[i] + suffix);
+    }
+    lines.push(baseIndent + ')');
+  } else {
+    lines.push(baseIndent + `insert into ${tableName}`);
+  }
+
+  if (remainder.length === 0) {
+    lines[lines.length - 1] = lines[lines.length - 1] + ';';
+    return lines;
+  }
+
+  const upperRemainder = remainder.toUpperCase();
+  if (upperRemainder.startsWith('VALUES')) {
+    const valuesText = remainder.slice(6).trimStart();
+    lines.push(...formatValuesRows(valuesText, baseIndent, nestedIndent));
+    return lines;
+  }
+
+  if (upperRemainder.startsWith('DEFAULT VALUES')) {
+    lines.push(baseIndent + 'default values;');
+    return lines;
+  }
+
+  if (upperRemainder.startsWith('SELECT')) {
+    lines.push(...formatSelect(remainder, baseIndent, nestedIndent));
+    return lines;
+  }
+
+  lines[lines.length - 1] = lines[lines.length - 1] + ';';
+  return lines;
+};
+
+const formatSqlStatement = (text: string, indentStep: number): string[] => {
+  const baseIndent = ' '.repeat(indentStep);
+  const nestedIndent = ' '.repeat(indentStep * 2);
+  const normalized = normalizeSqlWhitespace(text);
+  const upper = normalized.toUpperCase();
+
+  if (upper.startsWith('INSERT ')) {
+    return formatInsert(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('SELECT ')) {
+    return formatSelect(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('GET DIAGNOSTICS')) {
+    const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());
+    return [baseIndent + `get diagnostics ${rest};`.trim()];
+  }
+
+  const fallback = stripTrailingSemicolon(normalized);
+  return [baseIndent + fallback + ';'];
+};
+
+export const normalizeExecSqlBlocks = (
+  lines: string[],
+  cfg: Shift6Config
+): ExecSqlNormalizeResult => {
+  const out: string[] = [];
+  let changed = false;
+  let inExecSql = false;
+  let sqlBuffer: string[] = [];
+
+  const flushBuffer = () => {
+    if (sqlBuffer.length === 0) return;
+    const combined = sqlBuffer.join(' ').trim();
+    const statements = splitSqlStatements(combined);
+    for (const statement of statements) {
+      out.push(...formatSqlStatement(statement, cfg.blockIndent));
+    }
+    sqlBuffer = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trimStart();
+    if (trimmed.startsWith('//')) {
+      if (inExecSql) {
+        flushBuffer();
+      }
+      out.push(line);
+      continue;
+    }
+
+    if (!inExecSql) {
+      if (EXEC_SQL_START.test(line)) {
+        changed = true;
+        inExecSql = true;
+        out.push('exec sql');
+        const after = line.replace(EXEC_SQL_START, '').trim();
+        if (after.length > 0) {
+          const endIndex = after.search(END_EXEC);
+          if (endIndex >= 0) {
+            const sqlPart = after.slice(0, endIndex).trim();
+            if (sqlPart.length > 0) sqlBuffer.push(sqlPart);
+            flushBuffer();
+            out.push('end-exec;');
+            inExecSql = false;
+            continue;
+          }
+          sqlBuffer.push(after);
+        }
+        continue;
+      }
+      out.push(line);
+      continue;
+    }
+
+    if (END_EXEC.test(line)) {
+      const beforeEnd = line.split(END_EXEC)[0].trim();
+      if (beforeEnd.length > 0) {
+        sqlBuffer.push(beforeEnd);
+      }
+      flushBuffer();
+      out.push('end-exec;');
+      inExecSql = false;
+      continue;
+    }
+
+    sqlBuffer.push(line.trim());
+  }
+
+  if (inExecSql) {
+    flushBuffer();
+  }
+
+  return { lines: out, changed };
+};

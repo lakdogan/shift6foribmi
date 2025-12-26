@@ -5,6 +5,7 @@ export function initFormatContext(): FormatContext {
   return {
     indentLevel: 0,
     procDepth: 0,
+    execSqlDepth: 0,
     continuationOperatorColumn: null,
     pendingAssignmentContinuation: false
   };
@@ -14,6 +15,11 @@ export function initFormatContext(): FormatContext {
 export function updateContextBeforeLine(ctx: FormatContext, flags: LineFlags): FormatContext {
   let indentLevel = ctx.indentLevel;
   let procDepth = ctx.procDepth;
+  let execSqlDepth = ctx.execSqlDepth;
+
+  if (execSqlDepth > 0 && !flags.isExecSqlEnd) {
+    return ctx;
+  }
 
   if (flags.isCloser || flags.isMid) {
     if (!(flags.isProcEnd && procDepth === 0)) {
@@ -27,7 +33,8 @@ export function updateContextBeforeLine(ctx: FormatContext, flags: LineFlags): F
   return {
     ...ctx,
     indentLevel,
-    procDepth
+    procDepth,
+    execSqlDepth: flags.isExecSqlEnd ? Math.max(0, execSqlDepth - 1) : execSqlDepth
   };
 }
 
@@ -36,6 +43,11 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
   let indentLevel = ctx.indentLevel;
   let procDepth = ctx.procDepth;
   let pendingAssignmentContinuation = ctx.pendingAssignmentContinuation;
+  let execSqlDepth = ctx.execSqlDepth;
+
+  if (execSqlDepth > 0) {
+    return ctx;
+  }
 
   if (flags.isMid) {
     indentLevel++;
@@ -48,11 +60,15 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
       }
     }
   }
+  if (flags.isExecSqlStart && !flags.isExecSqlEnd) {
+    execSqlDepth++;
+  }
 
   return {
     ...ctx,
     indentLevel,
     procDepth,
+    execSqlDepth,
     pendingAssignmentContinuation: flags.endsStatement
       ? false
       : flags.endsWithAssignment

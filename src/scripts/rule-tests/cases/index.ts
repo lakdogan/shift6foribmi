@@ -77,6 +77,7 @@ import execSqlDescribeUsing from './exec-sql-describe-using';
 import execSqlLockTable from './exec-sql-lock-table';
 import execSqlSetCurrentOptions from './exec-sql-set-current-options';
 import execSqlMergeNotMatchedDelete from './exec-sql-merge-not-matched-delete';
+import execSqlSetPathList from './exec-sql-set-path-list';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -156,5 +157,6 @@ export const cases: Case[] = [
   execSqlDescribeUsing,
   execSqlLockTable,
   execSqlSetCurrentOptions,
-  execSqlMergeNotMatchedDelete
+  execSqlMergeNotMatchedDelete,
+  execSqlSetPathList
 ];

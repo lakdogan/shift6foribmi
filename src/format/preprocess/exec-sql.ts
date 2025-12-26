@@ -447,6 +447,7 @@ const splitJoinSegments = (text: string): { keyword: string; segment: string }[]
   let depth = 0;
   let inString = false;
   let quoteChar = '';
+  let lastMatchEnd = -1;
 
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
@@ -477,6 +478,7 @@ const splitJoinSegments = (text: string): { keyword: string; segment: string }[]
       continue;
     }
     if (depth !== 0) continue;
+    if (i < lastMatchEnd) continue;
 
     let matched = false;
     for (const keyword of JOIN_KEYWORDS) {
@@ -486,6 +488,7 @@ const splitJoinSegments = (text: string): { keyword: string; segment: string }[]
       const after = afterIndex < upper.length ? upper[afterIndex] : ' ';
       if (/[A-Z0-9_]/.test(before) || /[A-Z0-9_]/.test(after)) continue;
       positions.push({ index: i, keyword });
+      lastMatchEnd = i + keyword.length;
       i += keyword.length - 1;
       matched = true;
       break;

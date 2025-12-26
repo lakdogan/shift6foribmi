@@ -4,7 +4,7 @@ import {
   stripTrailingSemicolon,
   splitTopLevel,
   findKeywordIndex
-} from '../utils';
+} from '../utils/index';
 
 // Format PREPARE/EXECUTE/EXECUTE IMMEDIATE statements.
 export const formatPrepareExecute = (
@@ -18,12 +18,12 @@ export const formatPrepareExecute = (
   const formatUsingBlock = (argsText: string): string[] => {
     const normalized = normalizeSqlWhitespace(argsText);
     if (normalized.toUpperCase().startsWith('DESCRIPTOR')) {
-      return [nestedIndent + normalized + ';'];
+      return [nestedIndent + normalized];
     }
     const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
     const lines: string[] = [];
     for (let i = 0; i < args.length; i++) {
-      const suffix = i < args.length - 1 ? ',' : ';';
+      const suffix = i < args.length - 1 ? ',' : '';
       lines.push(nestedIndent + args[i] + suffix);
     }
     return lines;
@@ -71,6 +71,11 @@ export const formatPrepareExecute = (
       lines.push(baseIndent + 'using');
       const usingText = rest.slice(usingIndex + 5).trimStart();
       lines.push(...formatUsingBlock(usingText));
+    }
+    if (lines.length === 2) {
+      lines[1] = lines[1] + ';';
+    } else {
+      lines[lines.length - 1] = lines[lines.length - 1] + ';';
     }
     return lines;
   }

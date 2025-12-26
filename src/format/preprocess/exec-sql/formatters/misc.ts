@@ -4,8 +4,11 @@ import {
   normalizeSqlExpression,
   stripTrailingSemicolon,
   splitTopLevel,
-  findMatchingParenIndex
-} from '../utils';
+  findMatchingParenIndex,
+  findKeywordIndex,
+  findLastKeywordIndex,
+  splitStatementsOutsideStrings
+} from '../utils/index';
 import { formatPrepareExecute } from './prepare';
 
 // Format CALL statements with argument lists.
@@ -102,6 +105,35 @@ export const formatAllocateDescribe = (text: string, baseIndent: string): string
 // Format simple SQL statements as lowercase.
 export const formatSimpleSqlStatement = (text: string, baseIndent: string): string[] => {
   return formatLowercasedStatement(text, baseIndent);
+};
+
+// Format BEGIN...END blocks into structured statements.
+export const formatBeginEndStatement = (
+  text: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const normalized = normalizeSqlWhitespace(cleaned);
+  const upper = normalized.toUpperCase();
+  if (!upper.startsWith('BEGIN ')) {
+    return [baseIndent + normalized + ';'];
+  }
+  const beginIndex = findKeywordIndex(normalized, 'BEGIN');
+  if (beginIndex < 0) {
+    return [baseIndent + normalized + ';'];
+  }
+  const bodyWithEnd = normalized.slice(beginIndex + 5).trimStart();
+  const endIndex = findLastKeywordIndex(bodyWithEnd, 'END');
+  const bodyText = endIndex >= 0 ? bodyWithEnd.slice(0, endIndex).trim() : bodyWithEnd;
+  const statements = splitStatementsOutsideStrings(bodyText);
+  const lines: string[] = [];
+  lines.push(baseIndent + 'begin');
+  for (const statement of statements) {
+    lines.push(nestedIndent + normalizeSqlWhitespace(statement) + ';');
+  }
+  lines.push(baseIndent + 'end;');
+  return lines;
 };
 
 // Normalize and lowercase a single SQL statement.

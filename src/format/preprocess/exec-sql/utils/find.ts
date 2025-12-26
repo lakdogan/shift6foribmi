@@ -49,3 +49,31 @@ export const findKeywordIndex = (text: string, keyword: string): number => {
 
   return match;
 };
+
+// Find the last keyword index outside parentheses and identifiers.
+export const findLastKeywordIndex = (text: string, keyword: string): number => {
+  const upper = text.toUpperCase();
+  const token = keyword.toUpperCase();
+  let depth = 0;
+  let match = -1;
+
+  scanStringAware(text, (ch, index) => {
+    if (ch === '(') {
+      depth++;
+      return;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      return;
+    }
+    if (depth !== 0) return;
+    if (!upper.startsWith(token, index)) return;
+    const before = index > 0 ? upper[index - 1] : ' ';
+    const afterIndex = index + token.length;
+    const after = afterIndex < upper.length ? upper[afterIndex] : ' ';
+    if (/[A-Z0-9_]/.test(before) || /[A-Z0-9_]/.test(after)) return;
+    match = index;
+  });
+
+  return match;
+};

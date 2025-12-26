@@ -6,7 +6,7 @@ import {
   splitTopLevel,
   findMatchingParenIndex,
   findKeywordIndex
-} from '../utils';
+} from '../utils/index';
 import { formatSelect } from './select';
 import { formatValuesRows } from './values';
 import { formatInsert } from './insert';

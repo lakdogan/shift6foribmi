@@ -4,7 +4,7 @@ import {
   stripTrailingSemicolon,
   splitTopLevel,
   findMatchingParenIndex
-} from '../utils';
+} from '../utils/index';
 import { formatValuesRows } from './values';
 import { formatSelect } from './select';
 

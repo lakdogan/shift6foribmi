@@ -7,7 +7,7 @@ import {
   splitSelectClauses,
   parseWithClauses,
   trimTrailingSemicolon
-} from '../utils';
+} from '../utils/index';
 import { scanStringAware } from '../../../utils/string-scan';
 import { formatFromClause } from './from';
 import { formatSelectSetOperations } from './select-set';
@@ -113,7 +113,7 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
   for (let i = 0; i < clauses.length; i++) {
     const clause = normalizeSqlWhitespace(clauses[i]);
     const match = clause.match(
-      /^(FROM|WHERE CURRENT OF|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE|FOR READ ONLY|FOR FETCH ONLY)\b/i
+      /^(FROM|WHERE CURRENT OF|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE|FOR READ ONLY|FOR FETCH ONLY|WITH)\b/i
     );
     if (!match) continue;
     const keyword = match[1].toLowerCase();
@@ -146,8 +146,9 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
 
     if (keyword === 'from') {
       const fromLines = formatFromClause(restClause, baseIndent);
-      lines.push(...fromLines.map((line) => line + (isLast ? ';' : '')));
-      if (isLast) {
+      lines.push(...fromLines);
+      if (isLast && fromLines.length > 0) {
+        lines[lines.length - 1] = lines[lines.length - 1] + ';';
         return lines;
       }
       continue;

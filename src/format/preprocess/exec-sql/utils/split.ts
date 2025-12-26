@@ -96,3 +96,18 @@ export const splitSqlStatements = (text: string): string[] => {
   if (tail.length > 0) statements.push(tail);
   return statements;
 };
+
+// Split statements on semicolons outside string literals.
+export const splitStatementsOutsideStrings = (text: string): string[] => {
+  const statements: string[] = [];
+  let start = 0;
+  scanStringAware(text, (ch, index) => {
+    if (ch !== ';') return;
+    const piece = text.slice(start, index).trim();
+    if (piece.length > 0) statements.push(piece);
+    start = index + 1;
+  });
+  const tail = text.slice(start).trim();
+  if (tail.length > 0) statements.push(tail);
+  return statements;
+};

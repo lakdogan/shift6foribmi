@@ -13,11 +13,13 @@ const testCase: Case = {
   ].join('\n'),
   mustInclude: [
     'create procedure P1()',
-    'begin declare v int default 0;',
+    'begin',
+    'declare v int default 0;',
     'end if;',
     'create function F1() returns int',
     'return outv;',
-    'begin declare x int default 3;'
+    'begin',
+    'declare x int default 3;'
   ]
 };
 

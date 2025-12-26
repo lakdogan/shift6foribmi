@@ -4,7 +4,7 @@ import {
   normalizeSqlExpression,
   stripTrailingSemicolon,
   findKeywordIndex
-} from '../utils';
+} from '../utils/index';
 
 // Format DELETE statements with USING and WHERE variants.
 export const formatDelete = (text: string, baseIndent: string): string[] => {

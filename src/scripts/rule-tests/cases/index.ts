@@ -103,6 +103,7 @@ import execSqlSelectAdvanced from './exec-sql-select-advanced';
 import execSqlDmlSpecials from './exec-sql-dml-specials';
 import execSqlDiagnosticsSession from './exec-sql-diagnostics-session';
 import execSqlCursorDescriptor from './exec-sql-cursor-descriptor';
+import execSqlFunctions from './exec-sql-functions';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -208,5 +209,6 @@ export const cases: Case[] = [
   execSqlSelectAdvanced,
   execSqlDmlSpecials,
   execSqlDiagnosticsSession,
-  execSqlCursorDescriptor
+  execSqlCursorDescriptor,
+  execSqlFunctions
 ];

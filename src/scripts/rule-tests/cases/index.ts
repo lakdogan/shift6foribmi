@@ -46,6 +46,7 @@ import execSqlSelectClauses from './exec-sql-select-clauses';
 import execSqlUpdateVariants from './exec-sql-update-variants';
 import execSqlDeleteVariants from './exec-sql-delete-variants';
 import execSqlMergeDelete from './exec-sql-merge-delete';
+import execSqlDescribeVariants from './exec-sql-describe-variants';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -94,5 +95,6 @@ export const cases: Case[] = [
   execSqlSelectClauses,
   execSqlUpdateVariants,
   execSqlDeleteVariants,
-  execSqlMergeDelete
+  execSqlMergeDelete,
+  execSqlDescribeVariants
 ];

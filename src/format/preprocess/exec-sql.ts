@@ -770,6 +770,49 @@ const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
   return [baseIndent + cleaned + ';'];
 };
 
+const formatValuesStatement = (
+  text: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  if (!upper.startsWith('VALUES')) {
+    return [baseIndent + cleaned + ';'];
+  }
+  const valuesText = cleaned.slice(6).trimStart();
+  const rows = splitTopLevel(valuesText, ',');
+  if (rows.length <= 1) {
+    const row = rows.length === 1 ? rows[0] : valuesText;
+    const inner = row.startsWith('(') && row.endsWith(')')
+      ? row.slice(1, -1)
+      : row;
+    const items = splitTopLevel(inner, ',').map(normalizeSqlExpression);
+    const lines = [baseIndent + 'values ('];
+    for (let i = 0; i < items.length; i++) {
+      const suffix = i < items.length - 1 ? ',' : '';
+      lines.push(nestedIndent + items[i] + suffix);
+    }
+    lines.push(baseIndent + ');');
+    return lines;
+  }
+
+  const formattedRows = rows.map((row) => {
+    const inner = row.startsWith('(') && row.endsWith(')')
+      ? row.slice(1, -1)
+      : row;
+    const items = splitTopLevel(inner, ',').map(normalizeSqlExpression);
+    return '(' + items.join(', ') + ')';
+  });
+
+  const lines = [baseIndent + 'values'];
+  for (let i = 0; i < formattedRows.length; i++) {
+    const suffix = i < formattedRows.length - 1 ? ',' : ';';
+    lines.push(nestedIndent + formattedRows[i] + suffix);
+  }
+  return lines;
+};
+
 const formatOpenCloseFetch = (
   text: string,
   baseIndent: string,
@@ -939,6 +982,9 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   if (upper.startsWith('GET DIAGNOSTICS')) {
     const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());
     return [baseIndent + `get diagnostics ${rest};`.trim()];
+  }
+  if (upper.startsWith('VALUES')) {
+    return formatValuesStatement(normalized, baseIndent, nestedIndent);
   }
 
   const fallback = stripTrailingSemicolon(normalized);

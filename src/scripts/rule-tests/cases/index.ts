@@ -36,6 +36,7 @@ import execSqlHost from './exec-sql-host';
 import execSqlConnection from './exec-sql-connection';
 import execSqlDescribeAllocate from './exec-sql-describe-allocate';
 import execSqlCteUnion from './exec-sql-cte-union';
+import execSqlValues from './exec-sql-values';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -74,5 +75,6 @@ export const cases: Case[] = [
   execSqlHost,
   execSqlConnection,
   execSqlDescribeAllocate,
-  execSqlCteUnion
+  execSqlCteUnion,
+  execSqlValues
 ];

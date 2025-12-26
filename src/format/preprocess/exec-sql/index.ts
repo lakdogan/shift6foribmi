@@ -1,6 +1,6 @@
 import type { Shift6Config } from '../../../config';
 import { formatSqlStatement } from './formatters/index';
-import { END_EXEC, EXEC_SQL_START, splitSqlStatements } from './utils';
+import { END_EXEC, EXEC_SQL_START, splitSqlStatements } from './utils/index';
 
 interface ExecSqlNormalizeResult {
   lines: string[];

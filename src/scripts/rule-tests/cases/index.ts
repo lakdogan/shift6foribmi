@@ -72,6 +72,7 @@ import execSqlSelectCurrentOf from './exec-sql-select-current-of';
 import execSqlSetSpecialRegister from './exec-sql-set-special-register';
 import execSqlSetConnectionReset from './exec-sql-set-connection-reset';
 import execSqlWheneverGoto from './exec-sql-whenver-goto';
+import execSqlExecImmediateInto from './exec-sql-exec-immediate-into';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -146,5 +147,6 @@ export const cases: Case[] = [
   execSqlSelectCurrentOf,
   execSqlSetSpecialRegister,
   execSqlSetConnectionReset,
-  execSqlWheneverGoto
+  execSqlWheneverGoto,
+  execSqlExecImmediateInto
 ];

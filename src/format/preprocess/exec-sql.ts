@@ -445,28 +445,53 @@ const splitJoinSegments = (text: string): { keyword: string; segment: string }[]
   const upper = text.toUpperCase();
   const positions: { index: number; keyword: string }[] = [];
   let depth = 0;
+  let inString = false;
+  let quoteChar = '';
 
-  scanStringAware(text, (ch, index) => {
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (ch === quoteChar) {
+        if (i + 1 < text.length && text[i + 1] === quoteChar) {
+          i++;
+          continue;
+        }
+        inString = false;
+        quoteChar = '';
+      }
+      continue;
+    }
+
+    if (ch === '\'' || ch === '"') {
+      inString = true;
+      quoteChar = ch;
+      continue;
+    }
+
     if (ch === '(') {
       depth++;
-      return;
+      continue;
     }
     if (ch === ')') {
       depth = Math.max(0, depth - 1);
-      return;
+      continue;
     }
-    if (depth !== 0) return;
+    if (depth !== 0) continue;
 
+    let matched = false;
     for (const keyword of JOIN_KEYWORDS) {
-      if (!upper.startsWith(keyword, index)) continue;
-      const before = index > 0 ? upper[index - 1] : ' ';
-      const afterIndex = index + keyword.length;
+      if (!upper.startsWith(keyword, i)) continue;
+      const before = i > 0 ? upper[i - 1] : ' ';
+      const afterIndex = i + keyword.length;
       const after = afterIndex < upper.length ? upper[afterIndex] : ' ';
       if (/[A-Z0-9_]/.test(before) || /[A-Z0-9_]/.test(after)) continue;
-      positions.push({ index, keyword });
-      return;
+      positions.push({ index: i, keyword });
+      i += keyword.length - 1;
+      matched = true;
+      break;
     }
-  });
+    if (matched) continue;
+  }
 
   positions.sort((a, b) => a.index - b.index);
   if (positions.length === 0) return [{ keyword: 'FROM', segment: text.trim() }];

@@ -8,6 +8,8 @@
 - `src/format/rules/*` - rule pipeline for line formatting.
 - `src/config/schema.ts` - config defaults and normalization.
 - `src/scripts/rule-tests.ts` - fast rule-level sanity tests.
+- `src/format/preprocess/exec-sql/*` - exec sql formatter and helpers.
+- `docs/exec-sql-scope.md` - exec sql coverage target.
 - `assets/demo.gif` - demo animation used in README.
 - `demo*.rpgle` - sample inputs for quick manual checks.
 - `examples/test*.rpgle` - extended sample inputs for manual checks (if present).

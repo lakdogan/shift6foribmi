@@ -27,6 +27,7 @@
 
 ## Rule Tests (fast)
 - Run `npm run test:rules` to validate core formatting cases without launching VS Code.
+- Exec SQL coverage is tracked in `docs/exec-sql-scope.md` with matching rule-test cases.
 
 ## Packaging Verification
 - Build: `npm run compile`

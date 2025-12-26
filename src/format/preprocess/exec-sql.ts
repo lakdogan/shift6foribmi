@@ -60,6 +60,9 @@ const normalizeSqlWhitespace = (text: string): string => {
 const normalizeSqlIdentifierPath = (text: string): string =>
   text.replace(/\s*\/\s*/g, '/');
 
+const normalizeStarTokens = (text: string): string =>
+  text.replace(/\*\s+([A-Za-z][A-Za-z0-9_]*)/g, '*$1');
+
 const normalizeSqlExpression = (text: string): string => {
   const compact = normalizeSqlWhitespace(text);
   let out = '';
@@ -103,6 +106,17 @@ const normalizeSqlExpression = (text: string): string => {
       quoteChar = ch;
       out += ch;
       continue;
+    }
+
+    if (ch === '*' && /[A-Za-z]/.test(nextNonSpace(i + 1))) {
+      const prev = lastNonSpace();
+      if (prev === '' || prev === '=' || prev === ',' || prev === '(') {
+        out += ch;
+        while (i + 1 < compact.length && compact[i + 1] === ' ') {
+          i++;
+        }
+        continue;
+      }
     }
 
     if (ch === '=' || ch === '+' || ch === '-' || ch === '*' || ch === '>' || ch === '<') {
@@ -415,19 +429,20 @@ const splitSelectClauses = (text: string): string[] => {
   return clauses.filter((clause) => clause.length > 0);
 };
 
+const JOIN_KEYWORDS = [
+  'LEFT OUTER JOIN',
+  'RIGHT OUTER JOIN',
+  'FULL OUTER JOIN',
+  'LEFT JOIN',
+  'RIGHT JOIN',
+  'FULL JOIN',
+  'INNER JOIN',
+  'CROSS JOIN',
+  'JOIN'
+];
+
 const splitJoinSegments = (text: string): { keyword: string; segment: string }[] => {
   const upper = text.toUpperCase();
-  const joinKeywords = [
-    'LEFT OUTER JOIN',
-    'RIGHT OUTER JOIN',
-    'FULL OUTER JOIN',
-    'LEFT JOIN',
-    'RIGHT JOIN',
-    'FULL JOIN',
-    'INNER JOIN',
-    'CROSS JOIN',
-    'JOIN'
-  ];
   const positions: { index: number; keyword: string }[] = [];
   let depth = 0;
 
@@ -442,7 +457,7 @@ const splitJoinSegments = (text: string): { keyword: string; segment: string }[]
     }
     if (depth !== 0) return;
 
-    for (const keyword of joinKeywords) {
+    for (const keyword of JOIN_KEYWORDS) {
       if (!upper.startsWith(keyword, index)) continue;
       const before = index > 0 ? upper[index - 1] : ' ';
       const afterIndex = index + keyword.length;
@@ -469,9 +484,38 @@ const splitJoinSegments = (text: string): { keyword: string; segment: string }[]
   return segments;
 };
 
+const hasJoinKeyword = (text: string): boolean => {
+  const upper = text.toUpperCase();
+  return JOIN_KEYWORDS.some((keyword) => upper.includes(keyword));
+};
+
+const expandJoinSegments = (
+  segments: { keyword: string; segment: string }[]
+): { keyword: string; segment: string }[] => {
+  const expanded: { keyword: string; segment: string }[] = [];
+  for (const segment of segments) {
+    if (!hasJoinKeyword(segment.segment)) {
+      expanded.push(segment);
+      continue;
+    }
+
+    const nested = splitJoinSegments(segment.segment);
+    if (nested.length <= 1) {
+      expanded.push(segment);
+      continue;
+    }
+
+    expanded.push({ keyword: segment.keyword, segment: nested[0].segment });
+    for (let i = 1; i < nested.length; i++) {
+      expanded.push(nested[i]);
+    }
+  }
+  return expanded;
+};
+
 const formatFromClause = (rest: string, baseIndent: string): string[] => {
   const normalizedRest = normalizeSqlIdentifierPath(rest);
-  const segments = splitJoinSegments(normalizedRest);
+  const segments = expandJoinSegments(splitJoinSegments(normalizedRest));
   if (segments.length === 1) {
     return [baseIndent + `from ${normalizeSqlExpression(normalizedRest)}`];
   }
@@ -842,7 +886,13 @@ const formatSet = (text: string, baseIndent: string): string[] => {
   }
   const rest = cleaned.slice(3).trimStart();
   const normalized = normalizeSqlExpression(rest);
-  return [baseIndent + `set ${normalized};`];
+  const restUpper = rest.toUpperCase();
+  const withStarTokens = restUpper.startsWith('OPTION ')
+    || restUpper.startsWith('CURRENT ')
+    || restUpper.startsWith('TRANSACTION ')
+    ? normalizeStarTokens(normalized)
+    : normalized;
+  return [baseIndent + `set ${withStarTokens};`];
 };
 
 const formatCommitRollback = (text: string, baseIndent: string): string[] => {
@@ -956,6 +1006,36 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
       if (action.toUpperCase().startsWith('INSERT')) {
         const insertText = action.slice(6).trimStart();
         const mergeNestedIndent = nestedIndent + baseIndent;
+        if (insertText.startsWith('(')) {
+          const closingIndex = findMatchingParenIndex(insertText, 0);
+          if (closingIndex !== null) {
+            const inner = insertText.slice(1, closingIndex);
+            const columns = splitTopLevel(inner, ',').map(normalizeSqlWhitespace);
+            const remainder = insertText.slice(closingIndex + 1).trimStart();
+            lines.push(nestedIndent + 'insert (');
+            for (let j = 0; j < columns.length; j++) {
+              const suffix = j < columns.length - 1 ? ',' : '';
+              lines.push(mergeNestedIndent + columns[j] + suffix);
+            }
+            lines.push(nestedIndent + ')');
+            if (remainder.length === 0) {
+              lines[lines.length - 1] = lines[lines.length - 1] + ';';
+              continue;
+            }
+            const upperRemainder = remainder.toUpperCase();
+            if (upperRemainder.startsWith('VALUES')) {
+              const valuesText = remainder.slice(6).trimStart();
+              lines.push(...formatValuesRows(valuesText, nestedIndent, mergeNestedIndent));
+              continue;
+            }
+            if (upperRemainder.startsWith('SELECT')) {
+              lines.push(...formatSelect(remainder, nestedIndent, mergeNestedIndent));
+              continue;
+            }
+            lines[lines.length - 1] = lines[lines.length - 1] + ';';
+            continue;
+          }
+        }
         const formatted = formatInsert(`insert ${insertText}`, nestedIndent, mergeNestedIndent);
         for (const line of formatted) {
           lines.push(line);
@@ -1413,7 +1493,10 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   if (upper.startsWith('SET ')) {
     return formatSet(normalized, baseIndent);
   }
-  if (upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK')) {
+  if (
+    upper.startsWith('COMMIT') ||
+    (upper.startsWith('ROLLBACK') && !upper.startsWith('ROLLBACK TO SAVEPOINT'))
+  ) {
     return formatCommitRollback(normalized, baseIndent);
   }
   if (upper.startsWith('MERGE ')) {
@@ -1476,9 +1559,6 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   if (upper.startsWith('DECLARE SECTION') || upper.startsWith('END DECLARE SECTION') || upper.startsWith('INCLUDE ') || upper.startsWith('WHENEVER ')) {
     return formatHostAndConnection(normalized, baseIndent);
   }
-  if (upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK')) {
-    return formatSimpleSqlStatement(normalized, baseIndent);
-  }
   if (upper.startsWith('SAVEPOINT ')) {
     const rest = normalizeSqlWhitespace(normalized.slice(9).trimStart());
     return [baseIndent + `savepoint ${rest};`];
@@ -1490,6 +1570,12 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   if (upper.startsWith('ROLLBACK TO SAVEPOINT')) {
     const rest = normalizeSqlWhitespace(normalized.slice('rollback to savepoint'.length).trimStart());
     return [baseIndent + `rollback to savepoint ${rest};`];
+  }
+  if (
+    upper.startsWith('COMMIT') ||
+    (upper.startsWith('ROLLBACK') && !upper.startsWith('ROLLBACK TO SAVEPOINT'))
+  ) {
+    return formatSimpleSqlStatement(normalized, baseIndent);
   }
 
   const fallback = stripTrailingSemicolon(normalized);

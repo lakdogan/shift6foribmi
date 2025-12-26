@@ -8,7 +8,7 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'set transaction isolation level * cs;'
+    'set transaction isolation level *cs;'
   ]
 };
 

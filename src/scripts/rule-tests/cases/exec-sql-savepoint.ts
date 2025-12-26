@@ -13,7 +13,7 @@ const testCase: Case = {
   ].join('\n'),
   mustInclude: [
     'savepoint S1;',
-    'rollback to savepoint s1;',
+    'rollback to savepoint S1;',
     'release savepoint S1;'
   ]
 };

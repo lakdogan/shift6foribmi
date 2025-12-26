@@ -104,6 +104,13 @@ import execSqlDmlSpecials from './exec-sql-dml-specials';
 import execSqlDiagnosticsSession from './exec-sql-diagnostics-session';
 import execSqlCursorDescriptor from './exec-sql-cursor-descriptor';
 import execSqlFunctions from './exec-sql-functions';
+import execSqlPsmBlocks from './exec-sql-psm-blocks';
+import execSqlTriggerBody from './exec-sql-trigger-body';
+import execSqlWindowFunctions from './exec-sql-window-functions';
+import execSqlSubqueryJoins from './exec-sql-subquery-joins';
+import execSqlJsonXml from './exec-sql-json-xml';
+import execSqlDdlOptions from './exec-sql-ddl-options';
+import execSqlSpecialRegisters from './exec-sql-special-registers';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -210,5 +217,12 @@ export const cases: Case[] = [
   execSqlDmlSpecials,
   execSqlDiagnosticsSession,
   execSqlCursorDescriptor,
-  execSqlFunctions
+  execSqlFunctions,
+  execSqlPsmBlocks,
+  execSqlTriggerBody,
+  execSqlWindowFunctions,
+  execSqlSubqueryJoins,
+  execSqlJsonXml,
+  execSqlDdlOptions,
+  execSqlSpecialRegisters
 ];

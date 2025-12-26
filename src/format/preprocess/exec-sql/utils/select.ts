@@ -63,7 +63,8 @@ export const splitSelectClauses = (text: string): string[] => {
     'WHERE CURRENT OF',
     'FROM',
     'OFFSET',
-    'FETCH'
+    'FETCH',
+    'WITH'
   ];
   const positions: { index: number; keyword: string }[] = [];
   let depth = 0;

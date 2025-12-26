@@ -111,6 +111,18 @@ import execSqlSubqueryJoins from './exec-sql-subquery-joins';
 import execSqlJsonXml from './exec-sql-json-xml';
 import execSqlDdlOptions from './exec-sql-ddl-options';
 import execSqlSpecialRegisters from './exec-sql-special-registers';
+import execSqlCteRecursive from './exec-sql-cte-recursive';
+import execSqlTriggerReferencing from './exec-sql-trigger-referencing';
+import execSqlPsmHandlers from './exec-sql-psm-handlers';
+import execSqlWindowFrame from './exec-sql-window-frame';
+import execSqlJsonTable from './exec-sql-json-table';
+import execSqlXmltableNamespaces from './exec-sql-xmltable-namespaces';
+import execSqlSpecialRegistersExtended from './exec-sql-special-registers-extended';
+import execSqlDdlOptionsExtended from './exec-sql-ddl-options-extended';
+import execSqlMergeAdvanced from './exec-sql-merge-advanced';
+import execSqlUpdateFromSubquery from './exec-sql-update-from-subquery';
+import execSqlDeleteUsingSubselect from './exec-sql-delete-using-subselect';
+import execSqlSetOperationsOrder from './exec-sql-set-operations-order';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -224,5 +236,17 @@ export const cases: Case[] = [
   execSqlSubqueryJoins,
   execSqlJsonXml,
   execSqlDdlOptions,
-  execSqlSpecialRegisters
+  execSqlSpecialRegisters,
+  execSqlCteRecursive,
+  execSqlTriggerReferencing,
+  execSqlPsmHandlers,
+  execSqlWindowFrame,
+  execSqlJsonTable,
+  execSqlXmltableNamespaces,
+  execSqlSpecialRegistersExtended,
+  execSqlDdlOptionsExtended,
+  execSqlMergeAdvanced,
+  execSqlUpdateFromSubquery,
+  execSqlDeleteUsingSubselect,
+  execSqlSetOperationsOrder
 ];

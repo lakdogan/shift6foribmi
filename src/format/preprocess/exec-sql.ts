@@ -506,44 +506,15 @@ const splitJoinSegments = (text: string): { keyword: string; segment: string }[]
     const start = positions[i].index;
     const end = i + 1 < positions.length ? positions[i + 1].index : text.length;
     const keyword = positions[i].keyword;
-    const segment = text.slice(start + keyword.length).trim();
+    const segment = text.slice(start + keyword.length, end).trim();
     segments.push({ keyword, segment });
   }
   return segments;
 };
 
-const hasJoinKeyword = (text: string): boolean => {
-  const upper = text.toUpperCase();
-  return JOIN_KEYWORDS.some((keyword) => upper.includes(keyword));
-};
-
-const expandJoinSegments = (
-  segments: { keyword: string; segment: string }[]
-): { keyword: string; segment: string }[] => {
-  const expanded: { keyword: string; segment: string }[] = [];
-  for (const segment of segments) {
-    if (!hasJoinKeyword(segment.segment)) {
-      expanded.push(segment);
-      continue;
-    }
-
-    const nested = splitJoinSegments(segment.segment);
-    if (nested.length <= 1) {
-      expanded.push(segment);
-      continue;
-    }
-
-    expanded.push({ keyword: segment.keyword, segment: nested[0].segment });
-    for (let i = 1; i < nested.length; i++) {
-      expanded.push(nested[i]);
-    }
-  }
-  return expanded;
-};
-
 const formatFromClause = (rest: string, baseIndent: string): string[] => {
   const normalizedRest = normalizeSqlIdentifierPath(rest);
-  const segments = expandJoinSegments(splitJoinSegments(normalizedRest));
+  const segments = splitJoinSegments(normalizedRest);
   if (segments.length === 1) {
     return [baseIndent + `from ${normalizeSqlExpression(normalizedRest)}`];
   }

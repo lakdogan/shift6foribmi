@@ -4,5 +4,6 @@ export interface Case {
   name: string;
   input: string;
   mustInclude: string[];
+  mustExclude?: string[];
   config?: Shift6ConfigInput;
 }

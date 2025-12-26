@@ -31,12 +31,24 @@ function assertIncludes(name: string, output: string, expected: string): void {
   }
 }
 
+// Assert that formatted output does not contain a forbidden substring.
+function assertExcludes(name: string, output: string, forbidden: string): void {
+  if (output.includes(forbidden)) {
+    throw new Error(`Case "${name}" expected to exclude "${forbidden}"`);
+  }
+}
+
 let failed = false;
 for (const testCase of cases) {
   try {
     const output = runCase(testCase);
     for (const expected of testCase.mustInclude) {
       assertIncludes(testCase.name, output, expected);
+    }
+    if (testCase.mustExclude) {
+      for (const forbidden of testCase.mustExclude) {
+        assertExcludes(testCase.name, output, forbidden);
+      }
     }
   } catch (error) {
     failed = true;

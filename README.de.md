@@ -28,6 +28,8 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
   - *Mehrwert:* Direkt auf dem Host formatieren, ohne den Member herunterladen zu muessen.
 - **Whitespace-Normalisierung:** Mehrfach-Spaces zwischen Tokens werden auf eines reduziert (z.B. `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) und Spaces in string-only Klammern werden getrimmt `(   'error'  )` -> `('error')`.  
   - *Mehrwert:* Konsistente Lesbarkeit und kleinere Diffs, ohne String-Inhalte anzutasten.
+- **Exec SQL Formatierung:** Strukturierte Layouts fuer `exec sql` Bloecke (DML/DDL, Cursor, Dynamic SQL, Diagnostics, DB2-i Hints, PSM/Trigger Bodies).
+  - *Mehrwert:* Gut lesbares Embedded SQL ohne RPG-Struktur zu zerstoeren.
 
 **B. Einstellungen**
 
@@ -73,6 +75,7 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 > **Green-Screen-Lesbarkeit:** Falls ohne VS Code am Green Screen nachgebessert wird, bleibt der Code dank 6-Spaces-Offset lesbar (erste 5 Spalten sind dort ausgeblendet).
 
 > **Schnelle Rule-Checks:** `npm run test:rules` fuer einen schnellen Sanity-Check der Kernregeln.
+> **Exec SQL Scope:** Siehe `docs/exec-sql-scope.md` fuer die komplette Abdeckung.
 
 ---
 

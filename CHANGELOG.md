@@ -29,6 +29,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added exec sql test coverage for JSON/XML functions and XMLTABLE usage.
 - Added exec sql test coverage for DB2-i DDL options (RCDFMT/CCSID/for system name).
 - Added exec sql test coverage for special registers (SET CURRENT ... / CURRENT ...).
+- Formatted PSM and trigger bodies as structured BEGIN/END blocks with nested statements.
+- Ensured exec sql preprocessing uses the latest utils index after modularization.
+- Added exec sql edge-case tests for recursive CTEs, handler blocks, window frames, JSON_TABLE/XMLTABLE namespaces, merge/update/delete subselects, set-operation ordering, and extended special registers/DDL options.
 
 ## [0.1.20] - 2025-12-25
 - Modularized continuation handling into core/support submodules with smaller focused helpers.

@@ -2,6 +2,7 @@ Formatting Architecture
 
 Overview
 - src/format/preprocess: line splitting and normalization before formatting.
+- src/format/preprocess/exec-sql: embedded SQL normalization and statement formatting.
 - src/format/format-core: core formatter logic and layout decisions.
 - src/format/continuations: wrapping and continuation line handling.
 - src/format/operators: operator spacing, token normalization, and related helpers.

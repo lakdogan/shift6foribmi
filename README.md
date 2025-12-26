@@ -33,6 +33,8 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
     -   *Developer Value:* **Remote-first Ready:** Format members directly on the host without downloading to the workstation.
 -   **Whitespace Normalization:** Collapses multiple spaces between tokens to one (e.g., `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) and trims spaces inside string-only parentheses `(   'error'  )` -> `('error')`.
     -   *Developer Value:* **Cleaner Diffs:** Consistent spacing without touching string contents preserves readability and minimizes churn.
+-   **Exec SQL Formatting:** Structured layout for `exec sql` blocks (DML/DDL, cursors, dynamic SQL, diagnostics, DB2-i hints, and PSM/trigger bodies).
+    -   *Developer Value:* **Readable SQL:** Keeps complex embedded SQL readable without breaking RPG structure.
 
 **B. Settings**
 
@@ -86,6 +88,7 @@ To ensure optimal use of this extension, developers must adhere to the following
 > **Green Screen Readability:** If you need to fix code manually on the green screen (without VS Code access), the 6-space offset preserves readability because the first 5 columns are not shown there. The formatter ensures the source stays legible in that environment.
 
 > **Quick Rule Checks:** Run `npm run test:rules` for a fast sanity check of core formatting rules.
+> **Exec SQL Scope:** See `docs/exec-sql-scope.md` for the full statement coverage target.
 
 ---
 

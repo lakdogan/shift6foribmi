@@ -9,6 +9,12 @@ This file defines the full statement coverage target for exec sql formatting.
 - DELETE
 - MERGE
 
+## DDL & Schema
+- CREATE/ALTER/DROP TABLE, VIEW, INDEX, SEQUENCE, ALIAS
+- CREATE/ALTER PROCEDURE/FUNCTION (BEGIN/END bodies)
+- CREATE/DROP TRIGGER (BEGIN/END bodies)
+- DECLARE GLOBAL TEMPORARY TABLE
+
 ## Cursor
 - DECLARE CURSOR
 - OPEN
@@ -23,6 +29,7 @@ This file defines the full statement coverage target for exec sql formatting.
 ## Transaction
 - COMMIT
 - ROLLBACK
+- SAVEPOINT / RELEASE SAVEPOINT / ROLLBACK TO SAVEPOINT
 
 ## Prepare / Dynamic
 - PREPARE
@@ -37,6 +44,7 @@ This file defines the full statement coverage target for exec sql formatting.
 - SET CONNECTION
 - DISCONNECT
 - RELEASE
+- SET SESSION / SET CURRENT options
 
 ## Precompile / Host
 - DECLARE SECTION
@@ -45,7 +53,22 @@ This file defines the full statement coverage target for exec sql formatting.
 
 ## SQL Clauses / Combinators
 - WITH (CTE)
+- WITH RECURSIVE
 - UNION / UNION ALL
 - INTERSECT
 - EXCEPT
 - VALUES (table)
+- GROUP BY / ROLLUP / CUBE
+- ORDER BY / OFFSET / FETCH
+- FOR UPDATE / FOR READ ONLY / FOR FETCH ONLY
+- WINDOW / OVER (PARTITION BY ...)
+
+## DB2-i Clauses & Special Registers
+- WITH UR/CS/RS/NC (isolation hints)
+- SET CURRENT PATH/SCHEMA/DEGREE/ISOLATION
+- CURRENT DATE/TIME/TIMESTAMP, CURRENT CLIENT_* registers
+
+## Expressions & Functions
+- CASE (searched/simple), COALESCE, NULLIF
+- EXISTS/IN/ANY/ALL subqueries
+- LISTAGG/XMLAGG, JSON_OBJECT/JSON_ARRAY/JSON_TABLE, XMLTABLE

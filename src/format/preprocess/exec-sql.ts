@@ -102,13 +102,20 @@ const normalizeSqlExpression = (text: string): string => {
       continue;
     }
 
-    if (ch === '=' || ch === '+' || ch === '-' || ch === '*') {
+    if (ch === '=' || ch === '+' || ch === '-' || ch === '*' || ch === '>' || ch === '<') {
       const prev = lastNonSpace();
       const next = nextNonSpace(i + 1);
       const nextIsSpace = compact[i + 1] === ' ';
       if (
         ch === '=' &&
         (prev === '<' || prev === '>' || prev === '!' || prev === '=' || next === '=')
+      ) {
+        out += ch;
+        continue;
+      }
+      if (
+        (ch === '>' || ch === '<') &&
+        (next === '=')
       ) {
         out += ch;
         continue;
@@ -353,6 +360,55 @@ const splitSetOperations = (text: string): string[] => {
   return parts.filter((part) => part.length > 0);
 };
 
+const splitSelectClauses = (text: string): string[] => {
+  const upper = text.toUpperCase();
+  const keywords = [
+    'FOR UPDATE',
+    'GROUP BY',
+    'ORDER BY',
+    'HAVING',
+    'WHERE',
+    'FROM',
+    'OFFSET',
+    'FETCH'
+  ];
+  const positions: { index: number; keyword: string }[] = [];
+  let depth = 0;
+
+  scanStringAware(text, (ch, index) => {
+    if (ch === '(') {
+      depth++;
+      return;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      return;
+    }
+    if (depth !== 0) return;
+
+    for (const keyword of keywords) {
+      if (!upper.startsWith(keyword, index)) continue;
+      const before = index > 0 ? upper[index - 1] : ' ';
+      const afterIndex = index + keyword.length;
+      const after = afterIndex < upper.length ? upper[afterIndex] : ' ';
+      if (/[A-Z0-9_]/.test(before) || /[A-Z0-9_]/.test(after)) continue;
+      positions.push({ index, keyword });
+      return;
+    }
+  });
+
+  positions.sort((a, b) => a.index - b.index);
+  if (positions.length === 0) return [text.trim()];
+
+  const clauses: string[] = [];
+  for (let i = 0; i < positions.length; i++) {
+    const start = positions[i].index;
+    const end = i + 1 < positions.length ? positions[i + 1].index : text.length;
+    clauses.push(text.slice(start, end).trim());
+  }
+  return clauses.filter((clause) => clause.length > 0);
+};
+
 const formatSelect = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -449,23 +505,50 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
     return lines;
   }
 
-  const clauses = remainder.split(/\b(?=FROM|WHERE|FETCH)\b/i).map((part) => part.trim());
-  const visibleClauses = clauses.filter((clause) => clause.length > 0);
-  for (let i = 0; i < visibleClauses.length; i++) {
-    const clause = normalizeSqlWhitespace(visibleClauses[i]);
-    const match = clause.match(/^(FROM|WHERE|FETCH)\b/i);
+  const clauses = splitSelectClauses(remainder);
+  for (let i = 0; i < clauses.length; i++) {
+    const clause = normalizeSqlWhitespace(clauses[i]);
+    const match = clause.match(/^(FROM|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE)\b/i);
     if (!match) continue;
     const keyword = match[1].toLowerCase();
     const rest = clause.slice(match[0].length).trimStart();
-    const normalizedRest =
-      keyword === 'fetch'
-        ? normalizeSqlWhitespace(rest).toLowerCase()
-        : keyword === 'where'
-          ? normalizeSqlExpression(rest)
-          : normalizeSqlWhitespace(rest);
-    const isLast = i === visibleClauses.length - 1;
+    const isLast = i === clauses.length - 1;
     const suffix = isLast ? ';' : '';
-    lines.push(baseIndent + [keyword, normalizedRest].filter(Boolean).join(' ') + suffix);
+
+    if (keyword === 'group by' || keyword === 'order by') {
+      const items = splitTopLevel(rest, ',').map(normalizeSqlExpression);
+      lines.push(baseIndent + keyword);
+      for (let j = 0; j < items.length; j++) {
+        const itemSuffix = j < items.length - 1 ? ',' : '';
+        lines.push(nestedIndent + items[j] + itemSuffix);
+      }
+      if (isLast) {
+        lines[lines.length - 1] = lines[lines.length - 1] + ';';
+      }
+      continue;
+    }
+
+    if (keyword === 'where' || keyword === 'having') {
+      lines.push(baseIndent + ` ${keyword} ${normalizeSqlExpression(rest)}`.trim() + suffix);
+      continue;
+    }
+
+    if (keyword === 'fetch') {
+      lines.push(baseIndent + `fetch ${normalizeSqlWhitespace(rest).toLowerCase()}` + suffix);
+      continue;
+    }
+
+    if (keyword === 'offset') {
+      lines.push(baseIndent + `offset ${normalizeSqlWhitespace(rest).toLowerCase()}` + suffix);
+      continue;
+    }
+
+    if (keyword === 'for update') {
+      lines.push(baseIndent + 'for update' + (rest ? ` ${normalizeSqlWhitespace(rest)}` : '') + suffix);
+      continue;
+    }
+
+    lines.push(baseIndent + [keyword, normalizeSqlExpression(rest)].filter(Boolean).join(' ') + suffix);
   }
 
   return lines;

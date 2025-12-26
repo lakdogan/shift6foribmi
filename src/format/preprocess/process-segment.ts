@@ -35,6 +35,17 @@ export const processSegment = (
   const producedLines: string[] = [];
   let splitOccurred = false;
 
+  if (ctx.execSqlDepth > 0 || flags.isExecSqlStart) {
+    producedLines.push(seg);
+    const updatedCtx = updateContextAfterLine(nextCtx, flags);
+    return {
+      producedLines,
+      splitOccurred,
+      ctx: updatedCtx,
+      continuationState
+    };
+  }
+
   const handled = handleContinuationSegment(
     seg,
     lineIndex,

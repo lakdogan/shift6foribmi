@@ -970,6 +970,20 @@ const formatPrepareExecute = (
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
 
+  const formatUsingBlock = (argsText: string): string[] => {
+    const normalized = normalizeSqlWhitespace(argsText);
+    if (normalized.toUpperCase().startsWith('DESCRIPTOR')) {
+      return [nestedIndent + normalized + ';'];
+    }
+    const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
+    const lines: string[] = [];
+    for (let i = 0; i < args.length; i++) {
+      const suffix = i < args.length - 1 ? ',' : ';';
+      lines.push(nestedIndent + args[i] + suffix);
+    }
+    return lines;
+  };
+
   if (upper.startsWith('PREPARE ')) {
     const rest = cleaned.slice(7).trimStart();
     const fromIndex = findKeywordIndex(rest, 'FROM');
@@ -1010,12 +1024,8 @@ const formatPrepareExecute = (
     }
     if (usingIndex >= 0) {
       const argsText = rest.slice(usingIndex + 5).trimStart();
-      const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
       lines.push(baseIndent + 'using');
-      for (let i = 0; i < args.length; i++) {
-        const suffix = i < args.length - 1 ? ',' : ';';
-        lines.push(nestedIndent + args[i] + suffix);
-      }
+      lines.push(...formatUsingBlock(argsText));
       return lines;
     }
     lines[lines.length - 1] = lines[lines.length - 1] + ';';
@@ -1046,12 +1056,8 @@ const formatPrepareExecute = (
 
     if (usingIndex >= 0) {
       const argsText = rest.slice(usingIndex + 5).trimStart();
-      const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
       lines.push(baseIndent + 'using');
-      for (let i = 0; i < args.length; i++) {
-        const suffix = i < args.length - 1 ? ',' : ';';
-        lines.push(nestedIndent + args[i] + suffix);
-      }
+      lines.push(...formatUsingBlock(argsText));
       return lines;
     }
 

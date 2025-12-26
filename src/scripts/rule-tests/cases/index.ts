@@ -62,6 +62,7 @@ import execSqlSetOption from './exec-sql-set-option';
 import execSqlOpenUsing from './exec-sql-open-using';
 import execSqlExecuteInto from './exec-sql-execute-into';
 import execSqlSelectInto from './exec-sql-select-into';
+import execSqlJoins from './exec-sql-joins';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -126,5 +127,6 @@ export const cases: Case[] = [
   execSqlSetOption,
   execSqlOpenUsing,
   execSqlExecuteInto,
-  execSqlSelectInto
+  execSqlSelectInto,
+  execSqlJoins
 ];

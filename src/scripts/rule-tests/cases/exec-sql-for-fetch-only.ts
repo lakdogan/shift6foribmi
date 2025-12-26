@@ -11,7 +11,7 @@ const testCase: Case = {
     'select',
     'ID',
     'from SALES/CUSTOMER',
-    'for fetch only;'
+    'fetch only;'
   ]
 };
 

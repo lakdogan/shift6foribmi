@@ -473,13 +473,25 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
   })();
 
   const columnsText = fromIndex >= 0 ? afterSelect.slice(0, fromIndex).trim() : afterSelect.trim();
+  const intoIndex = findKeywordIndex(columnsText, 'INTO');
+  const selectColumnsText =
+    intoIndex >= 0 ? columnsText.slice(0, intoIndex).trim() : columnsText;
+  const intoText = intoIndex >= 0 ? columnsText.slice(intoIndex + 4).trimStart() : '';
   const remainder = fromIndex >= 0 ? afterSelect.slice(fromIndex).trim() : '';
 
-  const columns = splitTopLevel(columnsText, ',').map(normalizeSqlExpression);
+  const columns = splitTopLevel(selectColumnsText, ',').map(normalizeSqlExpression);
   const lines = [baseIndent + (distinct ? 'select distinct' : 'select')];
   for (let i = 0; i < columns.length; i++) {
     const suffix = i < columns.length - 1 ? ',' : '';
     lines.push(nestedIndent + columns[i] + suffix);
+  }
+  if (intoText.length > 0) {
+    const targets = splitTopLevel(intoText, ',').map(normalizeSqlExpression);
+    lines.push(baseIndent + 'into');
+    for (let i = 0; i < targets.length; i++) {
+      const suffix = i < targets.length - 1 ? ',' : '';
+      lines.push(nestedIndent + targets[i] + suffix);
+    }
   }
 
   if (remainder.length === 0) {

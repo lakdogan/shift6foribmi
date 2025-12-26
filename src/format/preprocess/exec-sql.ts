@@ -922,11 +922,11 @@ const formatOpenCloseFetch = (
     if (intoIndex < 0) {
       return [baseIndent + `fetch ${normalizeSqlWhitespace(rest)};`];
     }
-    const cursorName = rest.slice(0, intoIndex).trim();
+    const fetchSpec = rest.slice(0, intoIndex).trim();
     const intoText = rest.slice(intoIndex + 4).trimStart();
     const targets = splitTopLevel(intoText, ',').map(normalizeSqlExpression);
     const lines: string[] = [];
-    lines.push(baseIndent + `fetch ${cursorName}`);
+    lines.push(baseIndent + `fetch ${normalizeSqlWhitespace(fetchSpec)}`);
     lines.push(baseIndent + 'into');
     for (let i = 0; i < targets.length; i++) {
       const suffix = i < targets.length - 1 ? ',' : ';';

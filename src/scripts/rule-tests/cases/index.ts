@@ -28,6 +28,7 @@ import booleanAssignmentWrap from './boolean-assignment-wrap';
 import avoidSplitInsideParens from './avoid-split-inside-parens';
 import execSqlFormatting from './exec-sql-formatting';
 import execSqlUpdateDelete from './exec-sql-update-delete';
+import execSqlCallSetCommit from './exec-sql-call-set-commit';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -58,5 +59,6 @@ export const cases: Case[] = [
   booleanAssignmentWrap,
   avoidSplitInsideParens,
   execSqlFormatting,
-  execSqlUpdateDelete
+  execSqlUpdateDelete,
+  execSqlCallSetCommit
 ];

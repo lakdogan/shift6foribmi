@@ -402,6 +402,59 @@ const formatDelete = (text: string, baseIndent: string): string[] => {
   return lines;
 };
 
+const formatCall = (text: string, baseIndent: string, nestedIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  const callMatch = upper.match(/^CALL\s+/);
+  if (!callMatch) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const rest = cleaned.slice(callMatch[0].length).trimStart();
+  const parenIndex = rest.indexOf('(');
+  if (parenIndex < 0) {
+    return [baseIndent + `call ${rest};`];
+  }
+
+  const procName = rest.slice(0, parenIndex).trim();
+  const closingIndex = findMatchingParenIndex(rest, parenIndex);
+  if (!procName || closingIndex === null) {
+    return [baseIndent + `call ${rest};`];
+  }
+
+  const argsText = rest.slice(parenIndex + 1, closingIndex);
+  const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
+  const lines: string[] = [];
+  lines.push(baseIndent + `call ${procName}(`);
+  for (let i = 0; i < args.length; i++) {
+    const suffix = i < args.length - 1 ? ',' : '';
+    lines.push(nestedIndent + args[i] + suffix);
+  }
+  lines.push(baseIndent + ');');
+  return lines;
+};
+
+const formatSet = (text: string, baseIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  if (!upper.startsWith('SET ')) {
+    return [baseIndent + cleaned + ';'];
+  }
+  const rest = cleaned.slice(3).trimStart();
+  const normalized = normalizeSqlExpression(rest);
+  return [baseIndent + `set ${normalized};`];
+};
+
+const formatCommitRollback = (text: string, baseIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  if (!(upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK'))) {
+    return [baseIndent + cleaned + ';'];
+  }
+  const normalized = normalizeSqlWhitespace(cleaned).toLowerCase();
+  return [baseIndent + `${normalized};`];
+};
+
 const formatInsert = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -485,6 +538,15 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   }
   if (upper.startsWith('DELETE ')) {
     return formatDelete(normalized, baseIndent);
+  }
+  if (upper.startsWith('CALL ')) {
+    return formatCall(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('SET ')) {
+    return formatSet(normalized, baseIndent);
+  }
+  if (upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK')) {
+    return formatCommitRollback(normalized, baseIndent);
   }
   if (upper.startsWith('GET DIAGNOSTICS')) {
     const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());

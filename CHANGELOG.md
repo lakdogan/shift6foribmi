@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Expanded exec sql coverage: UPDATE/DELETE/MERGE (incl. conditions), SELECT clauses (JOIN/GROUP/HAVING/ORDER/OFFSET/FETCH/READ/UPDATE), VALUES INTO, cursor workflows, dynamic SQL (PREPARE/EXECUTE/EXECUTE IMMEDIATE with INTO/USING), host/connection/session/transaction commands, and lock table.
 - Added bundled rule-test blocks for dynamic SQL, DML edge cases, SELECT edge cases, session/transaction, cursor flows, and host/connection commands.
 - Added exec sql block formatting with structured SQL layout and preserved Shift6 indentation.
+- Fixed JOIN parsing to avoid duplicate JOIN segments on repeated formatting runs.
+- Kept star-prefixed SQL options intact (e.g., `*cs`, `*endmod`) and preserved savepoint case.
+- Added rule-test support for negative assertions (`mustExclude`) and a join-dedup case.
+- Modularized exec sql formatter into small utils and per-statement formatters with a dispatcher.
+- Added function header comments across exec sql modules for maintainability.
 
 ## [0.1.20] - 2025-12-25
 - Modularized continuation handling into core/support submodules with smaller focused helpers.

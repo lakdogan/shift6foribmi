@@ -10,6 +10,7 @@ import { formatPrepareExecute } from './prepare';
 import { formatDeclareCursor, formatOpenCloseFetch } from './cursor';
 import { formatHostAndConnection } from './host';
 import { formatValuesStatement } from './values';
+import { formatDdlStatement } from './ddl';
 
 // Dispatch SQL statements to the correct formatter.
 export const formatSqlStatement = (text: string, indentStep: number): string[] => {
@@ -83,6 +84,14 @@ export const formatSqlStatement = (text: string, indentStep: number): string[] =
   }
   if (upper.startsWith('VALUES')) {
     return formatValuesStatement(normalized, baseIndent, nestedIndent);
+  }
+  if (
+    upper.startsWith('CREATE ') ||
+    upper.startsWith('ALTER ') ||
+    upper.startsWith('DROP ') ||
+    upper.startsWith('DECLARE GLOBAL TEMPORARY TABLE')
+  ) {
+    return formatDdlStatement(normalized, baseIndent);
   }
   if (upper.startsWith('SAVEPOINT ')) {
     const rest = normalizeSqlWhitespace(normalized.slice(9).trimStart());

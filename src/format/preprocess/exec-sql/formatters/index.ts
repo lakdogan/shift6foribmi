@@ -1,7 +1,8 @@
 import {
   normalizeSqlWhitespace,
   normalizeSqlExpression,
-  stripTrailingSemicolon
+  stripTrailingSemicolon,
+  splitTopLevel
 } from '../utils';
 import { formatSelect } from './select';
 import { formatInsert, formatUpdate, formatDelete, formatMerge } from './dml';
@@ -83,8 +84,19 @@ export const formatSqlStatement = (text: string, indentStep: number): string[] =
     return formatAllocateDescribe(normalized, baseIndent);
   }
   if (upper.startsWith('GET DIAGNOSTICS')) {
-    const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());
-    return [baseIndent + `get diagnostics ${rest};`.trim()];
+    const rest = normalized.slice('get diagnostics'.length).trimStart();
+    const assignments = splitTopLevel(rest, ',').map(normalizeSqlExpression);
+    if (assignments.length <= 1) {
+      const single = assignments.length === 1 ? assignments[0] : normalizeSqlExpression(rest);
+      return [baseIndent + `get diagnostics ${single};`.trim()];
+    }
+    const lines: string[] = [];
+    lines.push(baseIndent + 'get diagnostics');
+    for (let i = 0; i < assignments.length; i++) {
+      const suffix = i < assignments.length - 1 ? ',' : ';';
+      lines.push(nestedIndent + assignments[i] + suffix);
+    }
+    return lines;
   }
   if (upper.startsWith('VALUES')) {
     return formatValuesStatement(normalized, baseIndent, nestedIndent);

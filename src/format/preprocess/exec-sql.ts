@@ -305,6 +305,54 @@ const parseWithClauses = (
   return { ctes, remainder: '' };
 };
 
+const splitSetOperations = (text: string): string[] => {
+  const upper = text.toUpperCase();
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+
+  scanStringAware(text, (ch, index) => {
+    if (ch === '(') {
+      depth++;
+      return;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      return;
+    }
+    if (depth !== 0) return;
+
+    if (upper.startsWith('UNION ALL', index)) {
+      parts.push(text.slice(start, index).trim());
+      parts.push('UNION ALL');
+      start = index + 9;
+      return;
+    }
+    if (upper.startsWith('UNION', index)) {
+      parts.push(text.slice(start, index).trim());
+      parts.push('UNION');
+      start = index + 5;
+      return;
+    }
+    if (upper.startsWith('INTERSECT', index)) {
+      parts.push(text.slice(start, index).trim());
+      parts.push('INTERSECT');
+      start = index + 9;
+      return;
+    }
+    if (upper.startsWith('EXCEPT', index)) {
+      parts.push(text.slice(start, index).trim());
+      parts.push('EXCEPT');
+      start = index + 6;
+      return;
+    }
+  });
+
+  const tail = text.slice(start).trim();
+  if (tail.length > 0) parts.push(tail);
+  return parts.filter((part) => part.length > 0);
+};
+
 const formatSelect = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -383,11 +431,29 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
     return lines;
   }
 
-  const clauses = remainder.split(/\b(?=FROM|WHERE|FETCH|UNION|INTERSECT|EXCEPT)\b/i).map((part) => part.trim());
+  const setParts = splitSetOperations(remainder);
+  if (setParts.length > 1) {
+    for (let i = 0; i < setParts.length; i++) {
+      const part = setParts[i];
+      const upperPart = part.toUpperCase();
+      if (upperPart === 'UNION' || upperPart === 'UNION ALL' || upperPart === 'INTERSECT' || upperPart === 'EXCEPT') {
+        lines.push(baseIndent + part.toLowerCase());
+        continue;
+      }
+      const sub = formatSelect(part, baseIndent, nestedIndent);
+      if (i < setParts.length - 1) {
+        trimTrailingSemicolon(sub);
+      }
+      lines.push(...sub);
+    }
+    return lines;
+  }
+
+  const clauses = remainder.split(/\b(?=FROM|WHERE|FETCH)\b/i).map((part) => part.trim());
   const visibleClauses = clauses.filter((clause) => clause.length > 0);
   for (let i = 0; i < visibleClauses.length; i++) {
     const clause = normalizeSqlWhitespace(visibleClauses[i]);
-    const match = clause.match(/^(FROM|WHERE|FETCH|UNION|INTERSECT|EXCEPT)\b/i);
+    const match = clause.match(/^(FROM|WHERE|FETCH)\b/i);
     if (!match) continue;
     const keyword = match[1].toLowerCase();
     const rest = clause.slice(match[0].length).trimStart();
@@ -398,7 +464,7 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
           ? normalizeSqlExpression(rest)
           : normalizeSqlWhitespace(rest);
     const isLast = i === visibleClauses.length - 1;
-    const suffix = isLast && !['union', 'intersect', 'except'].includes(keyword) ? ';' : '';
+    const suffix = isLast ? ';' : '';
     lines.push(baseIndent + [keyword, normalizedRest].filter(Boolean).join(' ') + suffix);
   }
 

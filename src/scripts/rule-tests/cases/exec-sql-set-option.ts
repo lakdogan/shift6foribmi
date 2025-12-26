@@ -8,7 +8,7 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'set option commit = * cs, closqlcsr = * endmod;'
+    'set option commit = *cs, closqlcsr = *endmod;'
   ]
 };
 

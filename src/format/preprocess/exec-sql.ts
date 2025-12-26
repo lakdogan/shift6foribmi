@@ -813,7 +813,7 @@ const formatHostAndConnection = (text: string, baseIndent: string): string[] => 
   }
   if (upper.startsWith('CONNECT ')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());
-    return [baseIndent + `connect ${rest.toLowerCase()};`];
+    return [baseIndent + `connect ${rest};`];
   }
   if (upper.startsWith('SET CONNECTION')) {
     const rest = normalizeSqlWhitespace(cleaned.slice('set connection'.length).trimStart());
@@ -821,11 +821,11 @@ const formatHostAndConnection = (text: string, baseIndent: string): string[] => 
   }
   if (upper.startsWith('DISCONNECT ')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(10).trimStart());
-    return [baseIndent + `disconnect ${rest.toLowerCase()};`];
+    return [baseIndent + `disconnect ${rest};`];
   }
   if (upper.startsWith('RELEASE')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());
-    return [baseIndent + `release${rest ? ` ${rest.toLowerCase()}` : ''};`];
+    return [baseIndent + `release${rest ? ` ${rest}` : ''};`];
   }
 
   return [baseIndent + cleaned + ';'];

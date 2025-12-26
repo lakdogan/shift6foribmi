@@ -65,6 +65,7 @@ import execSqlSelectInto from './exec-sql-select-into';
 import execSqlJoins from './exec-sql-joins';
 import execSqlOrderByNulls from './exec-sql-order-by-nulls';
 import execSqlMergeConditions from './exec-sql-merge-conditions';
+import execSqlGroupByRollup from './exec-sql-group-by-rollup';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -132,5 +133,6 @@ export const cases: Case[] = [
   execSqlSelectInto,
   execSqlJoins,
   execSqlOrderByNulls,
-  execSqlMergeConditions
+  execSqlMergeConditions,
+  execSqlGroupByRollup
 ];

@@ -53,6 +53,7 @@ import execSqlOffsetFetch from './exec-sql-offset-fetch';
 import execSqlForUpdateOf from './exec-sql-for-update-of';
 import execSqlSetCurrent from './exec-sql-set-current';
 import execSqlDescribeInputOutput from './exec-sql-describe-input-output';
+import execSqlFetchRowset from './exec-sql-fetch-rowset';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -108,5 +109,6 @@ export const cases: Case[] = [
   execSqlOffsetFetch,
   execSqlForUpdateOf,
   execSqlSetCurrent,
-  execSqlDescribeInputOutput
+  execSqlDescribeInputOutput,
+  execSqlFetchRowset
 ];

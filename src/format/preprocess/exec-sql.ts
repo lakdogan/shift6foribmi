@@ -1183,6 +1183,10 @@ const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
     const rest = normalizeSqlWhitespace(cleaned.slice('lock table'.length).trimStart());
     return [baseIndent + `lock table ${rest};`];
   }
+  if (upper.startsWith('SET SESSION')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice('set session'.length).trimStart());
+    return [baseIndent + `set session ${rest};`];
+  }
   if (upper.startsWith('SET TRANSACTION')) {
     const rest = normalizeSqlWhitespace(cleaned.slice('set transaction'.length).trimStart());
     return [baseIndent + `set transaction ${rest};`];

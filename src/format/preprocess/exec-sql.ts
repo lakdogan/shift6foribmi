@@ -1123,7 +1123,8 @@ const formatHostAndConnection = (text: string, baseIndent: string): string[] => 
     return [baseIndent + `connect ${rest};`];
   }
   if (upper.startsWith('SET CURRENT')) {
-    const rest = normalizeSqlWhitespace(cleaned.slice('set current'.length).trimStart());
+    const rest = normalizeSqlWhitespace(cleaned.slice('set current'.length).trimStart())
+      .replace(/\*\s+([A-Z0-9_]+)/gi, '*$1');
     return [baseIndent + `set current ${rest};`];
   }
   if (upper.startsWith('SET OPTION')) {

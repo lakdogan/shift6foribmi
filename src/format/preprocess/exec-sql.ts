@@ -969,6 +969,9 @@ const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
     const rest = normalizeSqlWhitespace(cleaned.slice(11).trimStart());
     return [baseIndent + `deallocate ${rest.toLowerCase()};`];
   }
+  if (upper.startsWith('PREPARE ') || upper.startsWith('EXECUTE ') || upper.startsWith('EXECUTE IMMEDIATE')) {
+    return formatPrepareExecute(cleaned, baseIndent, ' '.repeat(baseIndent.length * 2));
+  }
 
   return [baseIndent + cleaned + ';'];
 };

@@ -678,7 +678,7 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
       continue;
     }
     if (keyword === 'for fetch only') {
-      lines.push(baseIndent + 'for fetch only' + suffix);
+      lines.push(baseIndent + 'fetch only' + suffix);
       continue;
     }
 

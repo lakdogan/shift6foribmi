@@ -1013,9 +1013,12 @@ const formatValuesStatement = (
     return [baseIndent + cleaned + ';'];
   }
   const valuesText = cleaned.slice(6).trimStart();
-  const rows = splitTopLevel(valuesText, ',');
+  const intoIndex = findKeywordIndex(valuesText, 'INTO');
+  const valuesPart = intoIndex >= 0 ? valuesText.slice(0, intoIndex).trim() : valuesText;
+  const intoPart = intoIndex >= 0 ? valuesText.slice(intoIndex + 4).trimStart() : '';
+  const rows = splitTopLevel(valuesPart, ',');
   if (rows.length <= 1) {
-    const row = rows.length === 1 ? rows[0] : valuesText;
+    const row = rows.length === 1 ? rows[0] : valuesPart;
     const inner = row.startsWith('(') && row.endsWith(')')
       ? row.slice(1, -1)
       : row;
@@ -1024,6 +1027,16 @@ const formatValuesStatement = (
     for (let i = 0; i < items.length; i++) {
       const suffix = i < items.length - 1 ? ',' : '';
       lines.push(nestedIndent + items[i] + suffix);
+    }
+    if (intoPart.length > 0) {
+      lines.push(baseIndent + ')');
+      lines.push(baseIndent + 'into');
+      const targets = splitTopLevel(intoPart, ',').map(normalizeSqlExpression);
+      for (let i = 0; i < targets.length; i++) {
+        const suffix = i < targets.length - 1 ? ',' : ';';
+        lines.push(nestedIndent + targets[i] + suffix);
+      }
+      return lines;
     }
     lines.push(baseIndent + ');');
     return lines;

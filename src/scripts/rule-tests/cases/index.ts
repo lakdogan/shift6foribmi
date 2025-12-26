@@ -51,6 +51,7 @@ import execSqlTransactionVariants from './exec-sql-transaction-variants';
 import execSqlPrepareVariants from './exec-sql-prepare-variants';
 import execSqlOffsetFetch from './exec-sql-offset-fetch';
 import execSqlForUpdateOf from './exec-sql-for-update-of';
+import execSqlSetCurrent from './exec-sql-set-current';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -104,5 +105,6 @@ export const cases: Case[] = [
   execSqlTransactionVariants,
   execSqlPrepareVariants,
   execSqlOffsetFetch,
-  execSqlForUpdateOf
+  execSqlForUpdateOf,
+  execSqlSetCurrent
 ];

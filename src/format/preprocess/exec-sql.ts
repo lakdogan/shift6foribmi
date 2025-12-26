@@ -263,9 +263,82 @@ const formatValuesRows = (
   return lines;
 };
 
+const trimTrailingSemicolon = (lines: string[]): string[] => {
+  if (lines.length === 0) return lines;
+  const last = lines[lines.length - 1];
+  if (last.endsWith(';')) {
+    lines[lines.length - 1] = last.slice(0, -1);
+  }
+  return lines;
+};
+
+const parseWithClauses = (
+  text: string
+): { ctes: { name: string; body: string }[]; remainder: string } => {
+  let remaining = text.trimStart();
+  const ctes: { name: string; body: string }[] = [];
+
+  while (remaining.length > 0) {
+    const match = remaining.match(/^([A-Z0-9_]+)\s+AS\s*\(/i);
+    if (!match) {
+      return { ctes, remainder: remaining };
+    }
+    const name = match[1];
+    const openIndex = remaining.indexOf('(', match[0].length - 1);
+    if (openIndex < 0) {
+      return { ctes, remainder: remaining };
+    }
+    const closeIndex = findMatchingParenIndex(remaining, openIndex);
+    if (closeIndex === null) {
+      return { ctes, remainder: remaining };
+    }
+    const body = remaining.slice(openIndex + 1, closeIndex).trim();
+    ctes.push({ name, body });
+    remaining = remaining.slice(closeIndex + 1).trimStart();
+    if (remaining.startsWith(',')) {
+      remaining = remaining.slice(1).trimStart();
+      continue;
+    }
+    return { ctes, remainder: remaining };
+  }
+
+  return { ctes, remainder: '' };
+};
+
 const formatSelect = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
+
+  if (upper.startsWith('WITH ')) {
+    const withPart = cleaned.slice(4).trimStart();
+    const { ctes, remainder } = parseWithClauses(withPart);
+    if (ctes.length === 0) {
+      return [baseIndent + `with ${withPart};`];
+    }
+
+    const lines: string[] = [];
+    const innerNested = ' '.repeat(nestedIndent.length + (nestedIndent.length - baseIndent.length));
+
+    for (let i = 0; i < ctes.length; i++) {
+      const prefix = i === 0 ? 'with ' : ', ';
+      lines.push(baseIndent + `${prefix}${ctes[i].name} as (`);
+      const bodyLines = trimTrailingSemicolon(
+        formatSelect(ctes[i].body, nestedIndent, innerNested)
+      );
+      lines.push(...bodyLines);
+      lines.push(baseIndent + ')');
+    }
+
+    if (remainder.length > 0) {
+      const selectLines = formatSelect(remainder, baseIndent, nestedIndent);
+      lines.push(...selectLines);
+      return lines;
+    }
+
+    lines[lines.length - 1] = lines[lines.length - 1] + ';';
+    return lines;
+  }
+
   const selectMatch = upper.match(/^SELECT\s+(DISTINCT\s+)?/);
   if (!selectMatch) {
     return [baseIndent + cleaned + ';'];
@@ -310,11 +383,11 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
     return lines;
   }
 
-  const clauses = remainder.split(/\b(?=FROM|WHERE|FETCH)\b/i).map((part) => part.trim());
+  const clauses = remainder.split(/\b(?=FROM|WHERE|FETCH|UNION|INTERSECT|EXCEPT)\b/i).map((part) => part.trim());
   const visibleClauses = clauses.filter((clause) => clause.length > 0);
   for (let i = 0; i < visibleClauses.length; i++) {
     const clause = normalizeSqlWhitespace(visibleClauses[i]);
-    const match = clause.match(/^(FROM|WHERE|FETCH)\b/i);
+    const match = clause.match(/^(FROM|WHERE|FETCH|UNION|INTERSECT|EXCEPT)\b/i);
     if (!match) continue;
     const keyword = match[1].toLowerCase();
     const rest = clause.slice(match[0].length).trimStart();
@@ -325,7 +398,7 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
           ? normalizeSqlExpression(rest)
           : normalizeSqlWhitespace(rest);
     const isLast = i === visibleClauses.length - 1;
-    const suffix = isLast ? ';' : '';
+    const suffix = isLast && !['union', 'intersect', 'except'].includes(keyword) ? ';' : '';
     lines.push(baseIndent + [keyword, normalizedRest].filter(Boolean).join(' ') + suffix);
   }
 
@@ -810,7 +883,7 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   if (upper.startsWith('INSERT ')) {
     return formatInsert(normalized, baseIndent, nestedIndent);
   }
-  if (upper.startsWith('SELECT ')) {
+  if (upper.startsWith('SELECT ') || upper.startsWith('WITH ')) {
     return formatSelect(normalized, baseIndent, nestedIndent);
   }
   if (upper.startsWith('UPDATE ')) {

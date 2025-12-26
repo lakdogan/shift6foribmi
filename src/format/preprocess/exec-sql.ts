@@ -709,11 +709,26 @@ const formatPrepareExecute = (
   }
 
   if (upper.startsWith('EXECUTE IMMEDIATE')) {
-    const sqlText = cleaned.slice('execute immediate'.length).trimStart();
-    return [
-      baseIndent + 'execute immediate',
-      nestedIndent + sqlText + ';'
-    ];
+    const rest = cleaned.slice('execute immediate'.length).trimStart();
+    const usingIndex = findKeywordIndex(rest, 'USING');
+    if (usingIndex < 0) {
+      return [
+        baseIndent + 'execute immediate',
+        nestedIndent + rest + ';'
+      ];
+    }
+    const stmtText = rest.slice(0, usingIndex).trim();
+    const argsText = rest.slice(usingIndex + 5).trimStart();
+    const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
+    const lines: string[] = [];
+    lines.push(baseIndent + 'execute immediate');
+    lines.push(nestedIndent + stmtText);
+    lines.push(baseIndent + 'using');
+    for (let i = 0; i < args.length; i++) {
+      const suffix = i < args.length - 1 ? ',' : ';';
+      lines.push(nestedIndent + args[i] + suffix);
+    }
+    return lines;
   }
 
   if (upper.startsWith('EXECUTE ')) {

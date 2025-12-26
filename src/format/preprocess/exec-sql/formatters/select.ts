@@ -12,6 +12,7 @@ import { scanStringAware } from '../../../utils/string-scan';
 import { formatFromClause } from './from';
 import { formatSelectSetOperations } from './select-set';
 
+// Format SELECT and WITH queries into structured layout.
 export const formatSelect = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();

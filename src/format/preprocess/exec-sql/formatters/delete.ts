@@ -6,6 +6,7 @@ import {
   findKeywordIndex
 } from '../utils';
 
+// Format DELETE statements with USING and WHERE variants.
 export const formatDelete = (text: string, baseIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();

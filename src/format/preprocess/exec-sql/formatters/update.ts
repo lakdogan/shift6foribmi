@@ -7,6 +7,7 @@ import {
 } from '../utils';
 import { formatFromClause } from './from';
 
+// Format UPDATE statements with SET and optional FROM/WHERE.
 export const formatUpdate = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();

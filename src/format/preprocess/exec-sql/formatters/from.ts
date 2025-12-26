@@ -5,6 +5,7 @@ import {
   findKeywordIndex
 } from '../utils';
 
+// Format FROM and JOIN chains into multiple lines.
 export const formatFromClause = (rest: string, baseIndent: string): string[] => {
   const normalizedRest = normalizeSqlIdentifierPath(rest);
   const segments = splitJoinSegments(normalizedRest);

@@ -1,5 +1,6 @@
 import { scanStringAware } from '../../../utils/string-scan';
 
+// Split UNION/INTERSECT/EXCEPT operations at top level.
 export const splitSetOperations = (text: string): string[] => {
   const upper = text.toUpperCase();
   const parts: string[] = [];
@@ -48,6 +49,7 @@ export const splitSetOperations = (text: string): string[] => {
   return parts.filter((part) => part.length > 0);
 };
 
+// Split SELECT clauses at top level (FROM/WHERE/GROUP BY/etc.).
 export const splitSelectClauses = (text: string): string[] => {
   const upper = text.toUpperCase();
   const keywords = [

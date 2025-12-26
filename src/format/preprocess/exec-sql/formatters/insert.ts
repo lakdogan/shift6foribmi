@@ -8,6 +8,7 @@ import {
 import { formatValuesRows } from './values';
 import { formatSelect } from './select';
 
+// Format INSERT statements with columns and values/selects.
 export const formatInsert = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();

@@ -5,6 +5,7 @@ import {
   findKeywordIndex
 } from '../utils';
 
+// Format VALUES row lists into multi-line layout.
 export const formatValuesRows = (
   valuesText: string,
   baseIndent: string,
@@ -40,6 +41,7 @@ export const formatValuesRows = (
   return lines;
 };
 
+// Format VALUES statements (optionally with INTO).
 export const formatValuesStatement = (
   text: string,
   baseIndent: string,

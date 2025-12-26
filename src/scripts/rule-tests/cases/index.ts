@@ -82,6 +82,7 @@ import execSqlSetTransaction from './exec-sql-set-transaction';
 import execSqlWheneverContinue from './exec-sql-whenever-continue';
 import execSqlCallWithParams from './exec-sql-call-with-params';
 import execSqlSetTransactionMode from './exec-sql-set-transaction-mode';
+import execSqlConnectUsing from './exec-sql-connect-using';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -166,5 +167,6 @@ export const cases: Case[] = [
   execSqlSetTransaction,
   execSqlWheneverContinue,
   execSqlCallWithParams,
-  execSqlSetTransactionMode
+  execSqlSetTransactionMode,
+  execSqlConnectUsing
 ];

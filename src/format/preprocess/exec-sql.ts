@@ -364,6 +364,7 @@ const splitSelectClauses = (text: string): string[] => {
   const upper = text.toUpperCase();
   const keywords = [
     'FOR READ ONLY',
+    'FOR FETCH ONLY',
     'FOR UPDATE',
     'GROUP BY',
     'ORDER BY',
@@ -604,7 +605,7 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
   for (let i = 0; i < clauses.length; i++) {
     const clause = normalizeSqlWhitespace(clauses[i]);
     const match = clause.match(
-      /^(FROM|WHERE CURRENT OF|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE|FOR READ ONLY)\b/i
+      /^(FROM|WHERE CURRENT OF|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE|FOR READ ONLY|FOR FETCH ONLY)\b/i
     );
     if (!match) continue;
     const keyword = match[1].toLowerCase();
@@ -674,6 +675,10 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
     }
     if (keyword === 'for read only') {
       lines.push(baseIndent + 'for read only' + suffix);
+      continue;
+    }
+    if (keyword === 'for fetch only') {
+      lines.push(baseIndent + 'for fetch only' + suffix);
       continue;
     }
 

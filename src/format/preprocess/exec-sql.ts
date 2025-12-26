@@ -547,6 +547,58 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
   return lines;
 };
 
+const formatPrepareExecute = (
+  text: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+
+  if (upper.startsWith('PREPARE ')) {
+    const rest = cleaned.slice(7).trimStart();
+    const fromIndex = findKeywordIndex(rest, 'FROM');
+    if (fromIndex < 0) {
+      return [baseIndent + `prepare ${normalizeSqlWhitespace(rest)};`];
+    }
+    const stmtName = rest.slice(0, fromIndex).trim();
+    const sqlText = rest.slice(fromIndex + 4).trimStart();
+    return [
+      baseIndent + `prepare ${stmtName} from`,
+      nestedIndent + sqlText + ';'
+    ];
+  }
+
+  if (upper.startsWith('EXECUTE IMMEDIATE')) {
+    const sqlText = cleaned.slice('execute immediate'.length).trimStart();
+    return [
+      baseIndent + 'execute immediate',
+      nestedIndent + sqlText + ';'
+    ];
+  }
+
+  if (upper.startsWith('EXECUTE ')) {
+    const rest = cleaned.slice(7).trimStart();
+    const usingIndex = findKeywordIndex(rest, 'USING');
+    if (usingIndex < 0) {
+      return [baseIndent + `execute ${normalizeSqlWhitespace(rest)};`];
+    }
+    const stmtName = rest.slice(0, usingIndex).trim();
+    const argsText = rest.slice(usingIndex + 5).trimStart();
+    const args = splitTopLevel(argsText, ',').map(normalizeSqlExpression);
+    const lines: string[] = [];
+    lines.push(baseIndent + `execute ${stmtName}`);
+    lines.push(baseIndent + 'using');
+    for (let i = 0; i < args.length; i++) {
+      const suffix = i < args.length - 1 ? ',' : ';';
+      lines.push(nestedIndent + args[i] + suffix);
+    }
+    return lines;
+  }
+
+  return [baseIndent + cleaned + ';'];
+};
+
 const formatInsert = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -642,6 +694,13 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   }
   if (upper.startsWith('MERGE ')) {
     return formatMerge(normalized, baseIndent, nestedIndent);
+  }
+  if (
+    upper.startsWith('PREPARE ') ||
+    upper.startsWith('EXECUTE IMMEDIATE') ||
+    upper.startsWith('EXECUTE ')
+  ) {
+    return formatPrepareExecute(normalized, baseIndent, nestedIndent);
   }
   if (upper.startsWith('GET DIAGNOSTICS')) {
     const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());

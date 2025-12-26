@@ -78,8 +78,14 @@ export const formatOpenCloseFetch = (
   if (upper.startsWith('FETCH ')) {
     const rest = cleaned.slice(6).trimStart();
     const intoIndex = findKeywordIndex(rest, 'INTO');
-    const fetchPart = intoIndex >= 0 ? rest.slice(0, intoIndex).trim() : rest;
-    const intoPart = intoIndex >= 0 ? rest.slice(intoIndex + 4).trimStart() : '';
+    const usingIndex = findKeywordIndex(rest, 'USING');
+    const clauseIndexes = [intoIndex, usingIndex].filter((idx) => idx >= 0);
+    const clauseStart = clauseIndexes.length > 0 ? Math.min(...clauseIndexes) : -1;
+    const fetchPart = clauseStart >= 0 ? rest.slice(0, clauseStart).trim() : rest;
+    const intoPart = intoIndex >= 0
+      ? rest.slice(intoIndex + 4, usingIndex > intoIndex ? usingIndex : undefined).trimStart()
+      : '';
+    const usingPart = usingIndex >= 0 ? rest.slice(usingIndex + 5).trimStart() : '';
     const lines: string[] = [];
     lines.push(baseIndent + `fetch ${normalizeSqlWhitespace(fetchPart)}`);
     if (intoPart) {
@@ -89,7 +95,14 @@ export const formatOpenCloseFetch = (
         const suffix = i < targets.length - 1 ? ',' : '';
         lines.push(nestedIndent + targets[i] + suffix);
       }
-      lines[lines.length - 1] = lines[lines.length - 1] + ';';
+      if (!usingPart) {
+        lines[lines.length - 1] = lines[lines.length - 1] + ';';
+        return lines;
+      }
+    }
+    if (usingPart) {
+      const normalized = normalizeSqlWhitespace(usingPart);
+      lines.push(baseIndent + `using ${normalized};`);
       return lines;
     }
     lines[lines.length - 1] = lines[lines.length - 1] + ';';

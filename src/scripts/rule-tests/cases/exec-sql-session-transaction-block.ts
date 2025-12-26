@@ -28,7 +28,7 @@ const testCase: Case = {
     'set session authorization = :user;',
     'set transaction isolation level * cs;',
     'savepoint S1;',
-    'rollback to savepoint S1;',
+    'rollback to savepoint s1;',
     'release savepoint S1;'
   ]
 };

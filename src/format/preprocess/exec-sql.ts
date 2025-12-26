@@ -1173,7 +1173,8 @@ const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
     return [baseIndent + `lock table ${rest};`];
   }
   if (upper.startsWith('SET TRANSACTION')) {
-    const rest = normalizeSqlWhitespace(cleaned.slice('set transaction'.length).trimStart());
+    const rest = normalizeSqlWhitespace(cleaned.slice('set transaction'.length).trimStart())
+      .replace(/\*\s+([A-Z0-9_]+)/gi, '*$1');
     return [baseIndent + `set transaction ${rest};`];
   }
   if (upper.startsWith('PREPARE ') || upper.startsWith('EXECUTE ') || upper.startsWith('EXECUTE IMMEDIATE')) {

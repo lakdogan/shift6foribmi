@@ -27,6 +27,7 @@ import wrapLongLiteralNewLine from './wrap-long-literal-new-line';
 import booleanAssignmentWrap from './boolean-assignment-wrap';
 import avoidSplitInsideParens from './avoid-split-inside-parens';
 import execSqlFormatting from './exec-sql-formatting';
+import execSqlUpdateDelete from './exec-sql-update-delete';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -56,5 +57,6 @@ export const cases: Case[] = [
   wrapLongLiteralNewLine,
   booleanAssignmentWrap,
   avoidSplitInsideParens,
-  execSqlFormatting
+  execSqlFormatting,
+  execSqlUpdateDelete
 ];

@@ -627,13 +627,31 @@ const formatDelete = (text: string, baseIndent: string): string[] => {
     return [baseIndent + cleaned + ';'];
   }
 
+  const usingIndex = findKeywordIndex(rest, 'USING');
   const whereIndex = findKeywordIndex(rest, 'WHERE');
-  const tablePart = whereIndex >= 0 ? rest.slice(0, whereIndex).trim() : rest.trim();
+  let tableEnd = rest.length;
+  if (usingIndex >= 0) tableEnd = Math.min(tableEnd, usingIndex);
+  if (whereIndex >= 0) tableEnd = Math.min(tableEnd, whereIndex);
+  const tablePart = rest.slice(0, tableEnd).trim();
+  const usingText =
+    usingIndex >= 0
+      ? rest.slice(usingIndex + 5, whereIndex > usingIndex ? whereIndex : undefined).trim()
+      : '';
   const whereText = whereIndex >= 0 ? rest.slice(whereIndex + 5).trimStart() : '';
 
   const lines: string[] = [];
   lines.push(baseIndent + `delete from ${tablePart}`);
+  if (usingText.length > 0) {
+    lines.push(baseIndent + `using ${normalizeSqlWhitespace(usingText)}`);
+  }
+
   if (whereText.length > 0) {
+    const upperWhere = whereText.toUpperCase();
+    if (upperWhere.startsWith('CURRENT OF')) {
+      const cursor = whereText.slice(10).trimStart();
+      lines.push(baseIndent + `where current of ${normalizeSqlWhitespace(cursor)};`);
+      return lines;
+    }
     lines.push(baseIndent + `where ${normalizeSqlExpression(whereText)};`);
     return lines;
   }

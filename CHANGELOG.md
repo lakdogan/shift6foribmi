@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Applied SQL-aware indentation while keeping RPG block indent stable inside exec sql blocks.
 - Added SQL expression spacing for WHERE clauses and diagnostics assignments.
 - Added rule-test coverage for exec sql formatting.
+- Expanded exec sql coverage: UPDATE/DELETE/MERGE (incl. conditions), SELECT clauses (JOIN/GROUP/HAVING/ORDER/OFFSET/FETCH/READ/UPDATE), VALUES INTO, cursor workflows, dynamic SQL (PREPARE/EXECUTE/EXECUTE IMMEDIATE with INTO/USING), host/connection/session/transaction commands, and lock table.
+- Added bundled rule-test blocks for dynamic SQL, DML edge cases, SELECT edge cases, session/transaction, cursor flows, and host/connection commands.
 - Added exec sql block formatting with structured SQL layout and preserved Shift6 indentation.
 
 ## [0.1.20] - 2025-12-25

@@ -57,6 +57,9 @@ const normalizeSqlWhitespace = (text: string): string => {
   return out.trim();
 };
 
+const normalizeSqlIdentifierPath = (text: string): string =>
+  text.replace(/\s*\/\s*/g, '/');
+
 const normalizeSqlExpression = (text: string): string => {
   const compact = normalizeSqlWhitespace(text);
   let out = '';
@@ -467,9 +470,10 @@ const splitJoinSegments = (text: string): { keyword: string; segment: string }[]
 };
 
 const formatFromClause = (rest: string, baseIndent: string): string[] => {
-  const segments = splitJoinSegments(rest);
+  const normalizedRest = normalizeSqlIdentifierPath(rest);
+  const segments = splitJoinSegments(normalizedRest);
   if (segments.length === 1) {
-    return [baseIndent + `from ${normalizeSqlExpression(rest)}`];
+    return [baseIndent + `from ${normalizeSqlExpression(normalizedRest)}`];
   }
 
   const lines: string[] = [];
@@ -480,7 +484,7 @@ const formatFromClause = (rest: string, baseIndent: string): string[] => {
     const segment = segments[i].segment;
     const onIndex = findKeywordIndex(segment, 'ON');
     if (onIndex >= 0) {
-      const tablePart = segment.slice(0, onIndex).trim();
+      const tablePart = normalizeSqlIdentifierPath(segment.slice(0, onIndex).trim());
       const condition = segment.slice(onIndex + 2).trimStart();
       lines.push(
         baseIndent +
@@ -702,7 +706,7 @@ const formatUpdate = (text: string, baseIndent: string, nestedIndent: string): s
     return [baseIndent + cleaned + ';'];
   }
 
-  const tablePart = rest.slice(0, setIndex).trim();
+  const tablePart = normalizeSqlIdentifierPath(rest.slice(0, setIndex).trim());
   if (tablePart.length === 0) {
     return [baseIndent + cleaned + ';'];
   }
@@ -716,7 +720,9 @@ const formatUpdate = (text: string, baseIndent: string, nestedIndent: string): s
   const setText = afterSet.slice(0, setEnd).trim();
   const fromText =
     fromIndex >= 0
-      ? afterSet.slice(fromIndex + 4, whereIndex > fromIndex ? whereIndex : undefined).trim()
+      ? normalizeSqlIdentifierPath(
+          afterSet.slice(fromIndex + 4, whereIndex > fromIndex ? whereIndex : undefined).trim()
+        )
       : '';
   const whereText = whereIndex >= 0 ? afterSet.slice(whereIndex + 5).trimStart() : '';
 
@@ -766,10 +772,12 @@ const formatDelete = (text: string, baseIndent: string): string[] => {
   let tableEnd = rest.length;
   if (usingIndex >= 0) tableEnd = Math.min(tableEnd, usingIndex);
   if (whereIndex >= 0) tableEnd = Math.min(tableEnd, whereIndex);
-  const tablePart = rest.slice(0, tableEnd).trim();
+  const tablePart = normalizeSqlIdentifierPath(rest.slice(0, tableEnd).trim());
   const usingText =
     usingIndex >= 0
-      ? rest.slice(usingIndex + 5, whereIndex > usingIndex ? whereIndex : undefined).trim()
+      ? normalizeSqlIdentifierPath(
+          rest.slice(usingIndex + 5, whereIndex > usingIndex ? whereIndex : undefined).trim()
+        )
       : '';
   const whereText = whereIndex >= 0 ? rest.slice(whereIndex + 5).trimStart() : '';
 
@@ -861,14 +869,14 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
   if (usingIndex < 0) {
     return [baseIndent + cleaned + ';'];
   }
-  const targetPart = remaining.slice(0, usingIndex).trim();
+  const targetPart = normalizeSqlIdentifierPath(remaining.slice(0, usingIndex).trim());
   remaining = remaining.slice(usingIndex + 5).trimStart();
 
   const onIndex = findKeywordIndex(remaining, 'ON');
   if (onIndex < 0) {
     return [baseIndent + cleaned + ';'];
   }
-  const usingPart = remaining.slice(0, onIndex).trim();
+  const usingPart = normalizeSqlIdentifierPath(remaining.slice(0, onIndex).trim());
   remaining = remaining.slice(onIndex + 2).trimStart();
 
   const lines: string[] = [];
@@ -912,11 +920,12 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
         if (setIndex >= 0) {
           const setText = updateText.slice(setIndex + 3).trimStart();
           const assignments = splitTopLevel(setText, ',').map(normalizeSqlExpression);
+          const assignmentIndent = nestedIndent + baseIndent;
           lines.push(nestedIndent + 'update');
           lines.push(nestedIndent + 'set');
           for (let j = 0; j < assignments.length; j++) {
             const suffix = j < assignments.length - 1 ? ',' : '';
-            lines.push(' '.repeat(nestedIndent.length * 2) + assignments[j] + suffix);
+            lines.push(assignmentIndent + assignments[j] + suffix);
           }
           continue;
         }
@@ -946,7 +955,8 @@ const formatMerge = (text: string, baseIndent: string, nestedIndent: string): st
       );
       if (action.toUpperCase().startsWith('INSERT')) {
         const insertText = action.slice(6).trimStart();
-        const formatted = formatInsert(`insert ${insertText}`, nestedIndent, ' '.repeat(nestedIndent.length * 2));
+        const mergeNestedIndent = nestedIndent + baseIndent;
+        const formatted = formatInsert(`insert ${insertText}`, nestedIndent, mergeNestedIndent);
         for (const line of formatted) {
           lines.push(line);
         }
@@ -1320,7 +1330,8 @@ const formatInsert = (text: string, baseIndent: string, nestedIndent: string): s
     return [baseIndent + cleaned + ';'];
   }
 
-  const afterInsert = cleaned.slice(insertMatch[0].length).trimStart();
+  let afterInsert = cleaned.slice(insertMatch[0].length).trimStart();
+  afterInsert = normalizeSqlIdentifierPath(afterInsert);
   const tableMatch = afterInsert.match(/^([^\s(]+)\s*(.*)$/);
   if (!tableMatch) {
     return [baseIndent + cleaned + ';'];
@@ -1504,7 +1515,18 @@ export const normalizeExecSqlBlocks = (
     sqlBuffer = [];
   };
 
-  for (const line of lines) {
+  const nextNonEmptyLine = (start: number): string | null => {
+    for (let i = start; i < lines.length; i++) {
+      const trimmed = lines[i].trimStart();
+      if (trimmed.length === 0) continue;
+      if (trimmed.startsWith('//')) continue;
+      return trimmed;
+    }
+    return null;
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const trimmed = line.trimStart();
     if (trimmed.startsWith('//')) {
       if (inExecSql) {
@@ -1517,19 +1539,33 @@ export const normalizeExecSqlBlocks = (
     if (!inExecSql) {
       if (EXEC_SQL_START.test(line)) {
         changed = true;
-        inExecSql = true;
-        out.push('exec sql');
         const after = line.replace(EXEC_SQL_START, '').trim();
         if (after.length > 0) {
           const endIndex = after.search(END_EXEC);
           if (endIndex >= 0) {
+            out.push('exec sql');
             const sqlPart = after.slice(0, endIndex).trim();
             if (sqlPart.length > 0) sqlBuffer.push(sqlPart);
             flushBuffer();
             out.push('end-exec;');
-            inExecSql = false;
             continue;
           }
+
+          const nextLine = nextNonEmptyLine(i + 1);
+          const hasSemicolon = after.includes(';');
+          const expectsEndExec = nextLine ? END_EXEC.test(nextLine) : false;
+          if (hasSemicolon && !expectsEndExec) {
+            out.push('exec sql');
+            sqlBuffer.push(after);
+            flushBuffer();
+            out.push('end-exec;');
+            continue;
+          }
+        }
+
+        inExecSql = true;
+        out.push('exec sql');
+        if (after.length > 0) {
           sqlBuffer.push(after);
         }
         continue;

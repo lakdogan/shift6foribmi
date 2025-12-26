@@ -68,6 +68,7 @@ import execSqlMergeConditions from './exec-sql-merge-conditions';
 import execSqlGroupByRollup from './exec-sql-group-by-rollup';
 import execSqlHavingLogic from './exec-sql-having-logic';
 import execSqlForReadOnly from './exec-sql-for-read-only';
+import execSqlSelectCurrentOf from './exec-sql-select-current-of';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -138,5 +139,6 @@ export const cases: Case[] = [
   execSqlMergeConditions,
   execSqlGroupByRollup,
   execSqlHavingLogic,
-  execSqlForReadOnly
+  execSqlForReadOnly,
+  execSqlSelectCurrentOf
 ];

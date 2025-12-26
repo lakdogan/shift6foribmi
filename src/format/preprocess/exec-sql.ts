@@ -369,6 +369,7 @@ const splitSelectClauses = (text: string): string[] => {
     'ORDER BY',
     'HAVING',
     'WHERE',
+    'WHERE CURRENT OF',
     'FROM',
     'OFFSET',
     'FETCH'
@@ -603,7 +604,7 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
   for (let i = 0; i < clauses.length; i++) {
     const clause = normalizeSqlWhitespace(clauses[i]);
     const match = clause.match(
-      /^(FROM|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE|FOR READ ONLY)\b/i
+      /^(FROM|WHERE CURRENT OF|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE|FOR READ ONLY)\b/i
     );
     if (!match) continue;
     const keyword = match[1].toLowerCase();
@@ -621,6 +622,11 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
       if (isLast) {
         lines[lines.length - 1] = lines[lines.length - 1] + ';';
       }
+      continue;
+    }
+
+    if (keyword === 'where current of') {
+      lines.push(baseIndent + `where current of ${normalizeSqlWhitespace(rest)}` + suffix);
       continue;
     }
 

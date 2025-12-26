@@ -26,6 +26,7 @@ import percentBuiltinNoSpace from './percent-builtin-no-space';
 import wrapLongLiteralNewLine from './wrap-long-literal-new-line';
 import booleanAssignmentWrap from './boolean-assignment-wrap';
 import avoidSplitInsideParens from './avoid-split-inside-parens';
+import execSqlFormatting from './exec-sql-formatting';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -54,5 +55,6 @@ export const cases: Case[] = [
   percentBuiltinNoSpace,
   wrapLongLiteralNewLine,
   booleanAssignmentWrap,
-  avoidSplitInsideParens
+  avoidSplitInsideParens,
+  execSqlFormatting
 ];

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.21] - 2025-12-26
+- Added exec sql block formatting with structured SQL layout, including INSERT/VALUES/SELECT/DEFAULT/GET DIAGNOSTICS patterns.
+- Preserved SQL identifiers and spacing by skipping RPG operator normalization inside exec sql.
+- Applied SQL-aware indentation while keeping RPG block indent stable inside exec sql blocks.
+- Added SQL expression spacing for WHERE clauses and diagnostics assignments.
+- Added rule-test coverage for exec sql formatting.
+- Added exec sql block formatting with structured SQL layout and preserved Shift6 indentation.
+
 ## [0.1.20] - 2025-12-25
 - Modularized continuation handling into core/support submodules with smaller focused helpers.
 - Split preprocess helpers (multiline normalization, statement splitting, segment processing) into separate files.

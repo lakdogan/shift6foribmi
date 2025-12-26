@@ -11,7 +11,11 @@ export const indentationRule: Rule = {
     const target = cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent + continuationOffset;
 
     let newText = state.current;
-    if (currentIndent < target) {
+    if (ctx.execSqlDepth > 0) {
+      const trimmed = state.current.trimStart();
+      const adjustedIndent = target + currentIndent;
+      newText = ' '.repeat(adjustedIndent) + trimmed;
+    } else if (currentIndent < target) {
       newText = ' '.repeat(target - currentIndent) + state.current;
     } else if (currentIndent > target) {
       newText = state.current.substring(currentIndent - target);

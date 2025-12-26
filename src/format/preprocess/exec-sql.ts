@@ -544,6 +544,20 @@ const formatSelect = (text: string, baseIndent: string, nestedIndent: string): s
     }
 
     if (keyword === 'for update') {
+      const restUpper = rest.toUpperCase();
+      if (restUpper.startsWith('OF ')) {
+        const columnsText = rest.slice(3).trimStart();
+        const columns = splitTopLevel(columnsText, ',').map(normalizeSqlExpression);
+        lines.push(baseIndent + 'for update of');
+        for (let j = 0; j < columns.length; j++) {
+          const colSuffix = j < columns.length - 1 ? ',' : '';
+          lines.push(nestedIndent + columns[j] + colSuffix);
+        }
+        if (isLast) {
+          lines[lines.length - 1] = lines[lines.length - 1] + ';';
+        }
+        continue;
+      }
       lines.push(baseIndent + 'for update' + (rest ? ` ${normalizeSqlWhitespace(rest)}` : '') + suffix);
       continue;
     }

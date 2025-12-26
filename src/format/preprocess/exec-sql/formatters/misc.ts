@@ -58,8 +58,7 @@ export const formatCommitRollback = (text: string, baseIndent: string): string[]
   if (!(upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK'))) {
     return [baseIndent + cleaned + ';'];
   }
-  const normalized = normalizeSqlWhitespace(cleaned).toLowerCase();
-  return [baseIndent + `${normalized};`];
+  return formatLowercasedStatement(cleaned, baseIndent);
 };
 
 export const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
@@ -97,6 +96,10 @@ export const formatAllocateDescribe = (text: string, baseIndent: string): string
 };
 
 export const formatSimpleSqlStatement = (text: string, baseIndent: string): string[] => {
+  return formatLowercasedStatement(text, baseIndent);
+};
+
+const formatLowercasedStatement = (text: string, baseIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const normalized = normalizeSqlWhitespace(cleaned).toLowerCase();
   return [baseIndent + `${normalized};`];

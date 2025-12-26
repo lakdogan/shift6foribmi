@@ -6,6 +6,10 @@ import {
 export const formatHostAndConnection = (text: string, baseIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
+  const formatClause = (prefix: string, startIndex: number, lowerRest = false): string[] => {
+    const rest = normalizeSqlWhitespace(cleaned.slice(startIndex).trimStart());
+    return [baseIndent + `${prefix} ${lowerRest ? rest.toLowerCase() : rest};`];
+  };
 
   if (upper.startsWith('DECLARE SECTION')) {
     return [baseIndent + 'declare section;'];
@@ -14,24 +18,19 @@ export const formatHostAndConnection = (text: string, baseIndent: string): strin
     return [baseIndent + 'end declare section;'];
   }
   if (upper.startsWith('INCLUDE ')) {
-    const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());
-    return [baseIndent + `include ${rest.toLowerCase()};`];
+    return formatClause('include', 7, true);
   }
   if (upper.startsWith('WHENEVER ')) {
-    const rest = normalizeSqlWhitespace(cleaned.slice(9).trimStart());
-    return [baseIndent + `whenever ${rest};`];
+    return formatClause('whenever', 9);
   }
   if (upper.startsWith('CONNECT ')) {
-    const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());
-    return [baseIndent + `connect ${rest};`];
+    return formatClause('connect', 7);
   }
   if (upper.startsWith('SET CONNECTION')) {
-    const rest = normalizeSqlWhitespace(cleaned.slice('set connection'.length).trimStart());
-    return [baseIndent + `set connection ${rest};`];
+    return formatClause('set connection', 'set connection'.length);
   }
   if (upper.startsWith('DISCONNECT ')) {
-    const rest = normalizeSqlWhitespace(cleaned.slice(10).trimStart());
-    return [baseIndent + `disconnect ${rest};`];
+    return formatClause('disconnect', 10);
   }
   if (upper.startsWith('RELEASE ')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());

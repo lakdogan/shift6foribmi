@@ -12,12 +12,15 @@ export const formatValuesRows = (
 ): string[] => {
   const cleaned = stripTrailingSemicolon(valuesText);
   const rows = splitTopLevel(cleaned, ',');
-  if (rows.length <= 1) {
-    const row = rows.length === 1 ? rows[0] : cleaned;
+  const normalizeRowItems = (row: string): string[] => {
     const inner = row.startsWith('(') && row.endsWith(')')
       ? row.slice(1, -1)
       : row;
-    const items = splitTopLevel(inner, ',').map(normalizeSqlExpression);
+    return splitTopLevel(inner, ',').map(normalizeSqlExpression);
+  };
+  if (rows.length <= 1) {
+    const row = rows.length === 1 ? rows[0] : cleaned;
+    const items = normalizeRowItems(row);
     const lines = [baseIndent + 'values ('];
     for (let i = 0; i < items.length; i++) {
       const suffix = i < items.length - 1 ? ',' : '';
@@ -27,13 +30,7 @@ export const formatValuesRows = (
     return lines;
   }
 
-  const formattedRows = rows.map((row) => {
-    const inner = row.startsWith('(') && row.endsWith(')')
-      ? row.slice(1, -1)
-      : row;
-    const items = splitTopLevel(inner, ',').map(normalizeSqlExpression);
-    return '(' + items.join(', ') + ')';
-  });
+  const formattedRows = rows.map((row) => '(' + normalizeRowItems(row).join(', ') + ')');
 
   const lines = [baseIndent + 'values'];
   for (let i = 0; i < formattedRows.length; i++) {
@@ -53,6 +50,12 @@ export const formatValuesStatement = (
   if (!upper.startsWith('VALUES')) {
     return [baseIndent + cleaned + ';'];
   }
+  const normalizeRowItems = (row: string): string[] => {
+    const inner = row.startsWith('(') && row.endsWith(')')
+      ? row.slice(1, -1)
+      : row;
+    return splitTopLevel(inner, ',').map(normalizeSqlExpression);
+  };
   const valuesText = cleaned.slice(6).trimStart();
   const intoIndex = findKeywordIndex(valuesText, 'INTO');
   const valuesPart = intoIndex >= 0 ? valuesText.slice(0, intoIndex).trim() : valuesText;
@@ -60,10 +63,7 @@ export const formatValuesStatement = (
   const rows = splitTopLevel(valuesPart, ',');
   if (rows.length <= 1) {
     const row = rows.length === 1 ? rows[0] : valuesPart;
-    const inner = row.startsWith('(') && row.endsWith(')')
-      ? row.slice(1, -1)
-      : row;
-    const items = splitTopLevel(inner, ',').map(normalizeSqlExpression);
+    const items = normalizeRowItems(row);
     const lines = [baseIndent + 'values ('];
     for (let i = 0; i < items.length; i++) {
       const suffix = i < items.length - 1 ? ',' : '';
@@ -84,13 +84,7 @@ export const formatValuesStatement = (
     return lines;
   }
 
-  const formattedRows = rows.map((row) => {
-    const inner = row.startsWith('(') && row.endsWith(')')
-      ? row.slice(1, -1)
-      : row;
-    const items = splitTopLevel(inner, ',').map(normalizeSqlExpression);
-    return '(' + items.join(', ') + ')';
-  });
+  const formattedRows = rows.map((row) => '(' + normalizeRowItems(row).join(', ') + ')');
 
   const lines = [baseIndent + 'values'];
   for (let i = 0; i < formattedRows.length; i++) {

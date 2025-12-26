@@ -809,7 +809,7 @@ const formatHostAndConnection = (text: string, baseIndent: string): string[] => 
   }
   if (upper.startsWith('WHENEVER ')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(9).trimStart());
-    return [baseIndent + `whenever ${rest.toLowerCase()};`];
+    return [baseIndent + `whenever ${rest};`];
   }
   if (upper.startsWith('CONNECT ')) {
     const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());

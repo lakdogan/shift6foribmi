@@ -88,6 +88,7 @@ import execSqlIntersect from './exec-sql-intersect';
 import execSqlExcept from './exec-sql-except';
 import execSqlForFetchOnly from './exec-sql-for-fetch-only';
 import execSqlSetSession from './exec-sql-set-session';
+import execSqlLockTableVariants from './exec-sql-lock-table-variants';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -178,5 +179,6 @@ export const cases: Case[] = [
   execSqlIntersect,
   execSqlExcept,
   execSqlForFetchOnly,
-  execSqlSetSession
+  execSqlSetSession,
+  execSqlLockTableVariants
 ];

@@ -677,6 +677,26 @@ const formatHostAndConnection = (text: string, baseIndent: string): string[] => 
   return [baseIndent + cleaned + ';'];
 };
 
+const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+
+  if (upper.startsWith('DESCRIBE ')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice(9).trimStart());
+    return [baseIndent + `describe ${rest.toLowerCase()};`];
+  }
+  if (upper.startsWith('ALLOCATE ')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice(9).trimStart());
+    return [baseIndent + `allocate ${rest.toLowerCase()};`];
+  }
+  if (upper.startsWith('DEALLOCATE ')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice(11).trimStart());
+    return [baseIndent + `deallocate ${rest.toLowerCase()};`];
+  }
+
+  return [baseIndent + cleaned + ';'];
+};
+
 const formatOpenCloseFetch = (
   text: string,
   baseIndent: string,
@@ -835,6 +855,13 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   }
   if (upper.startsWith('OPEN ') || upper.startsWith('CLOSE ') || upper.startsWith('FETCH ')) {
     return formatOpenCloseFetch(normalized, baseIndent, nestedIndent);
+  }
+  if (
+    upper.startsWith('DESCRIBE ') ||
+    upper.startsWith('ALLOCATE ') ||
+    upper.startsWith('DEALLOCATE ')
+  ) {
+    return formatAllocateDescribe(normalized, baseIndent);
   }
   if (upper.startsWith('GET DIAGNOSTICS')) {
     const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());

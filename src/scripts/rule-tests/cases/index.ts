@@ -31,6 +31,7 @@ import execSqlUpdateDelete from './exec-sql-update-delete';
 import execSqlCallSetCommit from './exec-sql-call-set-commit';
 import execSqlMerge from './exec-sql-merge';
 import execSqlPrepareExecute from './exec-sql-prepare-execute';
+import execSqlCursor from './exec-sql-cursor';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -64,5 +65,6 @@ export const cases: Case[] = [
   execSqlUpdateDelete,
   execSqlCallSetCommit,
   execSqlMerge,
-  execSqlPrepareExecute
+  execSqlPrepareExecute,
+  execSqlCursor
 ];

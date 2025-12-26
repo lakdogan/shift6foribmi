@@ -599,6 +599,84 @@ const formatPrepareExecute = (
   return [baseIndent + cleaned + ';'];
 };
 
+const formatDeclareCursor = (
+  text: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+  if (!upper.startsWith('DECLARE ')) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const rest = cleaned.slice(8).trimStart();
+  const cursorIndex = findKeywordIndex(rest, 'CURSOR');
+  const forIndex = findKeywordIndex(rest, 'FOR');
+  if (cursorIndex < 0 || forIndex < 0 || forIndex <= cursorIndex) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const cursorName = rest.slice(0, cursorIndex).trim();
+  const afterFor = rest.slice(forIndex + 3).trimStart();
+  if (!cursorName) {
+    return [baseIndent + cleaned + ';'];
+  }
+
+  const lines: string[] = [];
+  lines.push(baseIndent + `declare ${cursorName} cursor for`);
+  if (afterFor.length === 0) {
+    lines[lines.length - 1] = lines[lines.length - 1] + ';';
+    return lines;
+  }
+
+  if (afterFor.toUpperCase().startsWith('SELECT ')) {
+    lines.push(...formatSelect(afterFor, baseIndent, nestedIndent));
+    return lines;
+  }
+
+  lines.push(baseIndent + normalizeSqlWhitespace(afterFor) + ';');
+  return lines;
+};
+
+const formatOpenCloseFetch = (
+  text: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+
+  if (upper.startsWith('OPEN ')) {
+    const rest = cleaned.slice(5).trimStart();
+    return [baseIndent + `open ${normalizeSqlWhitespace(rest)};`];
+  }
+  if (upper.startsWith('CLOSE ')) {
+    const rest = cleaned.slice(6).trimStart();
+    return [baseIndent + `close ${normalizeSqlWhitespace(rest)};`];
+  }
+  if (upper.startsWith('FETCH ')) {
+    const rest = cleaned.slice(6).trimStart();
+    const intoIndex = findKeywordIndex(rest, 'INTO');
+    if (intoIndex < 0) {
+      return [baseIndent + `fetch ${normalizeSqlWhitespace(rest)};`];
+    }
+    const cursorName = rest.slice(0, intoIndex).trim();
+    const intoText = rest.slice(intoIndex + 4).trimStart();
+    const targets = splitTopLevel(intoText, ',').map(normalizeSqlExpression);
+    const lines: string[] = [];
+    lines.push(baseIndent + `fetch ${cursorName}`);
+    lines.push(baseIndent + 'into');
+    for (let i = 0; i < targets.length; i++) {
+      const suffix = i < targets.length - 1 ? ',' : ';';
+      lines.push(nestedIndent + targets[i] + suffix);
+    }
+    return lines;
+  }
+
+  return [baseIndent + cleaned + ';'];
+};
+
 const formatInsert = (text: string, baseIndent: string, nestedIndent: string): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
@@ -701,6 +779,12 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
     upper.startsWith('EXECUTE ')
   ) {
     return formatPrepareExecute(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('DECLARE ')) {
+    return formatDeclareCursor(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('OPEN ') || upper.startsWith('CLOSE ') || upper.startsWith('FETCH ')) {
+    return formatOpenCloseFetch(normalized, baseIndent, nestedIndent);
   }
   if (upper.startsWith('GET DIAGNOSTICS')) {
     const rest = normalizeSqlExpression(normalized.slice('get diagnostics'.length).trimStart());

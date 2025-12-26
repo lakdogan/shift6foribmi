@@ -836,6 +836,12 @@ const formatAllocateDescribe = (text: string, baseIndent: string): string[] => {
   return [baseIndent + cleaned + ';'];
 };
 
+const formatSimpleSqlStatement = (text: string, baseIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const normalized = normalizeSqlWhitespace(cleaned).toLowerCase();
+  return [baseIndent + `${normalized};`];
+};
+
 const formatValuesStatement = (
   text: string,
   baseIndent: string,
@@ -1051,6 +1057,27 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   }
   if (upper.startsWith('VALUES')) {
     return formatValuesStatement(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('DESCRIBE ') || upper.startsWith('ALLOCATE ') || upper.startsWith('DEALLOCATE ')) {
+    return formatAllocateDescribe(normalized, baseIndent);
+  }
+  if (upper.startsWith('EXECUTE IMMEDIATE')) {
+    return formatPrepareExecute(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('EXECUTE ')) {
+    return formatPrepareExecute(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('PREPARE ')) {
+    return formatPrepareExecute(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('CONNECT ') || upper.startsWith('DISCONNECT ') || upper.startsWith('SET CONNECTION') || upper.startsWith('RELEASE')) {
+    return formatHostAndConnection(normalized, baseIndent);
+  }
+  if (upper.startsWith('DECLARE SECTION') || upper.startsWith('END DECLARE SECTION') || upper.startsWith('INCLUDE ') || upper.startsWith('WHENEVER ')) {
+    return formatHostAndConnection(normalized, baseIndent);
+  }
+  if (upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK')) {
+    return formatSimpleSqlStatement(normalized, baseIndent);
   }
 
   const fallback = stripTrailingSemicolon(normalized);

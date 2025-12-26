@@ -3,10 +3,17 @@ import {
   normalizeSqlExpression,
   stripTrailingSemicolon,
   splitTopLevel
-} from '../utils';
+} from '../utils/index';
 import { formatSelect } from './select';
 import { formatInsert, formatUpdate, formatDelete, formatMerge } from './dml';
-import { formatCall, formatSet, formatCommitRollback, formatAllocateDescribe, formatSimpleSqlStatement } from './misc';
+import {
+  formatCall,
+  formatSet,
+  formatCommitRollback,
+  formatAllocateDescribe,
+  formatSimpleSqlStatement,
+  formatBeginEndStatement
+} from './misc';
 import { formatPrepareExecute } from './prepare';
 import { formatDeclareCursor, formatOpenCloseFetch } from './cursor';
 import { formatHostAndConnection } from './host';
@@ -100,6 +107,9 @@ export const formatSqlStatement = (text: string, indentStep: number): string[] =
   }
   if (upper.startsWith('VALUES')) {
     return formatValuesStatement(normalized, baseIndent, nestedIndent);
+  }
+  if (upper.startsWith('BEGIN ')) {
+    return formatBeginEndStatement(normalized, baseIndent, nestedIndent);
   }
   if (
     upper.startsWith('CREATE ') ||

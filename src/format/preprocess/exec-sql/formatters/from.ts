@@ -3,7 +3,7 @@ import {
   normalizeSqlExpression,
   splitJoinSegments,
   findKeywordIndex
-} from '../utils';
+} from '../utils/index';
 
 // Format FROM and JOIN chains into multiple lines.
 export const formatFromClause = (rest: string, baseIndent: string): string[] => {

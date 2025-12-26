@@ -4,7 +4,7 @@ import {
   stripTrailingSemicolon,
   splitTopLevel,
   findKeywordIndex
-} from '../utils';
+} from '../utils/index';
 import { formatFromClause } from './from';
 
 // Format UPDATE statements with SET and optional FROM/WHERE.

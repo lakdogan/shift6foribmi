@@ -1,4 +1,4 @@
-import { normalizeSqlWhitespace, parseWithClauses, trimTrailingSemicolon } from '../utils';
+import { normalizeSqlWhitespace, parseWithClauses, trimTrailingSemicolon } from '../utils/index';
 import { formatSelect } from './select';
 import { formatInsert, formatUpdate, formatDelete, formatMerge } from './dml';
 

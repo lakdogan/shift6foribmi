@@ -28,7 +28,8 @@ const testCase: Case = {
     'with cs;',
     'with rs;',
     'with nc;',
-    'for read only with rs;',
+    'for read only',
+    'with rs;',
     'set current degree = 2;',
     'set current path = MYLIB, QSYS;',
     'set current schema = MYLIB;'

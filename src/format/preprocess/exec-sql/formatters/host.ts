@@ -1,7 +1,7 @@
 import {
   normalizeSqlWhitespace,
   stripTrailingSemicolon
-} from '../utils';
+} from '../utils/index';
 
 // Format host variables and connection control statements.
 export const formatHostAndConnection = (text: string, baseIndent: string): string[] => {

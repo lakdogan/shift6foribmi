@@ -4,7 +4,7 @@ import {
   stripTrailingSemicolon,
   splitTopLevel,
   findKeywordIndex
-} from '../utils';
+} from '../utils/index';
 import { formatSelect } from './select';
 
 // Format DECLARE CURSOR statements with options and SELECT body.

@@ -3,7 +3,7 @@ import {
   stripTrailingSemicolon,
   splitTopLevel,
   findKeywordIndex
-} from '../utils';
+} from '../utils/index';
 
 // Format VALUES row lists into multi-line layout.
 export const formatValuesRows = (

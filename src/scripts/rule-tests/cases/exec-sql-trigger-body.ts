@@ -9,7 +9,10 @@ const testCase: Case = {
   ].join('\n'),
   mustInclude: [
     'create trigger TR1',
-    'for each row begin set N.STATUS = \'A\';',
+    'referencing new as N',
+    'for each row',
+    'begin',
+    'set N.STATUS = \'A\';',
     'end;'
   ]
 };

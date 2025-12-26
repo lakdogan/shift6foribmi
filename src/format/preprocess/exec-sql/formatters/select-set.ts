@@ -1,4 +1,4 @@
-import { splitSetOperations, trimTrailingSemicolon } from '../utils';
+import { splitSetOperations, trimTrailingSemicolon } from '../utils/index';
 
 // Format UNION/INTERSECT/EXCEPT blocks within a SELECT statement.
 export const formatSelectSetOperations = (

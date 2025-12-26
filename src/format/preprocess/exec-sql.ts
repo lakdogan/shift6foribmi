@@ -639,6 +639,44 @@ const formatDeclareCursor = (
   return lines;
 };
 
+const formatHostAndConnection = (text: string, baseIndent: string): string[] => {
+  const cleaned = stripTrailingSemicolon(text);
+  const upper = cleaned.toUpperCase();
+
+  if (upper.startsWith('DECLARE SECTION')) {
+    return [baseIndent + 'declare section;'];
+  }
+  if (upper.startsWith('END DECLARE SECTION')) {
+    return [baseIndent + 'end declare section;'];
+  }
+  if (upper.startsWith('INCLUDE ')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());
+    return [baseIndent + `include ${rest.toLowerCase()};`];
+  }
+  if (upper.startsWith('WHENEVER ')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice(9).trimStart());
+    return [baseIndent + `whenever ${rest.toLowerCase()};`];
+  }
+  if (upper.startsWith('CONNECT ')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());
+    return [baseIndent + `connect ${rest.toLowerCase()};`];
+  }
+  if (upper.startsWith('SET CONNECTION')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice('set connection'.length).trimStart());
+    return [baseIndent + `set connection ${rest};`];
+  }
+  if (upper.startsWith('DISCONNECT ')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice(10).trimStart());
+    return [baseIndent + `disconnect ${rest.toLowerCase()};`];
+  }
+  if (upper.startsWith('RELEASE')) {
+    const rest = normalizeSqlWhitespace(cleaned.slice(7).trimStart());
+    return [baseIndent + `release${rest ? ` ${rest.toLowerCase()}` : ''};`];
+  }
+
+  return [baseIndent + cleaned + ';'];
+};
+
 const formatOpenCloseFetch = (
   text: string,
   baseIndent: string,
@@ -779,6 +817,18 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
     upper.startsWith('EXECUTE ')
   ) {
     return formatPrepareExecute(normalized, baseIndent, nestedIndent);
+  }
+  if (
+    upper.startsWith('DECLARE SECTION') ||
+    upper.startsWith('END DECLARE SECTION') ||
+    upper.startsWith('INCLUDE ') ||
+    upper.startsWith('WHENEVER ') ||
+    upper.startsWith('CONNECT ') ||
+    upper.startsWith('SET CONNECTION') ||
+    upper.startsWith('DISCONNECT ') ||
+    upper.startsWith('RELEASE')
+  ) {
+    return formatHostAndConnection(normalized, baseIndent);
   }
   if (upper.startsWith('DECLARE ')) {
     return formatDeclareCursor(normalized, baseIndent, nestedIndent);

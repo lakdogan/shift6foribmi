@@ -12,7 +12,7 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'set current isolation = *cs;',
+    'set current isolation = * cs;',
     'set current degree = 2;',
     'set current path = MYLIB, QSYS;'
   ]

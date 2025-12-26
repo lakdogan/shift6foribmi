@@ -574,8 +574,16 @@ const formatUpdate = (text: string, baseIndent: string, nestedIndent: string): s
   }
 
   let afterSet = rest.slice(setIndex + 3).trimStart();
+  const fromIndex = findKeywordIndex(afterSet, 'FROM');
   const whereIndex = findKeywordIndex(afterSet, 'WHERE');
-  const setText = whereIndex >= 0 ? afterSet.slice(0, whereIndex).trim() : afterSet.trim();
+  let setEnd = afterSet.length;
+  if (fromIndex >= 0) setEnd = Math.min(setEnd, fromIndex);
+  if (whereIndex >= 0) setEnd = Math.min(setEnd, whereIndex);
+  const setText = afterSet.slice(0, setEnd).trim();
+  const fromText =
+    fromIndex >= 0
+      ? afterSet.slice(fromIndex + 4, whereIndex > fromIndex ? whereIndex : undefined).trim()
+      : '';
   const whereText = whereIndex >= 0 ? afterSet.slice(whereIndex + 5).trimStart() : '';
 
   const assignments = splitTopLevel(setText, ',').map(normalizeSqlExpression);
@@ -587,7 +595,17 @@ const formatUpdate = (text: string, baseIndent: string, nestedIndent: string): s
     lines.push(nestedIndent + assignments[i] + suffix);
   }
 
+  if (fromText.length > 0) {
+    lines.push(baseIndent + `from ${normalizeSqlWhitespace(fromText)}`);
+  }
+
   if (whereText.length > 0) {
+    const upperWhere = whereText.toUpperCase();
+    if (upperWhere.startsWith('CURRENT OF')) {
+      const cursor = whereText.slice(10).trimStart();
+      lines.push(baseIndent + `where current of ${normalizeSqlWhitespace(cursor)};`);
+      return lines;
+    }
     lines.push(baseIndent + `where ${normalizeSqlExpression(whereText)};`);
     return lines;
   }

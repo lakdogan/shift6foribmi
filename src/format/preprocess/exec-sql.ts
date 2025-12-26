@@ -1252,6 +1252,18 @@ const formatSqlStatement = (text: string, indentStep: number): string[] => {
   if (upper.startsWith('COMMIT') || upper.startsWith('ROLLBACK')) {
     return formatSimpleSqlStatement(normalized, baseIndent);
   }
+  if (upper.startsWith('SAVEPOINT ')) {
+    const rest = normalizeSqlWhitespace(normalized.slice(9).trimStart());
+    return [baseIndent + `savepoint ${rest};`];
+  }
+  if (upper.startsWith('RELEASE SAVEPOINT')) {
+    const rest = normalizeSqlWhitespace(normalized.slice('release savepoint'.length).trimStart());
+    return [baseIndent + `release savepoint ${rest};`];
+  }
+  if (upper.startsWith('ROLLBACK TO SAVEPOINT')) {
+    const rest = normalizeSqlWhitespace(normalized.slice('rollback to savepoint'.length).trimStart());
+    return [baseIndent + `rollback to savepoint ${rest};`];
+  }
 
   const fallback = stripTrailingSemicolon(normalized);
   return [baseIndent + fallback + ';'];

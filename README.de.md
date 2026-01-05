@@ -28,11 +28,15 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
   - *Mehrwert:* Direkt auf dem Host formatieren, ohne den Member herunterladen zu muessen.
 - **Whitespace-Normalisierung:** Mehrfach-Spaces zwischen Tokens werden auf eines reduziert (z.B. `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) und Spaces in string-only Klammern werden getrimmt `(   'error'  )` -> `('error')`.  
   - *Mehrwert:* Konsistente Lesbarkeit und kleinere Diffs, ohne String-Inhalte anzutasten.
+- **String-Konkatenation:** Optionales Wrapping langer Literale und konfigurierbares Layout (`compact` oder `one-per-line`) plus Normalisierung von Multi-Line-String-Literalen in explizite Konkatenationen.  
+  - *Mehrwert:* Vorhersehbare Strings, ohne RPG-Semantik zu brechen.
 - **Exec SQL Formatierung:** Strukturierte Layouts fuer `exec sql` Bloecke (DML/DDL, Cursor, Dynamic SQL, Diagnostics, DB2-i Hints, PSM/Trigger Bodies).
   - *Mehrwert:* Gut lesbares Embedded SQL ohne RPG-Struktur zu zerstoeren.
 
 **B. Einstellungen**
 
+- `shift6.spaces` (Standard: `6`): Basis-Anzahl der Spaces am Zeilenanfang.
+- `shift6.blockIndent` (Standard: `2`): Extra-Spaces pro Schachtelung (IF/DOW/DOU/FOR/SELECT/MONITOR/PROC/etc.).
 - `shift6.collapseTokenSpaces` (Standard: `true`): Schaltet das Reduzieren mehrfacher Leerzeichen zwischen Tokens auf ein Leerzeichen.  
 - `shift6.trimStringParentheses` (Standard: `true`): Entfernt Leerzeichen direkt innerhalb von Klammern, wenn darin nur ein String literal steht.  
 - `shift6.alignPlusContinuation` (Standard: `true`): Richtet Zeilen, die mit `+` beginnen, unter dem ersten `+` der vorherigen Zeile aus.  
@@ -41,8 +45,6 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
 - `shift6.wrapLongStrings` (Standard: `false`): Lange String-Literale in Konkatenationen umbrechen (nur an Leerzeichen).
 - `shift6.fixMultilineStringLiterals` (Standard: `true`): Multi-Line-String-Literale (mit einfachen Quotes) in explizite Konkatenationen umwandeln.
 - `shift6.concatStyle` (Standard: `compact`): Style fuer String-Konkatenationen (`compact` oder `one-per-line`).
-
-Neu in 0.1.18: String-Konkatenations-Styles, optionales Long-String-Wrapping, Multiline-String-Normalisierung, verbesserte Continuations.
 
 **C. Git Hook (optional)**
 

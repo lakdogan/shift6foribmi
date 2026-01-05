@@ -27,17 +27,25 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
     -   *Developer Value:* **Zero Compilation Risk:** Guarantees adherence to stringent IBM i formatting rules.
 -   **Intelligent State Preservation:** Indentation is only applied to unformatted lines. Correctly indented code is ignored.
     -   *Developer Value:* **Predictable Results:** Maintains code stability and prevents unnecessary file changes.
+-   **Block Indentation:** Adds extra indentation per nesting level for IF/DOW/DOU/FOR/SELECT/MONITOR/PROC, including inline openers/closers.
+    -   *Developer Value:* **Readable Blocks:** Maintains structure without manual alignment.
+-   **Statement Splitting:** Ensures each semicolon-terminated statement is on its own line and cleans up repeated `;`.
+    -   *Developer Value:* **Clear Statements:** Prevents dense inline code from hiding logic.
 -   **Platform Compatibility:** Specifically designed to reconcile VS Code's flexible formatting with PDM's rigid requirements.
     -   *Developer Value:* **Seamless Toolchain:** Ensures source code is valid across both local and remote environments.
 -   **Local & Remote Support:** Works on local files (`file:`), unsaved editors, and IBM i remote source members (e.g., Code for IBM i `ibmi:` / `vscode-vfs:` URIs).
     -   *Developer Value:* **Remote-first Ready:** Format members directly on the host without downloading to the workstation.
 -   **Whitespace Normalization:** Collapses multiple spaces between tokens to one (e.g., `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) and trims spaces inside string-only parentheses `(   'error'  )` -> `('error')`.
     -   *Developer Value:* **Cleaner Diffs:** Consistent spacing without touching string contents preserves readability and minimizes churn.
+-   **String Concatenation Control:** Optional wrapping of long literals and configurable concat layout (`compact` or `one-per-line`), plus normalization of multi-line single-quote literals into explicit concatenations.
+    -   *Developer Value:* **Predictable Strings:** Keeps long text readable without breaking RPG string semantics.
 -   **Exec SQL Formatting:** Structured layout for `exec sql` blocks (DML/DDL, cursors, dynamic SQL, diagnostics, DB2-i hints, and PSM/trigger bodies).
     -   *Developer Value:* **Readable SQL:** Keeps complex embedded SQL readable without breaking RPG structure.
 
 **B. Settings**
 
+- `shift6.spaces` (default: `6`): Base number of spaces to add at the start of each line.
+- `shift6.blockIndent` (default: `2`): Extra spaces per nested block (IF/DOW/DOU/FOR/SELECT/MONITOR/PROC/etc.).
 - `shift6.collapseTokenSpaces` (default: `true`): Controls whether multiple spaces between tokens are collapsed to one.  
 - `shift6.trimStringParentheses` (default: `true`): Removes spaces directly inside parentheses when they contain only a single string literal.  
 - `shift6.alignPlusContinuation` (default: `true`): Aligns lines that start with `+` to the first `+` operator column in the previous line.  
@@ -46,8 +54,6 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
 - `shift6.wrapLongStrings` (default: `false`): Wrap long string literals inside concatenations, splitting only on spaces.
 - `shift6.fixMultilineStringLiterals` (default: `true`): Normalize multi-line single-quote literals into explicit concatenated strings.
 - `shift6.concatStyle` (default: `compact`): String concatenation wrapping style (`compact` or `one-per-line`).
-
-New in 0.1.18: string concat styles, optional long-string wrapping, multiline literal normalization, improved continuation handling.
 
 **C. Git Hook (optional)**
 

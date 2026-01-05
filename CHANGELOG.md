@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.22] - 2025-01-05
+- Fixed formatter handling of full-line `//` comments to keep them at base indent and avoid continuation/line-wrapping changes.
+
 ## [0.1.21] - 2025-12-26
 - Added exec sql block formatting with structured SQL layout, including INSERT/VALUES/SELECT/DEFAULT/GET DIAGNOSTICS patterns.
 - Preserved SQL identifiers and spacing by skipping RPG operator normalization inside exec sql.

@@ -41,6 +41,9 @@ export const tryStartPending = (
   state: ContinuationState,
   targetIndent: number
 ): boolean => {
+  if (seg.trimStart().startsWith('//')) {
+    return false;
+  }
   if (
     !lineEndsStatement(seg) &&
     !getLeadingOperator(seg.trim()) &&

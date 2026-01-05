@@ -21,6 +21,11 @@ export function wrapLongLine(
   const producedLines: string[] = [];
   let splitOccurred = false;
 
+  if (seg.trimStart().startsWith('//')) {
+    producedLines.push(seg);
+    return { producedLines, state, splitOccurred };
+  }
+
   let normalized = normalizeOperatorSpacing(seg, cfg);
   const booleanSplit = splitBooleanAssignmentLine(normalized);
   if (booleanSplit) {

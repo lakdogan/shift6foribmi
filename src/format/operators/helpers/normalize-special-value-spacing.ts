@@ -26,15 +26,15 @@ export const normalizeSpecialValueSpacing = (text: string): string => {
     if (k > j) {
       const token = fullText.substring(j, k).toUpperCase();
       if (allowJoin) {
-        if (/^IN[0-9]{2}$/i.test(token)) {
+        if (/^IN[0-9A-Z]{2}$/i.test(token)) {
           return { append: '*IN' + token.slice(-2), advance: k - 1 - index };
         }
         if (token === 'IN') {
           let m = k;
           while (m < fullText.length && isWhitespace(fullText[m])) m++;
-          const inDigits = fullText.substring(m, m + 2);
-          if (/^[0-9]{2}$/.test(inDigits)) {
-            return { append: '*IN' + inDigits, advance: m + 1 - index };
+          const inSuffix = fullText.substring(m, m + 2).toUpperCase();
+          if (/^[0-9A-Z]{2}$/.test(inSuffix)) {
+            return { append: '*IN' + inSuffix, advance: m + 1 - index };
           }
         }
         if (token === 'N' || SPECIAL_VALUES.includes(token)) {

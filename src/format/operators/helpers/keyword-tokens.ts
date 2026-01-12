@@ -40,5 +40,5 @@ export const isSpecialValueToken = (text: string, index: number): boolean => {
     }
     return true;
   }
-  return SPECIAL_VALUES.includes(token) || /^IN[0-9]{2}$/.test(token);
+  return SPECIAL_VALUES.includes(token) || /^IN[0-9A-Z]{2}$/.test(token);
 };

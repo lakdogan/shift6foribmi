@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.1.23] - 2026-01-12
+- Fixed indicator special-value joining so `*INxx` with alphanumeric suffixes (e.g., `*INKC`) stays intact.
+
 ## [0.1.22] - 2025-01-05
 - Fixed formatter handling of full-line `//` comments to keep them at base indent and avoid continuation/line-wrapping changes.
 

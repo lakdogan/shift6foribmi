@@ -40,6 +40,7 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
 - `shift6.collapseTokenSpaces` (Standard: `true`): Schaltet das Reduzieren mehrfacher Leerzeichen zwischen Tokens auf ein Leerzeichen.  
 - `shift6.trimStringParentheses` (Standard: `true`): Entfernt Leerzeichen direkt innerhalb von Klammern, wenn darin nur ein String literal steht.  
 - `shift6.alignPlusContinuation` (Standard: `true`): Richtet Zeilen, die mit `+` beginnen, unter dem ersten `+` der vorherigen Zeile aus.  
+- `shift6.alignProcedureCallParameters` (Standard: `false`): Richtet fuehrende `:`-Parameterzeilen unter der oeffnenden Klammer + 1 aus und setzt die schliessende `)` in eine eigene, ausgerichtete Zeile.  
 - `shift6.continuationColumn` (Standard: `66`, Minimum: `40`): Spaltengrenze, ab der lange Ausdruecke mit Operatoren in eine neue Fortsetzungszeile umgebrochen werden.
 - `shift6.joinAsteriskTokensInDecl` (Standard: `true`): Verbindet Tokens nach `*` in `DCL-PI`/`DCL-PR`/`DCL-PROC`/`CTL-OPT`-Zeilen (z.B. `*n`, `*no`, `*new`).
 - `shift6.wrapLongStrings` (Standard: `false`): Lange String-Literale in Konkatenationen umbrechen (nur an Leerzeichen).

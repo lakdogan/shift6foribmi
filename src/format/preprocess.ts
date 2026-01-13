@@ -5,6 +5,7 @@ import { normalizeMultilineStringLiterals } from './preprocess/normalize-multili
 import { normalizeExecSqlBlocks } from './preprocess/exec-sql';
 import { processSegment } from './preprocess/process-segment';
 import { splitStatements } from './preprocess/split-statements';
+import { findCommentIndexOutsideStrings } from './utils/string-scan';
 
 export interface PreprocessResult {
   linesToProcess: string[];
@@ -13,6 +14,28 @@ export interface PreprocessResult {
   firstLineText: string;
   lineCount: number;
 }
+
+const splitProcedureParameterClosing = (seg: string): string[] => {
+  const trimmedStart = seg.trimStart();
+  if (!trimmedStart.startsWith(':')) return [seg];
+
+  const commentIndex = findCommentIndexOutsideStrings(seg);
+  const codePart = commentIndex >= 0 ? seg.substring(0, commentIndex) : seg;
+  const commentPart = commentIndex >= 0 ? seg.substring(commentIndex).trimStart() : '';
+  const codeTrimmed = codePart.trimEnd();
+
+  if (!/\)\s*;$/.test(codeTrimmed)) return [seg];
+
+  const closeIndex = codeTrimmed.lastIndexOf(')');
+  const before = codeTrimmed.slice(0, closeIndex).trimEnd();
+  if (before.trim().length === 0) return [seg];
+
+  const indent = seg.match(/^\s*/)?.[0] ?? '';
+  const spacer = commentPart ? ' ' : '';
+  const closeLine = indent + ');' + spacer + commentPart;
+
+  return [before, closeLine];
+};
 
 // Normalize **FREE, split inline statements, and prepare lines for formatting.
 export function preprocessDocument(lines: string[], cfg: Shift6Config): PreprocessResult {
@@ -47,16 +70,23 @@ export function preprocessDocument(lines: string[], cfg: Shift6Config): Preproce
 
       const segments = splitStatements(after);
       for (const s of segments) {
-        if (!s.trimStart().toUpperCase().startsWith('**FREE')) {
-          const result = processSegment(s, i, lineCount, ctx, continuationState, cfg);
+        const paramSegments =
+          cfg.alignProcedureCallParameters && ctx.execSqlDepth === 0
+            ? splitProcedureParameterClosing(s)
+            : [s];
+        if (paramSegments.length > 1) localSplitOccurred = true;
+        for (const seg of paramSegments) {
+          if (seg.trimStart().toUpperCase().startsWith('**FREE')) {
+            localSplitOccurred = true;
+            continue;
+          }
+          const result = processSegment(seg, i, lineCount, ctx, continuationState, cfg);
           if (result.producedLines.length > 0) {
             linesToProcess.push(...result.producedLines);
           }
           if (result.splitOccurred) localSplitOccurred = true;
           ctx = result.ctx;
           continuationState = result.continuationState;
-        } else {
-          localSplitOccurred = true;
         }
       }
       continue;
@@ -64,17 +94,24 @@ export function preprocessDocument(lines: string[], cfg: Shift6Config): Preproce
 
     const segments = splitStatements(original);
     for (const seg of segments) {
-      if (seg.trimStart().toUpperCase().startsWith('**FREE')) {
-        localSplitOccurred = true;
-        continue;
+      const paramSegments =
+        cfg.alignProcedureCallParameters && ctx.execSqlDepth === 0
+          ? splitProcedureParameterClosing(seg)
+          : [seg];
+      if (paramSegments.length > 1) localSplitOccurred = true;
+      for (const part of paramSegments) {
+        if (part.trimStart().toUpperCase().startsWith('**FREE')) {
+          localSplitOccurred = true;
+          continue;
+        }
+        const result = processSegment(part, i, lineCount, ctx, continuationState, cfg);
+        if (result.producedLines.length > 0) {
+          linesToProcess.push(...result.producedLines);
+        }
+        if (result.splitOccurred) localSplitOccurred = true;
+        ctx = result.ctx;
+        continuationState = result.continuationState;
       }
-      const result = processSegment(seg, i, lineCount, ctx, continuationState, cfg);
-      if (result.producedLines.length > 0) {
-        linesToProcess.push(...result.producedLines);
-      }
-      if (result.splitOccurred) localSplitOccurred = true;
-      ctx = result.ctx;
-      continuationState = result.continuationState;
     }
   }
 

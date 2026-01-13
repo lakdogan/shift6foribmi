@@ -7,7 +7,8 @@ export function initFormatContext(): FormatContext {
     procDepth: 0,
     execSqlDepth: 0,
     continuationOperatorColumn: null,
-    pendingAssignmentContinuation: false
+    pendingAssignmentContinuation: false,
+    paramAlignStack: []
   };
 }
 

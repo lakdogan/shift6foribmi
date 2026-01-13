@@ -14,6 +14,7 @@ export function getConfig(): Shift6Config {
     collapseTokenSpaces: cfg.get<boolean>(CONFIG_KEYS.collapseTokenSpaces),
     trimStringParentheses: cfg.get<boolean>(CONFIG_KEYS.trimStringParentheses),
     alignPlusContinuation: cfg.get<boolean>(CONFIG_KEYS.alignPlusContinuation),
+    alignProcedureCallParameters: cfg.get<boolean>(CONFIG_KEYS.alignProcedureCallParameters),
     continuationColumn: cfg.get<number | string>(CONFIG_KEYS.continuationColumn),
     joinAsteriskTokensInDecl: cfg.get<boolean>(CONFIG_KEYS.joinAsteriskTokensInDecl),
     wrapLongStrings: cfg.get<boolean>(CONFIG_KEYS.wrapLongStrings),

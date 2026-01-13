@@ -6,6 +6,7 @@ export interface Shift6Config {
   collapseTokenSpaces: boolean;
   trimStringParentheses: boolean;
   alignPlusContinuation: boolean;
+  alignProcedureCallParameters: boolean;
   continuationColumn: number;
   joinAsteriskTokensInDecl: boolean;
   wrapLongStrings: boolean;

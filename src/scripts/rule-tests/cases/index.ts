@@ -6,6 +6,7 @@ import operatorSpacingBasic from './operator-spacing-basic';
 import specialValuesJoin from './special-values-join';
 import onErrorSpecialValue from './on-error-special-value';
 import continuationAlignment from './continuation-alignment';
+import procedureCallParamAlignment from './procedure-call-param-alignment';
 import declJoinAsteriskProto from './decl-join-asterisk-proto';
 import ctlOptOptionsCollapse from './ctl-opt-options-collapse';
 import inlineStatementSplit from './inline-statement-split';
@@ -132,6 +133,7 @@ export const cases: Case[] = [
   specialValuesJoin,
   onErrorSpecialValue,
   continuationAlignment,
+  procedureCallParamAlignment,
   declJoinAsteriskProto,
   ctlOptOptionsCollapse,
   inlineStatementSplit,

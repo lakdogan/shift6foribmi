@@ -6,6 +6,7 @@ export interface Shift6ConfigInput {
   collapseTokenSpaces?: boolean;
   trimStringParentheses?: boolean;
   alignPlusContinuation?: boolean;
+  alignProcedureCallParameters?: boolean;
   continuationColumn?: number | string;
   joinAsteriskTokensInDecl?: boolean;
   wrapLongStrings?: boolean;
@@ -19,6 +20,7 @@ export const SHIFT6_DEFAULTS: Shift6ConfigInput = {
   collapseTokenSpaces: true,
   trimStringParentheses: true,
   alignPlusContinuation: true,
+  alignProcedureCallParameters: false,
   continuationColumn: 66,
   joinAsteriskTokensInDecl: true,
   wrapLongStrings: false,
@@ -38,6 +40,9 @@ export function normalizeConfig(input: Shift6ConfigInput): Shift6Config {
   );
   const alignPlusContinuation = Boolean(
     input.alignPlusContinuation ?? SHIFT6_DEFAULTS.alignPlusContinuation
+  );
+  const alignProcedureCallParameters = Boolean(
+    input.alignProcedureCallParameters ?? SHIFT6_DEFAULTS.alignProcedureCallParameters
   );
   const continuationColumnRaw = input.continuationColumn ?? SHIFT6_DEFAULTS.continuationColumn;
   const continuationColumnValue = Number(continuationColumnRaw);
@@ -64,6 +69,7 @@ export function normalizeConfig(input: Shift6ConfigInput): Shift6Config {
     collapseTokenSpaces,
     trimStringParentheses,
     alignPlusContinuation,
+    alignProcedureCallParameters,
     continuationColumn,
     joinAsteriskTokensInDecl,
     wrapLongStrings,

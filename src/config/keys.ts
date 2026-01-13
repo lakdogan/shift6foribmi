@@ -4,6 +4,7 @@ export const CONFIG_KEYS = {
   collapseTokenSpaces: 'shift6.collapseTokenSpaces',
   trimStringParentheses: 'shift6.trimStringParentheses',
   alignPlusContinuation: 'shift6.alignPlusContinuation',
+  alignProcedureCallParameters: 'shift6.alignProcedureCallParameters',
   continuationColumn: 'shift6.continuationColumn',
   joinAsteriskTokensInDecl: 'shift6.joinAsteriskTokensInDecl',
   wrapLongStrings: 'shift6.wrapLongStrings',

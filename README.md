@@ -49,6 +49,7 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
 - `shift6.collapseTokenSpaces` (default: `true`): Controls whether multiple spaces between tokens are collapsed to one.  
 - `shift6.trimStringParentheses` (default: `true`): Removes spaces directly inside parentheses when they contain only a single string literal.  
 - `shift6.alignPlusContinuation` (default: `true`): Aligns lines that start with `+` to the first `+` operator column in the previous line.  
+- `shift6.alignProcedureCallParameters` (default: `false`): Aligns leading `:` parameter lines under the opening paren + 1 column and places the closing `)` on its own aligned line.  
 - `shift6.continuationColumn` (default: `66`, min: `40`): Column limit for wrapping long binary-operator expressions onto a new continuation line.
 - `shift6.joinAsteriskTokensInDecl` (default: `true`): Joins `*` tokens in `DCL-PI`/`DCL-PR`/`DCL-PROC`/`CTL-OPT` lines (e.g., `*n`, `*no`, `*new`).
 - `shift6.wrapLongStrings` (default: `false`): Wrap long string literals inside concatenations, splitting only on spaces.

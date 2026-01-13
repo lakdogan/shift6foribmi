@@ -93,6 +93,11 @@
           "default": true,
           "description": "Align lines that start with + to the first + operator column in the previous line."
         },
+        "shift6.alignProcedureCallParameters": {
+          "type": "boolean",
+          "default": false,
+          "description": "Align leading ':' continuation parameters under the opening paren + 1 and move the closing ')' to its own aligned line."
+        },
         "shift6.continuationColumn": {
           "type": "number",
           "default": 66,

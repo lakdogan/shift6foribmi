@@ -20,6 +20,7 @@
 - Set `shift6.blockIndent` to `0` and verify nesting does not increase indent.
 - Set `shift6.continuationColumn` to a small value (e.g., `45`) and confirm long expressions wrap safely without losing tokens.
 - Toggle `shift6.alignPlusContinuation` and confirm leading `+` lines align as expected.
+- Toggle `shift6.alignProcedureCallParameters` and confirm leading `:` parameter lines align under the opening paren + 1 column, with closing `)` moved to its own line aligned under the `:`.
 - Toggle `shift6.joinAsteriskTokensInDecl` and confirm `dcl-pi * n;` becomes `dcl-pi *n;` when enabled.
 - Toggle `shift6.wrapLongStrings` and confirm long string literals split only at spaces.
 - Toggle `shift6.fixMultilineStringLiterals` and confirm unclosed single-quote literals are normalized into concatenations.

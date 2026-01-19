@@ -7,7 +7,6 @@ export interface LineFlags {
   isExecSqlStart: boolean;
   isExecSqlEnd: boolean;
   hasInlineCloser: boolean;
-  isInlineDclDs: boolean;
   isCommentOnly: boolean;
   endsStatement: boolean;
   endsWithAssignment: boolean;

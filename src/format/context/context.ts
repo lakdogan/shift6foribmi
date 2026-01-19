@@ -54,7 +54,7 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
     indentLevel++;
   }
   if (flags.isOpener) {
-    if (!flags.hasInlineCloser && !flags.isInlineDclDs) {
+    if (!flags.hasInlineCloser) {
       indentLevel++;
       if (flags.isProcStart) {
         procDepth++;

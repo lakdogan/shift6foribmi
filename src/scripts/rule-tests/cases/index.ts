@@ -8,6 +8,7 @@ import onErrorSpecialValue from './on-error-special-value';
 import continuationAlignment from './continuation-alignment';
 import procedureCallParamAlignment from './procedure-call-param-alignment';
 import declJoinAsteriskProto from './decl-join-asterisk-proto';
+import dclDsInline from './dcl-ds-inline';
 import ctlOptOptionsCollapse from './ctl-opt-options-collapse';
 import inlineStatementSplit from './inline-statement-split';
 import dclPrInline from './dcl-pr-inline';
@@ -137,6 +138,7 @@ export const cases: Case[] = [
   continuationAlignment,
   procedureCallParamAlignment,
   declJoinAsteriskProto,
+  dclDsInline,
   ctlOptOptionsCollapse,
   inlineStatementSplit,
   dclPrInline,

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [0.2.1] - 2026-01-19
 - Kept inline `dcl-pr ... end-pr;` prototypes on a single line.
+- Kept inline `dcl-ds ... end-ds;` blocks on a single line.
 - Auto-closed free-form `exec sql` blocks without `end-exec;` so formatting resumes correctly.
 - Preserved SQL `<>` as a single operator during exec sql normalization.
 

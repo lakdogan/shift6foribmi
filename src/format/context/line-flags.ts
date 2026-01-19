@@ -32,11 +32,6 @@ export function getLineFlags(info: LineInfo): LineFlags {
   const isExecSqlStart = /^EXEC\s+SQL\b/.test(trimmedUpper);
   const isExecSqlEnd = /^END-EXEC\b/.test(trimmedUpper) || /^END\s+EXEC\b/.test(trimmedUpper);
   const hasInlineCloser = containsKeywordToken(upperNoComment, CLOSERS);
-  const isInlineDclDs =
-    upper.startsWith('DCL-DS') &&
-    info.trimmed.endsWith(';') &&
-    !containsKeywordToken(upperNoComment, ['END-DS', 'ENDDS']) &&
-    /\b(LIKEDS|EXTNAME)\b/i.test(upperNoComment);
   const lastToken = getLastSignificantToken(info);
   const endsStatement =
     !info.isCommentOnly &&
@@ -54,7 +49,6 @@ export function getLineFlags(info: LineInfo): LineFlags {
     isExecSqlStart,
     isExecSqlEnd,
     hasInlineCloser,
-    isInlineDclDs,
     isCommentOnly: info.isCommentOnly,
     endsStatement,
     endsWithAssignment

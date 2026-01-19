@@ -13,7 +13,10 @@ export function splitStatements(line: string): string[] {
   const commentPart = commentIndex >= 0 ? line.substring(commentIndex) : '';
 
   const inlinePrototypePattern = /^\s*dcl-pr\b[^;]*;\s*end-pr\s*;\s*$/i;
-  if (inlinePrototypePattern.test(codePart)) return [line];
+  const inlineDclDsPattern = /^\s*dcl-ds\b[^;]*;\s*end-ds\s*;\s*$/i;
+  if (inlinePrototypePattern.test(codePart) || inlineDclDsPattern.test(codePart)) {
+    return [line];
+  }
 
   if (!codePart.includes(';')) return [line];
 

@@ -3,6 +3,7 @@ import { initContinuationState } from './continuations';
 import { initFormatContext } from './context';
 import { normalizeMultilineStringLiterals } from './preprocess/normalize-multiline';
 import { normalizeExecSqlBlocks } from './preprocess/exec-sql';
+import { normalizeEmptyDclDsBlocks } from './preprocess/normalize-empty-dcl-ds';
 import { processSegment } from './preprocess/process-segment';
 import { splitStatements } from './preprocess/split-statements';
 import { findCommentIndexOutsideStrings } from './utils/string-scan';
@@ -50,6 +51,10 @@ export function preprocessDocument(lines: string[], cfg: Shift6Config): Preproce
   const execSqlNormalized = normalizeExecSqlBlocks(workingLines, cfg);
   workingLines = execSqlNormalized.lines;
   if (execSqlNormalized.changed) splitOccurred = true;
+
+  const emptyDclDsNormalized = normalizeEmptyDclDsBlocks(workingLines);
+  workingLines = emptyDclDsNormalized.lines;
+  if (emptyDclDsNormalized.changed) splitOccurred = true;
 
   const lineCount = workingLines.length;
   const firstLineText = lineCount > 0 ? workingLines[0] : '';

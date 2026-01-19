@@ -1,6 +1,6 @@
 import type { Shift6Config } from '../../../config';
 import { formatSqlStatement } from './formatters/index';
-import { END_EXEC, EXEC_SQL_START, splitSqlStatements } from './utils/index';
+import { END_EXEC, EXEC_SQL_START, endsWithTopLevelSemicolon, splitSqlStatements } from './utils/index';
 
 interface ExecSqlNormalizeResult {
   lines: string[];
@@ -98,6 +98,16 @@ export const normalizeExecSqlBlocks = (
     }
 
     sqlBuffer.push(line.trim());
+    const combined = sqlBuffer.join(' ').trim();
+    if (combined.length > 0 && endsWithTopLevelSemicolon(combined)) {
+      flushBuffer();
+      const nextLine = nextNonEmptyLine(i + 1);
+      const expectsEndExec = nextLine ? END_EXEC.test(nextLine) : false;
+      if (!expectsEndExec) {
+        out.push('end-exec;');
+        inExecSql = false;
+      }
+    }
   }
 
   if (inExecSql) {

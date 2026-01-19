@@ -1,5 +1,56 @@
 import { scanStringAware } from '../../../utils/string-scan';
 
+const isWordChar = (ch: string): boolean => /[A-Za-z0-9_]/.test(ch);
+
+const peekNextWords = (text: string, from: number, count: number): string[] => {
+  const words: string[] = [];
+  for (let i = from; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '\'' || ch === '"') {
+      const quote = ch;
+      i++;
+      while (i < text.length) {
+        if (text[i] === quote) {
+          if (i + 1 < text.length && text[i + 1] === quote) {
+            i += 2;
+            continue;
+          }
+          break;
+        }
+        i++;
+      }
+      continue;
+    }
+    if (isWordChar(ch)) {
+      let j = i + 1;
+      while (j < text.length && isWordChar(text[j])) j++;
+      words.push(text.slice(i, j).toUpperCase());
+      i = j - 1;
+      if (words.length >= count) return words;
+    }
+  }
+  return words;
+};
+
+const updateBlockDepth = (text: string, word: string, endIndex: number, depth: number): number => {
+  const upper = word.toUpperCase();
+  if (upper === 'BEGIN') {
+    const [nextWord, nextNext] = peekNextWords(text, endIndex, 2);
+    if (nextWord === 'DECLARE' && nextNext === 'SECTION') {
+      return depth;
+    }
+    return depth + 1;
+  }
+  if (upper === 'END') {
+    const [nextWord] = peekNextWords(text, endIndex, 1);
+    if (nextWord && ['IF', 'CASE', 'LOOP', 'FOR', 'WHILE', 'REPEAT'].includes(nextWord)) {
+      return depth;
+    }
+    return Math.max(0, depth - 1);
+  }
+  return depth;
+};
+
 // Split a string on delimiters outside parentheses.
 export const splitTopLevel = (text: string, delimiter: string): string[] => {
   const parts: string[] = [];
@@ -32,59 +83,6 @@ export const splitSqlStatements = (text: string): string[] => {
   let blockDepth = 0;
   let currentWord = '';
 
-  const isWordChar = (ch: string): boolean => /[A-Za-z0-9_]/.test(ch);
-
-  const peekNextWords = (from: number, count: number): string[] => {
-    const words: string[] = [];
-    for (let i = from; i < text.length; i++) {
-      const ch = text[i];
-      if (ch === '\'' || ch === '"') {
-        const quote = ch;
-        i++;
-        while (i < text.length) {
-          if (text[i] === quote) {
-            if (i + 1 < text.length && text[i + 1] === quote) {
-              i += 2;
-              continue;
-            }
-            break;
-          }
-          i++;
-        }
-        continue;
-      }
-      if (isWordChar(ch)) {
-        let j = i + 1;
-        while (j < text.length && isWordChar(text[j])) j++;
-        words.push(text.slice(i, j).toUpperCase());
-        i = j - 1;
-        if (words.length >= count) return words;
-      }
-    }
-    return words;
-  };
-
-  const flushWord = (endIndex: number) => {
-    if (!currentWord) return;
-    const upper = currentWord.toUpperCase();
-    if (upper === 'BEGIN') {
-      const [nextWord, nextNext] = peekNextWords(endIndex, 2);
-      if (nextWord === 'DECLARE' && nextNext === 'SECTION') {
-        currentWord = '';
-        return;
-      }
-      blockDepth++;
-    } else if (upper === 'END') {
-      const [nextWord] = peekNextWords(endIndex, 1);
-      if (nextWord && ['IF', 'CASE', 'LOOP', 'FOR', 'WHILE', 'REPEAT'].includes(nextWord)) {
-        currentWord = '';
-        return;
-      }
-      if (blockDepth > 0) blockDepth--;
-    }
-    currentWord = '';
-  };
-
   scanStringAware(text, (ch, index) => {
     if (isWordChar(ch)) {
       currentWord += ch;
@@ -92,7 +90,8 @@ export const splitSqlStatements = (text: string): string[] => {
     }
 
     if (currentWord) {
-      flushWord(index);
+      blockDepth = updateBlockDepth(text, currentWord, index, blockDepth);
+      currentWord = '';
     }
 
     if (ch === ';' && blockDepth === 0) {
@@ -101,10 +100,50 @@ export const splitSqlStatements = (text: string): string[] => {
       start = index + 1;
     }
   });
-  if (currentWord) flushWord(text.length);
+  if (currentWord) {
+    blockDepth = updateBlockDepth(text, currentWord, text.length, blockDepth);
+    currentWord = '';
+  }
   const tail = text.slice(start).trim();
   if (tail.length > 0) statements.push(tail);
   return statements;
+};
+
+// Check if the last non-whitespace character is a top-level semicolon.
+export const endsWithTopLevelSemicolon = (text: string): boolean => {
+  let blockDepth = 0;
+  let currentWord = '';
+  let lastTopLevelSemicolon = -1;
+
+  scanStringAware(text, (ch, index) => {
+    if (isWordChar(ch)) {
+      currentWord += ch;
+      return;
+    }
+
+    if (currentWord) {
+      blockDepth = updateBlockDepth(text, currentWord, index, blockDepth);
+      currentWord = '';
+    }
+
+    if (ch === ';' && blockDepth === 0) {
+      lastTopLevelSemicolon = index;
+    }
+  });
+
+  if (currentWord) {
+    blockDepth = updateBlockDepth(text, currentWord, text.length, blockDepth);
+    currentWord = '';
+  }
+
+  if (lastTopLevelSemicolon < 0) return false;
+  for (let i = lastTopLevelSemicolon + 1; i < text.length; i++) {
+    const ch = text[i];
+    if (ch !== ' ' && ch !== '\t' && ch !== '\n' && ch !== '\r') {
+      return false;
+    }
+  }
+  return true;
 };
 
 // Split statements on semicolons outside string literals.

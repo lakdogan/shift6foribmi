@@ -7,7 +7,12 @@ export {
   stripTrailingSemicolon,
   trimTrailingSemicolon
 } from './normalize';
-export { splitTopLevel, splitSqlStatements, splitStatementsOutsideStrings } from './split';
+export {
+  splitTopLevel,
+  splitSqlStatements,
+  splitStatementsOutsideStrings,
+  endsWithTopLevelSemicolon
+} from './split';
 export { findMatchingParenIndex, findKeywordIndex, findLastKeywordIndex } from './find';
 export { parseWithClauses } from './cte';
 export { splitSetOperations, splitSelectClauses } from './select';

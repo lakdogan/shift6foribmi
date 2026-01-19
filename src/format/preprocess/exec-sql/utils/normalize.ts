@@ -70,6 +70,13 @@ export const normalizeSqlExpression = (text: string): string => {
     return '';
   };
 
+  const nextNonSpaceIndex = (start: number): number => {
+    for (let i = start; i < compact.length; i++) {
+      if (compact[i] !== ' ') return i;
+    }
+    return -1;
+  };
+
   const lastNonSpace = () => {
     for (let i = out.length - 1; i >= 0; i--) {
       const ch = out[i];
@@ -99,6 +106,24 @@ export const normalizeSqlExpression = (text: string): string => {
       quoteChar = ch;
       out += ch;
       continue;
+    }
+
+    if (ch === '<') {
+      const nextIndex = nextNonSpaceIndex(i + 1);
+      if (nextIndex >= 0 && compact[nextIndex] === '>') {
+        if (out.length > 0 && !out.endsWith(' ')) {
+          out += ' ';
+        }
+        out += '<>';
+        const afterIndex = nextIndex + 1;
+        const nextAfter = nextNonSpace(afterIndex);
+        const nextAfterIsSpace = compact[afterIndex] === ' ';
+        if (!nextAfterIsSpace && nextAfter !== '' && nextAfter !== ' ') {
+          out += ' ';
+        }
+        i = nextIndex;
+        continue;
+      }
     }
 
     if (ch === '*' && /[A-Za-z]/.test(nextNonSpace(i + 1))) {

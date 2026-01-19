@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.2.1] - 2026-01-19
+- Kept inline `dcl-pr ... end-pr;` prototypes on a single line.
+- Auto-closed free-form `exec sql` blocks without `end-exec;` so formatting resumes correctly.
+- Preserved SQL `<>` as a single operator during exec sql normalization.
+
 ## [0.2.0] - 2026-01-13
 - Added optional alignment for procedure call parameter continuation lines via `shift6.alignProcedureCallParameters`.
 

@@ -12,6 +12,9 @@ export function splitStatements(line: string): string[] {
   const codePart = commentIndex >= 0 ? line.substring(0, commentIndex) : line;
   const commentPart = commentIndex >= 0 ? line.substring(commentIndex) : '';
 
+  const inlinePrototypePattern = /^\s*dcl-pr\b[^;]*;\s*end-pr\s*;\s*$/i;
+  if (inlinePrototypePattern.test(codePart)) return [line];
+
   if (!codePart.includes(';')) return [line];
 
   const lineIndent = line.match(/^ */)?.[0] ?? '';

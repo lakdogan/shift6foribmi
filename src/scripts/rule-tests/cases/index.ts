@@ -10,6 +10,7 @@ import procedureCallParamAlignment from './procedure-call-param-alignment';
 import declJoinAsteriskProto from './decl-join-asterisk-proto';
 import ctlOptOptionsCollapse from './ctl-opt-options-collapse';
 import inlineStatementSplit from './inline-statement-split';
+import dclPrInline from './dcl-pr-inline';
 import stringParenthesesTrim from './string-parentheses-trim';
 import spaceCollapseBetweenTokens from './space-collapse-between-tokens';
 import percentBuiltinsSpacing from './percent-builtins-spacing';
@@ -28,6 +29,7 @@ import wrapLongLiteralNewLine from './wrap-long-literal-new-line';
 import booleanAssignmentWrap from './boolean-assignment-wrap';
 import avoidSplitInsideParens from './avoid-split-inside-parens';
 import execSqlFormatting from './exec-sql-formatting';
+import execSqlFreeformMultiline from './exec-sql-freeform-multiline';
 import execSqlUpdateDelete from './exec-sql-update-delete';
 import execSqlCallSetCommit from './exec-sql-call-set-commit';
 import execSqlMerge from './exec-sql-merge';
@@ -137,6 +139,7 @@ export const cases: Case[] = [
   declJoinAsteriskProto,
   ctlOptOptionsCollapse,
   inlineStatementSplit,
+  dclPrInline,
   stringParenthesesTrim,
   spaceCollapseBetweenTokens,
   percentBuiltinsSpacing,
@@ -155,6 +158,7 @@ export const cases: Case[] = [
   booleanAssignmentWrap,
   avoidSplitInsideParens,
   execSqlFormatting,
+  execSqlFreeformMultiline,
   execSqlUpdateDelete,
   execSqlCallSetCommit,
   execSqlMerge,

@@ -129,6 +129,7 @@ import execSqlDeleteUsingSubselect from './exec-sql-delete-using-subselect';
 import execSqlSetOperationsOrder from './exec-sql-set-operations-order';
 import commentIndentFollowing from './comment-indent-following';
 import procedureCallParamAlignmentSplit from './procedure-call-param-alignment-split';
+import procedureCallParamPreserve from './procedure-call-param-preserve';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -260,5 +261,6 @@ export const cases: Case[] = [
   execSqlDeleteUsingSubselect,
   execSqlSetOperationsOrder,
   commentIndentFollowing,
-  procedureCallParamAlignmentSplit
+  procedureCallParamAlignmentSplit,
+  procedureCallParamPreserve
 ];

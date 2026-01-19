@@ -13,6 +13,10 @@ export const indentationRule: Rule = {
     const target = isCommentLine
       ? state.commentIndentOverride ?? cfg.targetBaseIndent
       : cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent + continuationOffset;
+    const preserveIndent =
+      !cfg.alignProcedureCallParameters &&
+      state.paramContinuationDepth > 0 &&
+      !isCommentLine;
 
     let newText = state.current;
     if (isCommentLine) {
@@ -23,7 +27,7 @@ export const indentationRule: Rule = {
       newText = ' '.repeat(adjustedIndent) + trimmed;
     } else if (currentIndent < target) {
       newText = ' '.repeat(target - currentIndent) + state.current;
-    } else if (currentIndent > target) {
+    } else if (currentIndent > target && !preserveIndent) {
       newText = state.current.substring(currentIndent - target);
     }
 

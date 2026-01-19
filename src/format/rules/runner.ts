@@ -7,6 +7,7 @@ import {
   updateContextBeforeLine
 } from '../context';
 import { countLeadingSpaces } from '../utils';
+import { findCommentIndexOutsideStrings, scanOutsideStrings } from '../utils/string-scan';
 import { PreprocessResult } from '../preprocess';
 import { FormatCoreResult } from '../types';
 import { Rule } from './types';
@@ -28,6 +29,22 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
     probeCtx = updateContextAfterLine(probeCtx, flags);
   }
 
+  const paramContinuationDepth: number[] = new Array(lineInfos.length).fill(0);
+  let parenDepth = 0;
+  for (let i = 0; i < lineInfos.length; i++) {
+    paramContinuationDepth[i] = parenDepth;
+    const line = lineInfos[i].original;
+    const commentIndex = findCommentIndexOutsideStrings(line);
+    const codePart = commentIndex >= 0 ? line.slice(0, commentIndex) : line;
+    scanOutsideStrings(codePart, (ch) => {
+      if (ch === '(') {
+        parenDepth++;
+      } else if (ch === ')') {
+        parenDepth = Math.max(0, parenDepth - 1);
+      }
+    });
+  }
+
   const desiredIndent = lineInfos.map((info, index) => {
     const ctx = ctxBefore[index];
     const currentIndent = countLeadingSpaces(info.original);
@@ -36,6 +53,13 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
     const target = cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent + continuationOffset;
     if (ctx.execSqlDepth > 0 && !trimmedStart.startsWith('//')) {
       return target + currentIndent;
+    }
+    const preserveIndent =
+      !cfg.alignProcedureCallParameters &&
+      paramContinuationDepth[index] > 0 &&
+      !trimmedStart.startsWith('//');
+    if (preserveIndent && currentIndent > target) {
+      return currentIndent;
     }
     return target;
   });
@@ -70,7 +94,8 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
       current: original,
       info,
       targetIndent: cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent,
-      commentIndentOverride: commentIndentOverrides[index]
+      commentIndentOverride: commentIndentOverrides[index],
+      paramContinuationDepth: paramContinuationDepth[index]
     };
 
     for (const rule of rules) {

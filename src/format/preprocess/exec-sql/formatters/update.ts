@@ -6,6 +6,7 @@ import {
   findKeywordIndex
 } from '../utils/index';
 import { formatFromClause } from './from';
+import { formatBooleanClause } from './conditions';
 
 // Format UPDATE statements with SET and optional FROM/WHERE.
 export const formatUpdate = (text: string, baseIndent: string, nestedIndent: string): string[] => {
@@ -59,7 +60,9 @@ export const formatUpdate = (text: string, baseIndent: string, nestedIndent: str
     lines.push(...fromLines);
     if (whereIndexInFrom >= 0) {
       const whereText = fromText.slice(whereIndexInFrom + 5).trimStart();
-      lines.push(baseIndent + `where ${normalizeSqlExpression(whereText)};`);
+      const whereLines = formatBooleanClause('where', whereText, baseIndent, nestedIndent);
+      whereLines[whereLines.length - 1] = whereLines[whereLines.length - 1] + ';';
+      lines.push(...whereLines);
       return lines;
     }
     lines[lines.length - 1] = lines[lines.length - 1] + ';';
@@ -68,7 +71,9 @@ export const formatUpdate = (text: string, baseIndent: string, nestedIndent: str
 
   if (upperRest.startsWith('WHERE')) {
     const whereText = afterSet.slice(5).trimStart();
-    lines.push(baseIndent + `where ${normalizeSqlExpression(whereText)};`);
+    const whereLines = formatBooleanClause('where', whereText, baseIndent, nestedIndent);
+    whereLines[whereLines.length - 1] = whereLines[whereLines.length - 1] + ';';
+    lines.push(...whereLines);
     return lines;
   }
 

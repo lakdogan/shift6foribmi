@@ -146,6 +146,83 @@ export const endsWithTopLevelSemicolon = (text: string): boolean => {
   return true;
 };
 
+export type BooleanCondition = {
+  op: 'and' | 'or' | null;
+  text: string;
+};
+
+// Split boolean conditions on AND/OR at top level while preserving BETWEEN ... AND.
+export const splitBooleanConditions = (text: string): BooleanCondition[] => {
+  const segments: BooleanCondition[] = [];
+  let start = 0;
+  let depth = 0;
+  let currentWord = '';
+  let wordStart = 0;
+  let pendingOp: 'and' | 'or' | null = null;
+  let betweenActive = false;
+
+  const pushSegment = (endIndex: number) => {
+    const segmentText = text.slice(start, endIndex).trim();
+    if (segmentText.length > 0) {
+      segments.push({ op: pendingOp, text: segmentText });
+    }
+    pendingOp = null;
+  };
+
+  const flushWord = (endIndex: number) => {
+    if (!currentWord) return;
+    const upper = currentWord.toUpperCase();
+    if (upper === 'BETWEEN' && depth === 0) {
+      betweenActive = true;
+      currentWord = '';
+      return;
+    }
+    if ((upper === 'AND' || upper === 'OR') && depth === 0) {
+      if (upper === 'AND' && betweenActive) {
+        betweenActive = false;
+        currentWord = '';
+        return;
+      }
+      pushSegment(wordStart);
+      pendingOp = upper === 'AND' ? 'and' : 'or';
+      start = endIndex;
+      currentWord = '';
+      return;
+    }
+    currentWord = '';
+  };
+
+  scanStringAware(text, (ch, index) => {
+    if (ch === '(') {
+      if (currentWord) flushWord(index);
+      depth++;
+      return;
+    }
+    if (ch === ')') {
+      if (currentWord) flushWord(index);
+      depth = Math.max(0, depth - 1);
+      return;
+    }
+    if (isWordChar(ch)) {
+      if (!currentWord) wordStart = index;
+      currentWord += ch;
+      return;
+    }
+    if (currentWord) flushWord(index);
+  });
+
+  if (currentWord) {
+    flushWord(text.length);
+  }
+
+  const tail = text.slice(start).trim();
+  if (tail.length > 0) {
+    segments.push({ op: pendingOp, text: tail });
+  }
+
+  return segments;
+};
+
 // Split statements on semicolons outside string literals.
 export const splitStatementsOutsideStrings = (text: string): string[] => {
   const statements: string[] = [];

@@ -41,7 +41,7 @@ export const formatSqlStatement = (text: string, indentStep: number): string[] =
     return formatUpdate(normalized, baseIndent, nestedIndent);
   }
   if (upper.startsWith('DELETE ')) {
-    return formatDelete(normalized, baseIndent);
+    return formatDelete(normalized, baseIndent, nestedIndent);
   }
   if (upper.startsWith('CALL ')) {
     return formatCall(normalized, baseIndent, nestedIndent);

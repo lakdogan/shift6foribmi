@@ -11,6 +11,7 @@ import {
 import { scanStringAware } from '../../../utils/string-scan';
 import { formatFromClause } from './from';
 import { formatSelectSetOperations } from './select-set';
+import { formatBooleanClause } from './conditions';
 
 // Format SELECT and WITH queries into structured layout.
 export const formatSelect = (text: string, baseIndent: string, nestedIndent: string): string[] => {
@@ -140,7 +141,11 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
     }
 
     if (keyword === 'where' || keyword === 'having') {
-      lines.push(baseIndent + ` ${keyword} ${normalizeSqlExpression(restClause)}`.trim() + suffix);
+      const clauseLines = formatBooleanClause(keyword as 'where' | 'having', restClause, baseIndent, nestedIndent);
+      if (isLast) {
+        clauseLines[clauseLines.length - 1] = clauseLines[clauseLines.length - 1] + ';';
+      }
+      lines.push(...clauseLines);
       continue;
     }
 

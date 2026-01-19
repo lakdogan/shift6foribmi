@@ -11,7 +11,8 @@ export {
   splitTopLevel,
   splitSqlStatements,
   splitStatementsOutsideStrings,
-  endsWithTopLevelSemicolon
+  endsWithTopLevelSemicolon,
+  splitBooleanConditions
 } from './split';
 export { findMatchingParenIndex, findKeywordIndex, findLastKeywordIndex } from './find';
 export { parseWithClauses } from './cte';

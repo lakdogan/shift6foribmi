@@ -45,7 +45,7 @@ export const formatWithStatement = (
   } else if (upperRemainder.startsWith('UPDATE ')) {
     formatted = formatUpdate(remainder, baseIndent, nestedIndent);
   } else if (upperRemainder.startsWith('DELETE ')) {
-    formatted = formatDelete(remainder, baseIndent);
+    formatted = formatDelete(remainder, baseIndent, nestedIndent);
   } else if (upperRemainder.startsWith('MERGE ')) {
     formatted = formatMerge(remainder, baseIndent, nestedIndent);
   } else {

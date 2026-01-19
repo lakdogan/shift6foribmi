@@ -8,7 +8,9 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'having sum(AMOUNT) > 100 and count(*) > 1;'
+    'having',
+    'sum(AMOUNT) > 100',
+    'and count(*) > 1;'
   ]
 };
 

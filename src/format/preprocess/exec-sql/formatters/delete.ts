@@ -1,13 +1,17 @@
 import {
   normalizeSqlWhitespace,
   normalizeSqlIdentifierPath,
-  normalizeSqlExpression,
   stripTrailingSemicolon,
   findKeywordIndex
 } from '../utils/index';
+import { formatBooleanClause } from './conditions';
 
 // Format DELETE statements with USING and WHERE variants.
-export const formatDelete = (text: string, baseIndent: string): string[] => {
+export const formatDelete = (
+  text: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] => {
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
   const deleteMatch = upper.match(/^DELETE\s+(FROM\s+)?/);
@@ -47,7 +51,9 @@ export const formatDelete = (text: string, baseIndent: string): string[] => {
       lines.push(baseIndent + `where current of ${normalizeSqlWhitespace(cursor)};`);
       return lines;
     }
-    lines.push(baseIndent + `where ${normalizeSqlExpression(whereText)};`);
+    const whereLines = formatBooleanClause('where', whereText, baseIndent, nestedIndent);
+    whereLines[whereLines.length - 1] = whereLines[whereLines.length - 1] + ';';
+    lines.push(...whereLines);
     return lines;
   }
 

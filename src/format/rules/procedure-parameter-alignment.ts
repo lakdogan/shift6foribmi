@@ -58,6 +58,19 @@ export const procedureParameterAlignmentRule: Rule = {
           changed = true;
         }
       }
+    } else if (
+      paramAlignStack.length > 0 &&
+      trimmedStart.length > 0 &&
+      !trimmedStart.startsWith('//')
+    ) {
+      const top = paramAlignStack[paramAlignStack.length - 1];
+      const desiredColumn = top.colonColumn ?? top.parenColumn + 1;
+      const desiredIndent = Math.max(state.targetIndent, desiredColumn);
+      const aligned = ' '.repeat(desiredIndent) + trimmedStart;
+      if (aligned !== newText) {
+        newText = aligned;
+        changed = true;
+      }
     }
 
     const commentIndex = findCommentIndexOutsideStrings(newText);

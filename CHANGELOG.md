@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Split exec sql WHERE/HAVING conditions onto separate lines for top-level AND/OR.
 - Skipped RPG operator spacing on inline `exec sql ...;` to avoid breaking SQL tokens like `SCHEMA/TABLE` and `*cs`.
 - Aligned full-line `//` comments to the indent of the following code line for tighter grouping.
+- Split inline procedure calls into parameter lines when alignment is enabled, while preserving existing multi-line layouts.
 
 ## [0.2.0] - 2026-01-13
 - Added optional alignment for procedure call parameter continuation lines via `shift6.alignProcedureCallParameters`.

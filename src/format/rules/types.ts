@@ -6,6 +6,7 @@ export interface LineState {
   current: string;
   info: LineInfo;
   targetIndent: number;
+  commentIndentOverride: number | null;
 }
 
 export interface RuleResult {

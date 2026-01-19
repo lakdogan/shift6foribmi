@@ -11,12 +11,12 @@ export const indentationRule: Rule = {
     const isCommentLine = trimmedStart.startsWith('//');
     const continuationOffset = ctx.pendingAssignmentContinuation ? cfg.blockIndent : 0;
     const target = isCommentLine
-      ? cfg.targetBaseIndent
+      ? state.commentIndentOverride ?? cfg.targetBaseIndent
       : cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent + continuationOffset;
 
     let newText = state.current;
     if (isCommentLine) {
-      newText = ' '.repeat(cfg.targetBaseIndent) + trimmedStart;
+      newText = ' '.repeat(target) + trimmedStart;
     } else if (ctx.execSqlDepth > 0) {
       const trimmed = state.current.trimStart();
       const adjustedIndent = target + currentIndent;

@@ -127,6 +127,7 @@ import execSqlMergeAdvanced from './exec-sql-merge-advanced';
 import execSqlUpdateFromSubquery from './exec-sql-update-from-subquery';
 import execSqlDeleteUsingSubselect from './exec-sql-delete-using-subselect';
 import execSqlSetOperationsOrder from './exec-sql-set-operations-order';
+import commentIndentFollowing from './comment-indent-following';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -256,5 +257,6 @@ export const cases: Case[] = [
   execSqlMergeAdvanced,
   execSqlUpdateFromSubquery,
   execSqlDeleteUsingSubselect,
-  execSqlSetOperationsOrder
+  execSqlSetOperationsOrder,
+  commentIndentFollowing
 ];

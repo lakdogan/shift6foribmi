@@ -47,7 +47,13 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
   let execSqlDepth = ctx.execSqlDepth;
 
   if (execSqlDepth > 0) {
-    return ctx;
+    if (flags.isExecSqlEnd || flags.endsStatement) {
+      execSqlDepth = Math.max(0, execSqlDepth - 1);
+    }
+    return {
+      ...ctx,
+      execSqlDepth
+    };
   }
 
   if (flags.isMid) {
@@ -61,7 +67,7 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
       }
     }
   }
-  if (flags.isExecSqlStart && !flags.isExecSqlEnd) {
+  if (flags.isExecSqlStart && !flags.isExecSqlEnd && !flags.endsStatement) {
     execSqlDepth++;
   }
 

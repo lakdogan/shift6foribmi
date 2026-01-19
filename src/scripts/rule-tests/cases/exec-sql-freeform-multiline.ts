@@ -15,9 +15,9 @@ const testCase: Case = {
     'select',
     'from SALES/CUSTOMER',
     "where STATUS <> 'A';",
-    'end-exec;',
     "dsply 'AFTER';"
-  ]
+  ],
+  mustExclude: ['end-exec;']
 };
 
 export default testCase;

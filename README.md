@@ -31,6 +31,8 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
     -   *Developer Value:* **Readable Blocks:** Maintains structure without manual alignment.
 -   **Statement Splitting:** Ensures each semicolon-terminated statement is on its own line and cleans up repeated `;`.
     -   *Developer Value:* **Clear Statements:** Prevents dense inline code from hiding logic.
+-   **Comment Alignment:** Full-line `//` comments align to the following code line.
+    -   *Developer Value:* **Tighter Grouping:** Keeps comment blocks visually attached to the code they describe.
 -   **Platform Compatibility:** Specifically designed to reconcile VS Code's flexible formatting with PDM's rigid requirements.
     -   *Developer Value:* **Seamless Toolchain:** Ensures source code is valid across both local and remote environments.
 -   **Local & Remote Support:** Works on local files (`file:`), unsaved editors, and IBM i remote source members (e.g., Code for IBM i `ibmi:` / `vscode-vfs:` URIs).
@@ -49,7 +51,7 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
 - `shift6.collapseTokenSpaces` (default: `true`): Controls whether multiple spaces between tokens are collapsed to one.  
 - `shift6.trimStringParentheses` (default: `true`): Removes spaces directly inside parentheses when they contain only a single string literal.  
 - `shift6.alignPlusContinuation` (default: `true`): Aligns lines that start with `+` to the first `+` operator column in the previous line.  
-- `shift6.alignProcedureCallParameters` (default: `false`): Aligns leading `:` parameter lines under the opening paren + 1 column and places the closing `)` on its own aligned line.  
+- `shift6.alignProcedureCallParameters` (default: `false`): Aligns leading `:` parameter lines under the opening paren + 1 column and places the closing `)` on its own aligned line; when enabled, inline calls with `:` are split into aligned lines, and when disabled, existing multiline parameter indentation is preserved.  
 - `shift6.continuationColumn` (default: `66`, min: `40`): Column limit for wrapping long binary-operator expressions onto a new continuation line.
 - `shift6.joinAsteriskTokensInDecl` (default: `true`): Joins `*` tokens in `DCL-PI`/`DCL-PR`/`DCL-PROC`/`CTL-OPT` lines (e.g., `*n`, `*no`, `*new`).
 - `shift6.wrapLongStrings` (default: `false`): Wrap long string literals inside concatenations, splitting only on spaces.

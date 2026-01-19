@@ -24,6 +24,8 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
   - *Mehrwert:* Lesbare Schachtelungen, ohne bestehende Struktur zu zerstoeren.
 - **Semikolon-Splitting:** Jede Anweisung endet auf eigener Zeile; Mehrfach-`;` werden bereinigt.  
   - *Mehrwert:* Klar getrennte Statements, auch wenn sie inline geschrieben wurden.
+- **Kommentar-Ausrichtung:** Vollzeilige `//`-Kommentare richten sich nach der naechsten Codezeile aus.
+  - *Mehrwert:* Kommentare bleiben optisch nah am zugehoerigen Code.
 - **Lokal & Remote:** Funktioniert auf lokalen Dateien (`file:`), unsaved Tabs und IBM i Remote Members (z.B. Code for IBM i `ibmi:` / `vscode-vfs:` URIs).  
   - *Mehrwert:* Direkt auf dem Host formatieren, ohne den Member herunterladen zu muessen.
 - **Whitespace-Normalisierung:** Mehrfach-Spaces zwischen Tokens werden auf eines reduziert (z.B. `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) und Spaces in string-only Klammern werden getrimmt `(   'error'  )` -> `('error')`.  
@@ -40,7 +42,7 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
 - `shift6.collapseTokenSpaces` (Standard: `true`): Schaltet das Reduzieren mehrfacher Leerzeichen zwischen Tokens auf ein Leerzeichen.  
 - `shift6.trimStringParentheses` (Standard: `true`): Entfernt Leerzeichen direkt innerhalb von Klammern, wenn darin nur ein String literal steht.  
 - `shift6.alignPlusContinuation` (Standard: `true`): Richtet Zeilen, die mit `+` beginnen, unter dem ersten `+` der vorherigen Zeile aus.  
-- `shift6.alignProcedureCallParameters` (Standard: `false`): Richtet fuehrende `:`-Parameterzeilen unter der oeffnenden Klammer + 1 aus und setzt die schliessende `)` in eine eigene, ausgerichtete Zeile.  
+- `shift6.alignProcedureCallParameters` (Standard: `false`): Richtet fuehrende `:`-Parameterzeilen unter der oeffnenden Klammer + 1 aus und setzt die schliessende `)` in eine eigene, ausgerichtete Zeile; wenn aktiv, werden Inline-Calls mit `:` in ausgerichtete Zeilen aufgeteilt, und wenn deaktiviert, bleibt bestehende Mehrzeilen-Einrueckung erhalten.  
 - `shift6.continuationColumn` (Standard: `66`, Minimum: `40`): Spaltengrenze, ab der lange Ausdruecke mit Operatoren in eine neue Fortsetzungszeile umgebrochen werden.
 - `shift6.joinAsteriskTokensInDecl` (Standard: `true`): Verbindet Tokens nach `*` in `DCL-PI`/`DCL-PR`/`DCL-PROC`/`CTL-OPT`-Zeilen (z.B. `*n`, `*no`, `*new`).
 - `shift6.wrapLongStrings` (Standard: `false`): Lange String-Literale in Konkatenationen umbrechen (nur an Leerzeichen).

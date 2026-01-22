@@ -15,6 +15,13 @@ export const formatPrepareExecute = (
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
 
+  const pushSqlTextLines = (lines: string[], indent: string, sqlText: string): void => {
+    const parts = sqlText.split(/\r?\n/);
+    for (const part of parts) {
+      lines.push(indent + part);
+    }
+  };
+
   const formatUsingBlock = (argsText: string): string[] => {
     const normalized = normalizeSqlWhitespace(argsText);
     if (normalized.toUpperCase().startsWith('DESCRIPTOR')) {
@@ -48,16 +55,17 @@ export const formatPrepareExecute = (
     const intoIndex = findKeywordIndex(rest, 'INTO');
     const usingIndex = findKeywordIndex(rest, 'USING');
     if (intoIndex < 0 && usingIndex < 0) {
-      return [
-        baseIndent + 'execute immediate',
-        nestedIndent + rest + ';'
-      ];
+      const lines: string[] = [];
+      lines.push(baseIndent + 'execute immediate');
+      pushSqlTextLines(lines, nestedIndent, rest);
+      lines[lines.length - 1] = lines[lines.length - 1] + ';';
+      return lines;
     }
     const lines: string[] = [];
     const stmtEnd = [intoIndex, usingIndex].filter((i) => i >= 0).sort((a, b) => a - b)[0];
     const stmtText = rest.slice(0, stmtEnd).trim();
     lines.push(baseIndent + 'execute immediate');
-    lines.push(nestedIndent + stmtText);
+    pushSqlTextLines(lines, nestedIndent, stmtText);
     if (intoIndex >= 0) {
       const intoText = rest.slice(intoIndex + 4, usingIndex > intoIndex ? usingIndex : undefined).trimStart();
       const targets = splitTopLevel(intoText, ',').map(normalizeSqlExpression);
@@ -72,11 +80,7 @@ export const formatPrepareExecute = (
       const usingText = rest.slice(usingIndex + 5).trimStart();
       lines.push(...formatUsingBlock(usingText));
     }
-    if (lines.length === 2) {
-      lines[1] = lines[1] + ';';
-    } else {
-      lines[lines.length - 1] = lines[lines.length - 1] + ';';
-    }
+    lines[lines.length - 1] = lines[lines.length - 1] + ';';
     return lines;
   }
 

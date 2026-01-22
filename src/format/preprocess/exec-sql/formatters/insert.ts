@@ -3,7 +3,8 @@ import {
   normalizeSqlIdentifierPath,
   stripTrailingSemicolon,
   splitTopLevel,
-  findMatchingParenIndex
+  findMatchingParenIndex,
+  findKeywordIndex
 } from '../utils/index';
 import { formatValuesRows } from './values';
 import { formatSelect } from './select';
@@ -58,7 +59,19 @@ export const formatInsert = (text: string, baseIndent: string, nestedIndent: str
   const upperRemainder = remainder.toUpperCase();
   if (upperRemainder.startsWith('VALUES')) {
     const valuesText = remainder.slice(6).trimStart();
-    lines.push(...formatValuesRows(valuesText, baseIndent, nestedIndent));
+    const withIndex = findKeywordIndex(valuesText, 'WITH');
+    const valuesPart = withIndex >= 0 ? valuesText.slice(0, withIndex).trimEnd() : valuesText;
+    const withPart = withIndex >= 0 ? valuesText.slice(withIndex).trimStart() : '';
+    const formattedValues = formatValuesRows(valuesPart, baseIndent, nestedIndent);
+    if (withPart) {
+      const normalizedWith = normalizeSqlWhitespace(withPart);
+      const withClause = normalizedWith.toUpperCase().startsWith('WITH ')
+        ? `with ${normalizedWith.slice(4).trimStart()}`
+        : normalizedWith;
+      const lastIndex = formattedValues.length - 1;
+      formattedValues[lastIndex] = formattedValues[lastIndex].replace(/;\s*$/, '') + ` ${withClause};`;
+    }
+    lines.push(...formattedValues);
     return lines;
   }
 

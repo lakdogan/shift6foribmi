@@ -43,7 +43,7 @@ export const normalizeExecSqlBlocks = (
 
   const flushBuffer = () => {
     if (sqlBuffer.length === 0) return;
-    const combined = sqlBuffer.join(' ').trim();
+    const combined = sqlBuffer.join('\n').trimEnd();
     const statements = splitSqlStatements(combined);
     for (let i = 0; i < statements.length; i++) {
       const statement = statements[i];
@@ -116,8 +116,8 @@ export const normalizeExecSqlBlocks = (
       continue;
     }
 
-    sqlBuffer.push(line.trim());
-    const combined = sqlBuffer.join(' ').trim();
+    sqlBuffer.push(line.trimEnd());
+    const combined = sqlBuffer.join('\n').trimEnd();
     if (combined.length > 0 && endsWithTopLevelSemicolon(combined)) {
       flushBuffer();
       inExecSql = false;

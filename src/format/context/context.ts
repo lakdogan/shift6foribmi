@@ -6,6 +6,7 @@ export function initFormatContext(): FormatContext {
     indentLevel: 0,
     procDepth: 0,
     execSqlDepth: 0,
+    execSqlBlockDepth: 0,
     continuationOperatorColumn: null,
     pendingAssignmentContinuation: false,
     paramAlignStack: []
@@ -17,6 +18,7 @@ export function updateContextBeforeLine(ctx: FormatContext, flags: LineFlags): F
   let indentLevel = ctx.indentLevel;
   let procDepth = ctx.procDepth;
   let execSqlDepth = ctx.execSqlDepth;
+  let execSqlBlockDepth = ctx.execSqlBlockDepth;
 
   if (execSqlDepth > 0 && !flags.isExecSqlEnd) {
     return ctx;
@@ -35,7 +37,8 @@ export function updateContextBeforeLine(ctx: FormatContext, flags: LineFlags): F
     ...ctx,
     indentLevel,
     procDepth,
-    execSqlDepth: flags.isExecSqlEnd ? Math.max(0, execSqlDepth - 1) : execSqlDepth
+    execSqlDepth: flags.isExecSqlEnd ? Math.max(0, execSqlDepth - 1) : execSqlDepth,
+    execSqlBlockDepth: flags.isExecSqlEnd ? 0 : execSqlBlockDepth
   };
 }
 
@@ -45,14 +48,20 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
   let procDepth = ctx.procDepth;
   let pendingAssignmentContinuation = ctx.pendingAssignmentContinuation;
   let execSqlDepth = ctx.execSqlDepth;
+  let execSqlBlockDepth = ctx.execSqlBlockDepth;
 
   if (execSqlDepth > 0) {
-    if (flags.isExecSqlEnd || flags.endsStatement) {
+    execSqlBlockDepth = Math.max(0, execSqlBlockDepth + flags.execSqlBlockDelta);
+    if (flags.isExecSqlEnd || (flags.endsStatement && execSqlBlockDepth === 0)) {
       execSqlDepth = Math.max(0, execSqlDepth - 1);
+      if (execSqlDepth === 0) {
+        execSqlBlockDepth = 0;
+      }
     }
     return {
       ...ctx,
-      execSqlDepth
+      execSqlDepth,
+      execSqlBlockDepth
     };
   }
 
@@ -69,6 +78,7 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
   }
   if (flags.isExecSqlStart && !flags.isExecSqlEnd && !flags.endsStatement) {
     execSqlDepth++;
+    execSqlBlockDepth = 0;
   }
 
   return {
@@ -76,6 +86,7 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
     indentLevel,
     procDepth,
     execSqlDepth,
+    execSqlBlockDepth,
     pendingAssignmentContinuation: flags.endsStatement
       ? false
       : flags.endsWithAssignment

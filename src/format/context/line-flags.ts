@@ -1,7 +1,76 @@
 import { CLOSERS, MID_KEYWORDS, OPENERS } from '../../constants';
 import { containsKeywordToken, startsWithKeyword } from '../utils';
+import { scanStringAware } from '../utils/string-scan';
 import { LineFlags } from './types';
 import { LineInfo } from './line-info';
+
+const isWordChar = (ch: string): boolean => /[A-Z0-9_]/.test(ch);
+
+const peekNextWords = (text: string, from: number, count: number): string[] => {
+  const words: string[] = [];
+  for (let i = from; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '\'' || ch === '"') {
+      const quote = ch;
+      i++;
+      while (i < text.length) {
+        if (text[i] === quote) {
+          if (i + 1 < text.length && text[i + 1] === quote) {
+            i += 2;
+            continue;
+          }
+          break;
+        }
+        i++;
+      }
+      continue;
+    }
+    if (isWordChar(ch)) {
+      let j = i + 1;
+      while (j < text.length && isWordChar(text[j])) j++;
+      words.push(text.slice(i, j));
+      i = j - 1;
+      if (words.length >= count) return words;
+    }
+  }
+  return words;
+};
+
+const getExecSqlBlockDelta = (text: string): number => {
+  let delta = 0;
+  let currentWord = '';
+  const flushWord = (endIndex: number) => {
+    if (!currentWord) return;
+    if (currentWord === 'BEGIN') {
+      const [nextWord, nextNext] = peekNextWords(text, endIndex, 2);
+      if (!(nextWord === 'DECLARE' && nextNext === 'SECTION')) {
+        delta++;
+      }
+    } else if (currentWord === 'END') {
+      const [nextWord] = peekNextWords(text, endIndex, 1);
+      if (!nextWord || !['IF', 'CASE', 'LOOP', 'FOR', 'WHILE', 'REPEAT'].includes(nextWord)) {
+        delta--;
+      }
+    }
+    currentWord = '';
+  };
+
+  scanStringAware(text, (ch, index) => {
+    if (isWordChar(ch)) {
+      currentWord += ch;
+      return;
+    }
+    if (currentWord) {
+      flushWord(index);
+    }
+  });
+
+  if (currentWord) {
+    flushWord(text.length);
+  }
+
+  return delta;
+};
 
 const getLastSignificantToken = (
   info: LineInfo
@@ -31,6 +100,7 @@ export function getLineFlags(info: LineInfo): LineFlags {
   const isProcEnd = upper.startsWith('END-PROC') || upper.startsWith('ENDPROC');
   const isExecSqlStart = /^EXEC\s+SQL\b/.test(trimmedUpper);
   const isExecSqlEnd = /^END-EXEC\b/.test(trimmedUpper) || /^END\s+EXEC\b/.test(trimmedUpper);
+  const execSqlBlockDelta = info.isCommentOnly ? 0 : getExecSqlBlockDelta(info.upperNoComment);
   const hasInlineCloser = containsKeywordToken(upperNoComment, CLOSERS);
   const lastToken = getLastSignificantToken(info);
   const endsStatement =
@@ -48,6 +118,7 @@ export function getLineFlags(info: LineInfo): LineFlags {
     isProcEnd,
     isExecSqlStart,
     isExecSqlEnd,
+    execSqlBlockDelta,
     hasInlineCloser,
     isCommentOnly: info.isCommentOnly,
     endsStatement,

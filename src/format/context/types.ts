@@ -6,6 +6,7 @@ export interface LineFlags {
   isProcEnd: boolean;
   isExecSqlStart: boolean;
   isExecSqlEnd: boolean;
+  execSqlBlockDelta: number;
   hasInlineCloser: boolean;
   isCommentOnly: boolean;
   endsStatement: boolean;
@@ -21,6 +22,7 @@ export interface FormatContext {
   indentLevel: number;
   procDepth: number;
   execSqlDepth: number;
+  execSqlBlockDepth: number;
   continuationOperatorColumn: number | null;
   pendingAssignmentContinuation: boolean;
   paramAlignStack: ParamAlignState[];

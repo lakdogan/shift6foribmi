@@ -130,7 +130,19 @@ export const formatBeginEndStatement = (
   const lines: string[] = [];
   lines.push(baseIndent + 'begin');
   for (const statement of statements) {
-    lines.push(nestedIndent + normalizeSqlWhitespace(statement) + ';');
+    const normalizedStatement = normalizeSqlWhitespace(statement);
+    const upperStatement = normalizedStatement.toUpperCase();
+    if (
+      upperStatement.startsWith('PREPARE ') ||
+      upperStatement.startsWith('EXECUTE IMMEDIATE') ||
+      upperStatement.startsWith('EXECUTE ')
+    ) {
+      const innerNested = nestedIndent + ' '.repeat(baseIndent.length);
+      const formatted = formatPrepareExecute(normalizedStatement, nestedIndent, innerNested);
+      lines.push(...formatted);
+      continue;
+    }
+    lines.push(nestedIndent + normalizedStatement + ';');
   }
   lines.push(baseIndent + 'end;');
   return lines;

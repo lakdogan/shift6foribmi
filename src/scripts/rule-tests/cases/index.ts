@@ -43,6 +43,8 @@ import execSqlCteUnion from './exec-sql-cte-union';
 import execSqlValues from './exec-sql-values';
 import execSqlCteMulti from './exec-sql-cte-multi';
 import execSqlExecImmediateUsing from './exec-sql-exec-immediate-using';
+import execSqlExecImmediateMultiline from './exec-sql-exec-immediate-multiline';
+import execSqlInsertWithNc from './exec-sql-insert-with-nc';
 import execSqlFetchVariants from './exec-sql-fetch-variants';
 import execSqlWhenever from './exec-sql-whenever';
 import execSqlConnectionVariants from './exec-sql-connection-variants';
@@ -176,6 +178,7 @@ export const cases: Case[] = [
   execSqlValues,
   execSqlCteMulti,
   execSqlExecImmediateUsing,
+  execSqlExecImmediateMultiline,
   execSqlFetchVariants,
   execSqlWhenever,
   execSqlConnectionVariants,
@@ -229,6 +232,7 @@ export const cases: Case[] = [
   execSqlSetSessionCurrent,
   execSqlDynamicVariants,
   execSqlDmlEdgeVariants,
+  execSqlInsertWithNc,
   execSqlSelectEdgeVariants,
   execSqlSessionTransactionBlock,
   execSqlCursorBlock,

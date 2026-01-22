@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.2.3] - 2026-01-22
+- Preserved multiline SQL literals inside exec sql blocks to avoid forced concatenation.
+- Kept exec sql formatting active through SQL BEGIN...END blocks so nested statements format correctly.
+- Fixed INSERT ... VALUES ... WITH NC formatting to keep WITH NC on the final line.
+- Improved EXECUTE IMMEDIATE formatting to preserve multiline SQL text.
+- Added rule-test coverage for exec sql multiline execute immediate and VALUES with WITH NC.
+
 ## [0.2.2] - 2026-01-22
 - Removed contributed language registrations to avoid collisions with syntax highlighters.
 - Formatter now registers only for existing RPGLE/RPG language IDs.

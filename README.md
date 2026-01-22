@@ -134,8 +134,8 @@ https://github.com/lakdogan/shift6foribmi/issues/new/choose
 
 The following animation shows a formatting operation performed by Shift6 within Visual Studio Code.
 
-![Shift6 one-click formatting demo](https://github.com/lakdogan/shift6-formatter/blob/main/raw/HEAD/assets/demo.gif?raw=true)
-Direct link (if the image does not load): https://github.com/lakdogan/shift6-formatter/blob/main/raw/HEAD/assets/demo.gif?raw=true
+![Shift6 one-click formatting demo](https://github.com/lakdogan/shift6foribmi/tree/master/assets/demo.gif?raw=true)
+Direct link (if the image does not load): https://github.com/lakdogan/shift6foribmi/tree/master/assets/demo.gif?raw=true
 
 #### Before -> Format Document -> After (sample)
 

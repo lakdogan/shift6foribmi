@@ -1,7 +1,7 @@
 // Shift6 Formatter by Levent Akdogan (Lakdogan)
 import * as vscode from 'vscode';
 import { getConfig } from './config';
-import { LANGUAGE_IDS, PATTERNS } from './constants';
+import { LANGUAGE_IDS } from './constants';
 import { formatCore, postProcessBlankLines, preprocessDocument } from './format';
 import { getFullDocumentRange } from './utils/document';
 
@@ -33,10 +33,7 @@ function provideShift6FormattingEdits(document: vscode.TextDocument): vscode.Tex
 
 // Register the formatter for RPGLE language selectors.
 export function activate(context: vscode.ExtensionContext) {
-  const selectors: vscode.DocumentSelector = [
-    ...PATTERNS.map((pattern) => ({ pattern })),
-    ...LANGUAGE_IDS.map((lang) => ({ language: lang }))
-  ];
+  const selectors: vscode.DocumentSelector = LANGUAGE_IDS.map((lang) => ({ language: lang }));
 
   const provider: vscode.DocumentFormattingEditProvider = {
     provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.TextEdit[] {

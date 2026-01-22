@@ -85,6 +85,7 @@ Formatting can be executed immediately on any open RPG Free source file:
     -   `Ctrl` + `Shift` + `P` -> **"Format Document"**
 
 > **Note on Multiple Formatters:** If alternative formatters are active, use **"Format Document With..."** to explicitly select the **Shift6 Formatter**.
+> **Language Mode:** Shift6 is formatter-only and does not provide syntax highlighting or language registrations. Ensure the file language is `RPGLE` (e.g., via the IBMi Languages extension or `files.associations`) so formatting is available.
 
 ---
 

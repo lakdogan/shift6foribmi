@@ -17,52 +17,10 @@
   "activationEvents": [
     "onLanguage:rpgle",
     "onLanguage:rpg",
-    "onLanguage:sqlrpgle",
-    "onLanguage:rpginc",
     "onCommand:editor.action.formatDocument"
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "languages": [
-      {
-        "id": "rpgle",
-        "aliases": [
-          "RPGLE"
-        ],
-        "extensions": [
-          ".rpgle"
-        ]
-      },
-      {
-        "id": "sqlrpgle",
-        "aliases": [
-          "SQLRPGLE"
-        ],
-        "extensions": [
-          ".sqlrpgle"
-        ]
-      },
-      {
-        "id": "rpg",
-        "aliases": [
-          "RPG"
-        ],
-        "extensions": [
-          ".rpg",
-          ".sqlrpg"
-        ]
-      },
-      {
-        "id": "rpginc",
-        "aliases": [
-          "RPGINC"
-        ],
-        "extensions": [
-          ".rpginc",
-          ".rpgleinc"
-        ]
-      }
-    ],
     "configuration": {
       "title": "Shift6 for IBM i",
       "properties": {

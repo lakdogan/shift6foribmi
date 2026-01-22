@@ -54,13 +54,4 @@ export const MID_KEYWORDS = [
 
 export const DASH_KEYWORD_PREFIX = /^(DCL|END|ON|WHEN|ELSE|CTL)-[A-Z0-9-]+$/;
 
-export const PATTERNS = [
-  '**/*.rpgle',
-  '**/*.sqlrpgle',
-  '**/*.rpg',
-  '**/*.sqlrpg',
-  '**/*.rpginc',
-  '**/*.rpgleinc'
-];
-
-export const LANGUAGE_IDS = ['rpgle', 'sqlrpgle', 'rpg', 'rpginc'];
+export const LANGUAGE_IDS = ['rpgle', 'rpg'];

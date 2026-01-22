@@ -71,6 +71,7 @@ Beliebige geoeffnete RPG-Free-Datei formatieren:
 - **Command Palette:** `Ctrl` + `Shift` + `P` -> **Format Document**.
 
 > Wenn mehrere Formatter installiert sind, **Format Document With...** waehlen und **Shift6 Formatter** auswaehlen.
+> **Language Mode:** Shift6 liefert kein eigenes Syntax-Highlighting und registriert keine Sprache. Stelle sicher, dass die Datei im Modus `RPGLE` geoeffnet ist (z.B. ueber die IBMi Languages Extension oder `files.associations`), damit der Formatter verfuegbar ist.
 
 ---
 

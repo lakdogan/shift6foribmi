@@ -26,6 +26,7 @@
 1. `npm run compile -- --watch` in a terminal.
 2. `F5` (Run Extension) to launch the Extension Development Host.
 3. Open a `.rpgle`/`.sqlrpgle` file and run **Format Document**.
+   - Note: Shift6 does not contribute a language; ensure the editor language mode is `RPGLE` (e.g., via IBMi Languages or `files.associations`).
 
 ## Formatting Settings to Verify
 - `shift6.continuationColumn` controls wrap width for long operator chains.

@@ -3,10 +3,10 @@ import {
   stripTrailingSemicolon,
   findKeywordIndex,
   findLastKeywordIndex,
-  splitStatementsOutsideStrings,
   findMatchingParenIndex,
   splitTopLevel
 } from '../utils/index';
+import { formatPsmBeginEndBlock } from './psm';
 
 // Format DDL statements as normalized single lines.
 export const formatDdlStatement = (text: string, baseIndent: string): string[] => {
@@ -15,11 +15,8 @@ export const formatDdlStatement = (text: string, baseIndent: string): string[] =
   const upper = normalized.toUpperCase();
   const nestedIndent = ' '.repeat(baseIndent.length * 2);
 
-  if (
-    upper.startsWith('CREATE TRIGGER ') ||
-    upper.startsWith('CREATE PROCEDURE ') ||
-    upper.startsWith('CREATE FUNCTION ')
-  ) {
+  const routineMatch = upper.match(/^CREATE(\s+OR\s+REPLACE)?\s+(TRIGGER|PROCEDURE|FUNCTION)\b/);
+  if (routineMatch) {
     const beginIndex = findKeywordIndex(normalized, 'BEGIN');
     if (beginIndex >= 0) {
       const header = normalized.slice(0, beginIndex).trim();
@@ -27,12 +24,12 @@ export const formatDdlStatement = (text: string, baseIndent: string): string[] =
       const endIndex = findLastKeywordIndex(bodyWithEnd, 'END');
       const bodyText = endIndex >= 0 ? bodyWithEnd.slice(0, endIndex).trim() : bodyWithEnd;
       const lines: string[] = [];
-      if (upper.startsWith('CREATE TRIGGER ')) {
+      if (routineMatch[2] === 'TRIGGER') {
         lines.push(...formatTriggerHeader(header, baseIndent));
       } else {
-        lines.push(baseIndent + header);
+        lines.push(...formatRoutineHeader(header, baseIndent, nestedIndent));
       }
-      lines.push(...formatBeginEndBlock(bodyText, baseIndent, nestedIndent));
+      lines.push(...formatPsmBeginEndBlock(bodyText, baseIndent, nestedIndent));
       return lines;
     }
   }
@@ -64,18 +61,45 @@ const formatTriggerHeader = (header: string, baseIndent: string): string[] => {
   return segments.map((segment) => baseIndent + normalizeSqlWhitespace(segment));
 };
 
-const formatBeginEndBlock = (
-  bodyText: string,
+const formatRoutineHeader = (
+  header: string,
   baseIndent: string,
   nestedIndent: string
 ): string[] => {
-  const statements = splitStatementsOutsideStrings(bodyText);
-  const lines: string[] = [];
-  lines.push(baseIndent + 'begin');
-  for (const statement of statements) {
-    lines.push(nestedIndent + normalizeSqlWhitespace(statement) + ';');
+  const normalized = normalizeSqlWhitespace(header);
+  const parenIndex = normalized.indexOf('(');
+  if (parenIndex < 0) return [baseIndent + normalized];
+
+  const closingIndex = findMatchingParenIndex(normalized, parenIndex);
+  if (closingIndex === null) return [baseIndent + normalized];
+
+  const prefix = normalized.slice(0, parenIndex).trim();
+  const paramsText = normalized.slice(parenIndex + 1, closingIndex).trim();
+  const suffixRaw = normalized.slice(closingIndex + 1).trim();
+  const suffix = suffixRaw.length > 0 ? normalizeSqlWhitespace(suffixRaw) : '';
+
+  if (paramsText.length === 0) {
+    const line = `${prefix}()${suffix ? ` ${suffix}` : ''}`;
+    return [baseIndent + line];
   }
-  lines.push(baseIndent + 'end;');
+
+  const params = splitTopLevel(paramsText, ',').map(normalizeSqlWhitespace);
+  if (params.length <= 1) {
+    const paramsJoined = params.join(', ');
+    const line = `${prefix} (${paramsJoined})${suffix ? ` ${suffix}` : ''}`;
+    return [baseIndent + line.trimEnd()];
+  }
+
+  const lines: string[] = [];
+  lines.push(baseIndent + `${prefix} (`.trimEnd());
+  for (let i = 0; i < params.length; i++) {
+    const suffixComma = i < params.length - 1 ? ',' : '';
+    lines.push(nestedIndent + params[i] + suffixComma);
+  }
+  lines.push(baseIndent + ')');
+  if (suffix.length > 0) {
+    lines.push(baseIndent + suffix);
+  }
   return lines;
 };
 

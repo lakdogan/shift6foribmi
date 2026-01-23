@@ -114,6 +114,7 @@ import execSqlDiagnosticsSession from './exec-sql-diagnostics-session';
 import execSqlCursorDescriptor from './exec-sql-cursor-descriptor';
 import execSqlFunctions from './exec-sql-functions';
 import execSqlPsmBlocks from './exec-sql-psm-blocks';
+import execSqlPsmOrReplace from './exec-sql-psm-or-replace';
 import execSqlTriggerBody from './exec-sql-trigger-body';
 import execSqlWindowFunctions from './exec-sql-window-functions';
 import execSqlSubqueryJoins from './exec-sql-subquery-joins';
@@ -253,6 +254,7 @@ export const cases: Case[] = [
   execSqlCursorDescriptor,
   execSqlFunctions,
   execSqlPsmBlocks,
+  execSqlPsmOrReplace,
   execSqlTriggerBody,
   execSqlWindowFunctions,
   execSqlSubqueryJoins,

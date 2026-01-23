@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.2.5] - 2026-01-23
+- Improved exec sql PSM formatting: structured IF/ELSE blocks and cleaner BEGIN/END bodies.
+- Added support for `CREATE OR REPLACE` routine headers with multi-line parameter formatting.
+- Formatted CASE expressions in SELECT lists into readable multi-line blocks.
+- Added rule-test coverage for CREATE OR REPLACE PSM formatting.
+
 ## [0.2.4] - 2026-01-23
 - Reformatted EXECUTE IMMEDIATE CREATE TABLE string literals into a multi-line, aligned column layout for readability.
 - Aligned CREATE TABLE column name/type spacing inside dynamic SQL literals.

@@ -12,6 +12,7 @@ import { scanStringAware } from '../../../utils/string-scan';
 import { formatFromClause } from './from';
 import { formatSelectSetOperations } from './select-set';
 import { formatBooleanClause } from './conditions';
+import { formatCaseExpression } from './case';
 
 // Format SELECT and WITH queries into structured layout.
 export const formatSelect = (text: string, baseIndent: string, nestedIndent: string): string[] => {
@@ -86,8 +87,16 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
 
   const columns = splitTopLevel(selectColumnsText, ',').map(normalizeSqlExpression);
   const lines = [baseIndent + (distinct ? 'select distinct' : 'select')];
+  const indentStep = Math.max(0, nestedIndent.length - baseIndent.length);
+  const caseNestedIndent = nestedIndent + ' '.repeat(indentStep);
   for (let i = 0; i < columns.length; i++) {
     const suffix = i < columns.length - 1 ? ',' : '';
+    const caseLines = formatCaseExpression(columns[i], nestedIndent, caseNestedIndent);
+    if (caseLines) {
+      caseLines[caseLines.length - 1] = caseLines[caseLines.length - 1] + suffix;
+      lines.push(...caseLines);
+      continue;
+    }
     lines.push(nestedIndent + columns[i] + suffix);
   }
   if (intoText.length > 0) {

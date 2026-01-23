@@ -41,6 +41,31 @@ export const indentationRule: Rule = {
         changed: newText !== state.current
       };
     }
+
+    const parenContinuationIndent =
+      !cfg.alignProcedureCallParameters &&
+      state.paramContinuationDepth > 0 &&
+      !isCommentLine &&
+      ctx.execSqlDepth === 0 &&
+      !trimmedStart.startsWith(')');
+
+    if (parenContinuationIndent) {
+      const desiredIndent = Math.max(currentIndent, target + cfg.blockIndent);
+      if (desiredIndent > currentIndent) {
+        newText = ' '.repeat(desiredIndent - currentIndent) + state.current;
+      } else if (desiredIndent < currentIndent) {
+        newText = state.current.substring(currentIndent - desiredIndent);
+      }
+      return {
+        state: {
+          ...state,
+          current: newText,
+          targetIndent: target
+        },
+        ctx,
+        changed: newText !== state.current
+      };
+    }
     if (isCommentLine) {
       newText = ' '.repeat(target) + trimmedStart;
     } else if (ctx.execSqlDepth > 0) {

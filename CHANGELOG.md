@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Reformatted EXECUTE IMMEDIATE CREATE TABLE string literals into a multi-line, aligned column layout for readability.
 - Aligned CREATE TABLE column name/type spacing inside dynamic SQL literals.
 - Expanded exec sql CREATE TABLE formatting to keep multi-line column layouts (including global temp tables and options).
+- Indented multi-line procedure call argument continuations inside parentheses for cleaner readability.
+- Prevented exec sql `begin declare section` from being expanded into begin/end blocks that duplicate `end;` lines.
 - Added rule-test coverage for single-line CREATE TABLE literals in EXECUTE IMMEDIATE.
 
 ## [0.2.3] - 2026-01-22

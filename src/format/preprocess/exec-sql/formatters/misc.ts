@@ -119,6 +119,9 @@ export const formatBeginEndStatement = (
   if (!upper.startsWith('BEGIN ')) {
     return [baseIndent + normalized + ';'];
   }
+  if (upper.startsWith('BEGIN DECLARE SECTION')) {
+    return [baseIndent + 'begin declare section;'];
+  }
   const beginIndex = findKeywordIndex(normalized, 'BEGIN');
   if (beginIndex < 0) {
     return [baseIndent + normalized + ';'];

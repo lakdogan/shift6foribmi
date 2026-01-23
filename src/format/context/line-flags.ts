@@ -119,6 +119,7 @@ export function getLineFlags(info: LineInfo): LineFlags {
     isExecSqlStart,
     isExecSqlEnd,
     execSqlBlockDelta,
+    isMultilineStringContinuation: false,
     hasInlineCloser,
     isCommentOnly: info.isCommentOnly,
     endsStatement,

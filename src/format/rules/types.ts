@@ -8,6 +8,7 @@ export interface LineState {
   targetIndent: number;
   commentIndentOverride: number | null;
   paramContinuationDepth: number;
+  execSqlIndentBase: number | null;
 }
 
 export interface RuleResult {

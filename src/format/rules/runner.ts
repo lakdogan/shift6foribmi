@@ -17,8 +17,40 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
   const resultLines: string[] = [];
   let anyChanged = false;
 
+  const multilineStringContinuation: boolean[] = [];
+  const multilineStringStart: boolean[] = [];
+  let inMultilineString = false;
+  for (const line of pre.linesToProcess) {
+    const startedInString = inMultilineString;
+    let openedHere = false;
+    multilineStringContinuation.push(startedInString);
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (!inMultilineString && ch === '/' && line[i + 1] === '/') {
+        break;
+      }
+      if (ch !== '\'') {
+        continue;
+      }
+      if (inMultilineString) {
+        if (i + 1 < line.length && line[i + 1] === '\'') {
+          i++;
+          continue;
+        }
+        inMultilineString = false;
+        continue;
+      }
+      inMultilineString = true;
+      openedHere = true;
+    }
+    multilineStringStart.push(!startedInString && openedHere && inMultilineString);
+  }
+
   const lineInfos = pre.linesToProcess.map((line) => buildLineInfo(line));
   const lineFlags = lineInfos.map((info) => getLineFlags(info));
+  for (let i = 0; i < lineFlags.length; i++) {
+    lineFlags[i].isMultilineStringContinuation = multilineStringContinuation[i];
+  }
   const ctxBefore: Array<ReturnType<typeof initFormatContext>> = [];
 
   let probeCtx = initFormatContext();
@@ -28,6 +60,40 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
     ctxBefore[i] = probeCtx;
     probeCtx = updateContextAfterLine(probeCtx, flags);
   }
+
+  const execSqlIndentBase: Array<number | null> = new Array(lineInfos.length).fill(null);
+  let activeExecSqlIndices: number[] | null = null;
+  let activeExecSqlMin = Number.POSITIVE_INFINITY;
+  const finalizeExecSqlBlock = () => {
+    if (!activeExecSqlIndices) return;
+    const base = Number.isFinite(activeExecSqlMin) ? activeExecSqlMin : cfg.blockIndent;
+    for (const idx of activeExecSqlIndices) {
+      execSqlIndentBase[idx] = base;
+    }
+    activeExecSqlIndices = null;
+    activeExecSqlMin = Number.POSITIVE_INFINITY;
+  };
+
+  for (let i = 0; i < lineInfos.length; i++) {
+    const inExecSql = ctxBefore[i].execSqlDepth > 0;
+    if (!inExecSql) {
+      finalizeExecSqlBlock();
+      continue;
+    }
+    if (!activeExecSqlIndices) {
+      activeExecSqlIndices = [];
+      activeExecSqlMin = Number.POSITIVE_INFINITY;
+    }
+    activeExecSqlIndices.push(i);
+    const flags = lineFlags[i];
+    if (!flags.isCommentOnly && !flags.isMultilineStringContinuation && !multilineStringStart[i]) {
+      const indent = countLeadingSpaces(lineInfos[i].original);
+      if (indent < activeExecSqlMin) {
+        activeExecSqlMin = indent;
+      }
+    }
+  }
+  finalizeExecSqlBlock();
 
   const paramContinuationDepth: number[] = new Array(lineInfos.length).fill(0);
   let parenDepth = 0;
@@ -52,7 +118,9 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
     const continuationOffset = ctx.pendingAssignmentContinuation ? cfg.blockIndent : 0;
     const target = cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent + continuationOffset;
     if (ctx.execSqlDepth > 0 && !trimmedStart.startsWith('//')) {
-      return target + currentIndent;
+      const execSqlBase = execSqlIndentBase[index] ?? currentIndent;
+      const relativeIndent = currentIndent >= execSqlBase ? currentIndent - execSqlBase : 0;
+      return target + relativeIndent;
     }
     const preserveIndent =
       !cfg.alignProcedureCallParameters &&
@@ -95,7 +163,8 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
       info,
       targetIndent: cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent,
       commentIndentOverride: commentIndentOverrides[index],
-      paramContinuationDepth: paramContinuationDepth[index]
+      paramContinuationDepth: paramContinuationDepth[index],
+      execSqlIndentBase: execSqlIndentBase[index]
     };
 
     for (const rule of rules) {

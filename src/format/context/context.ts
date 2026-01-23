@@ -20,6 +20,10 @@ export function updateContextBeforeLine(ctx: FormatContext, flags: LineFlags): F
   let execSqlDepth = ctx.execSqlDepth;
   let execSqlBlockDepth = ctx.execSqlBlockDepth;
 
+  if (flags.isMultilineStringContinuation) {
+    return ctx;
+  }
+
   if (execSqlDepth > 0 && !flags.isExecSqlEnd) {
     return ctx;
   }
@@ -49,6 +53,10 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
   let pendingAssignmentContinuation = ctx.pendingAssignmentContinuation;
   let execSqlDepth = ctx.execSqlDepth;
   let execSqlBlockDepth = ctx.execSqlBlockDepth;
+
+  if (flags.isMultilineStringContinuation) {
+    return ctx;
+  }
 
   if (execSqlDepth > 0) {
     execSqlBlockDepth = Math.max(0, execSqlBlockDepth + flags.execSqlBlockDelta);

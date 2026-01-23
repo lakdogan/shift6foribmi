@@ -5,7 +5,7 @@ import { Rule, RuleResult } from './types';
 export const operatorSpacingRule: Rule = {
   id: 'operator-spacing',
   apply(state, ctx, cfg, flags): RuleResult {
-    if (ctx.execSqlDepth > 0 || flags.isExecSqlStart) {
+    if (flags.isMultilineStringContinuation || ctx.execSqlDepth > 0 || flags.isExecSqlStart) {
       return { state, ctx, changed: false };
     }
     const normalized = normalizeOperatorSpacing(state.current, cfg);

@@ -19,11 +19,35 @@ export const indentationRule: Rule = {
       !isCommentLine;
 
     let newText = state.current;
+    if (flags.isMultilineStringContinuation) {
+      if (ctx.execSqlDepth === 0 || isCommentLine) {
+        return { state, ctx, changed: false };
+      }
+      const execSqlBase = state.execSqlIndentBase ?? currentIndent;
+      const sqlIndent = currentIndent >= execSqlBase ? currentIndent - execSqlBase : 0;
+      const adjustedIndent = target + sqlIndent;
+      if (adjustedIndent > currentIndent) {
+        newText = ' '.repeat(adjustedIndent - currentIndent) + state.current;
+      } else if (adjustedIndent < currentIndent) {
+        newText = state.current.substring(currentIndent - adjustedIndent);
+      }
+      return {
+        state: {
+          ...state,
+          current: newText,
+          targetIndent: target
+        },
+        ctx,
+        changed: newText !== state.current
+      };
+    }
     if (isCommentLine) {
       newText = ' '.repeat(target) + trimmedStart;
     } else if (ctx.execSqlDepth > 0) {
       const trimmed = state.current.trimStart();
-      const adjustedIndent = target + currentIndent;
+      const execSqlBase = state.execSqlIndentBase ?? currentIndent;
+      const sqlIndent = currentIndent >= execSqlBase ? currentIndent - execSqlBase : 0;
+      const adjustedIndent = target + sqlIndent;
       newText = ' '.repeat(adjustedIndent) + trimmed;
     } else if (currentIndent < target) {
       newText = ' '.repeat(target - currentIndent) + state.current;

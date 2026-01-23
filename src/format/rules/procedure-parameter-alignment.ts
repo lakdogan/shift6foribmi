@@ -26,7 +26,7 @@ const updateParamAlignStack = (stack: ParamAlignState[], text: string): ParamAli
 export const procedureParameterAlignmentRule: Rule = {
   id: 'procedure-parameter-alignment',
   apply(state, ctx, cfg, flags): RuleResult {
-    if (!cfg.alignProcedureCallParameters || ctx.execSqlDepth > 0) {
+    if (flags.isMultilineStringContinuation || !cfg.alignProcedureCallParameters || ctx.execSqlDepth > 0) {
       return { state, ctx, changed: false };
     }
 

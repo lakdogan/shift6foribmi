@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.2.4] - 2026-01-23
+- Reformatted EXECUTE IMMEDIATE CREATE TABLE string literals into a multi-line, aligned column layout for readability.
+- Aligned CREATE TABLE column name/type spacing inside dynamic SQL literals.
+- Added rule-test coverage for single-line CREATE TABLE literals in EXECUTE IMMEDIATE.
+
 ## [0.2.3] - 2026-01-22
 - Preserved multiline SQL literals inside exec sql blocks to avoid forced concatenation.
 - Kept exec sql formatting active through SQL BEGIN...END blocks so nested statements format correctly.

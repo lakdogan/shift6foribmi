@@ -105,8 +105,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lakdogan/shift6-formatter"
+    "url": "https://github.com/lakdogan/shift6foribmi"
   },
+  "homepage": "https://github.com/lakdogan/shift6foribmi#readme",
   "icon": "assets/icon.png",
   "bugs": {
     "url": "https://github.com/lakdogan/shift6foribmi/issues"

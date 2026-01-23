@@ -9,7 +9,7 @@ import { Rule, RuleResult } from './types';
 export const continuationAlignmentRule: Rule = {
   id: 'continuation-alignment',
   apply(state, ctx, cfg, flags): RuleResult {
-    if (!cfg.alignPlusContinuation) {
+    if (flags.isMultilineStringContinuation || !cfg.alignPlusContinuation) {
       return { state, ctx, changed: false };
     }
 

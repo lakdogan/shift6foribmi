@@ -10,7 +10,10 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'create table SALES/ORDERS (ID int, AMOUNT dec(9,2)) for system name ORDERSYS rcdfmt ORDRCD ccsid 37;',
+    'create table SALES/ORDERS (',
+    'ID      int,',
+    'AMOUNT  dec(9,2)',
+    ') for system name ORDERSYS rcdfmt ORDRCD ccsid 37;',
     'create alias SALES/ORD_ALIAS for SALES/ORDERS;'
   ]
 };

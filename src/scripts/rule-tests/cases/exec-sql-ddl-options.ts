@@ -8,7 +8,10 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'create table SALES/CUSTOMER (ID int, NAME varchar(50)) rcdfmt CUSTREC ccsid 37 for system name CUSTSYS;'
+    'create table SALES/CUSTOMER (',
+    'ID    int,',
+    'NAME  varchar(50)',
+    ') rcdfmt CUSTREC ccsid 37 for system name CUSTSYS;'
   ]
 };
 

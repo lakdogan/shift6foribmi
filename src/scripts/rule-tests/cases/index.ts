@@ -45,6 +45,7 @@ import execSqlCteMulti from './exec-sql-cte-multi';
 import execSqlExecImmediateUsing from './exec-sql-exec-immediate-using';
 import execSqlExecImmediateMultiline from './exec-sql-exec-immediate-multiline';
 import execSqlExecImmediateCreateTableSingleline from './exec-sql-exec-immediate-create-table-singleline';
+import execSqlCreateTable from './exec-sql-create-table';
 import execSqlInsertWithNc from './exec-sql-insert-with-nc';
 import execSqlFetchVariants from './exec-sql-fetch-variants';
 import execSqlWhenever from './exec-sql-whenever';
@@ -181,6 +182,7 @@ export const cases: Case[] = [
   execSqlExecImmediateUsing,
   execSqlExecImmediateMultiline,
   execSqlExecImmediateCreateTableSingleline,
+  execSqlCreateTable,
   execSqlFetchVariants,
   execSqlWhenever,
   execSqlConnectionVariants,

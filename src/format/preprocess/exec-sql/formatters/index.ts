@@ -77,6 +77,9 @@ export const formatSqlStatement = (text: string, indentStep: number): string[] =
   ) {
     return formatHostAndConnection(normalized, baseIndent);
   }
+  if (upper.startsWith('DECLARE GLOBAL TEMPORARY TABLE')) {
+    return formatDdlStatement(normalized, baseIndent);
+  }
   if (upper.startsWith('DECLARE ')) {
     return formatDeclareCursor(normalized, baseIndent, nestedIndent);
   }

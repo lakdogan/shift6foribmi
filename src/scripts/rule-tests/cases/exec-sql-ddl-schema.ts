@@ -30,7 +30,10 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'create table SALES/CUSTOMER (ID int, NAME varchar(50));',
+    'create table SALES/CUSTOMER (',
+    'ID    int,',
+    'NAME  varchar(50)',
+    ');',
     'alter table SALES/CUSTOMER add column STATUS char(1);',
     'drop table SALES/CUSTOMER;',
     'create view SALES/CUST_VIEW as select ID, NAME from SALES/CUSTOMER;',
@@ -43,7 +46,9 @@ const testCase: Case = {
     'create function SALES/FN1 (P1 int) returns int language sql',
     'create trigger SALES/TR1 after insert on SALES/CUSTOMER',
     'drop trigger SALES/TR1;',
-    'declare global temporary table SESSION/TEMP1 (ID int);'
+    'declare global temporary table SESSION/TEMP1 (',
+    'ID  int',
+    ');'
   ]
 };
 

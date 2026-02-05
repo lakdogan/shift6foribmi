@@ -2,7 +2,10 @@ import { transformOutsideStrings } from './string-transform';
 import { isWhitespace } from './token-utils';
 
 // Extract raw builtin argument text while respecting nested parens and strings.
-const extractBuiltinArgs = (text: string, startIndex: number): { content: string; end: number } => {
+const extractBuiltinArgs = (
+  text: string,
+  startIndex: number
+): { content: string; end: number; closed: boolean } => {
   let inString = false;
   let quoteChar = '';
   let depth = 0;
@@ -36,7 +39,7 @@ const extractBuiltinArgs = (text: string, startIndex: number): { content: string
     if (ch === ')') {
       if (depth === 0) {
         const raw = text.slice(startIndex + 1, i);
-        return { content: raw.trim(), end: i };
+        return { content: raw.trim(), end: i, closed: true };
       }
       depth--;
       continue;
@@ -44,7 +47,7 @@ const extractBuiltinArgs = (text: string, startIndex: number): { content: string
   }
 
   const raw = text.slice(startIndex + 1);
-  return { content: raw.trim(), end: text.length - 1 };
+  return { content: raw.trim(), end: text.length - 1, closed: false };
 };
 
 // Join %builtin names and trim surrounding argument whitespace.
@@ -61,9 +64,15 @@ export const normalizePercentBuiltins = (text: string): string => {
       while (m < fullText.length && isWhitespace(fullText[m])) m++;
       if (m < fullText.length && fullText[m] === '(') {
         const parsed = extractBuiltinArgs(fullText, m);
+        if (parsed.closed) {
+          return {
+            append: name + '(' + parsed.content + ')',
+            advance: parsed.end - index
+          };
+        }
         return {
-          append: name + '(' + parsed.content + ')',
-          advance: parsed.end - index
+          append: name + '(',
+          advance: m - index
         };
       }
       return { append: name, advance: k - 1 - index };

@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.2.6] - 2026-02-05
+- Fixed percent-builtin normalization to avoid inserting extra ')' when a built-in call is split across lines, preventing doubled closing parens after formatting.
+
 ## [0.2.5] - 2026-01-23
 - Improved exec sql PSM formatting: structured IF/ELSE blocks and cleaner BEGIN/END bodies.
 - Added support for `CREATE OR REPLACE` routine headers with multi-line parameter formatting.

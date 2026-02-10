@@ -118,6 +118,7 @@ import execSqlPsmOrReplace from './exec-sql-psm-or-replace';
 import execSqlTriggerBody from './exec-sql-trigger-body';
 import execSqlWindowFunctions from './exec-sql-window-functions';
 import execSqlSubqueryJoins from './exec-sql-subquery-joins';
+import execSqlDerivedTableUnion from './exec-sql-derived-table-union';
 import execSqlJsonXml from './exec-sql-json-xml';
 import execSqlDdlOptions from './exec-sql-ddl-options';
 import execSqlSpecialRegisters from './exec-sql-special-registers';
@@ -258,6 +259,7 @@ export const cases: Case[] = [
   execSqlTriggerBody,
   execSqlWindowFunctions,
   execSqlSubqueryJoins,
+  execSqlDerivedTableUnion,
   execSqlJsonXml,
   execSqlDdlOptions,
   execSqlSpecialRegisters,

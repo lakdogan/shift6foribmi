@@ -7,6 +7,7 @@ import {
 } from '../utils/index';
 import { formatFromClause } from './from';
 import { formatBooleanClause } from './conditions';
+import { formatSelect } from './select';
 
 // Format UPDATE statements with SET and optional FROM/WHERE.
 export const formatUpdate = (text: string, baseIndent: string, nestedIndent: string): string[] => {
@@ -56,7 +57,7 @@ export const formatUpdate = (text: string, baseIndent: string, nestedIndent: str
     const fromText = afterSet.slice(5).trimStart();
     const whereIndexInFrom = findKeywordIndex(fromText, 'WHERE');
     const fromPart = whereIndexInFrom >= 0 ? fromText.slice(0, whereIndexInFrom).trim() : fromText;
-    const fromLines = formatFromClause(fromPart, baseIndent);
+    const fromLines = formatFromClause(fromPart, baseIndent, nestedIndent, formatSelect);
     lines.push(...fromLines);
     if (whereIndexInFrom >= 0) {
       const whereText = fromText.slice(whereIndexInFrom + 5).trimStart();

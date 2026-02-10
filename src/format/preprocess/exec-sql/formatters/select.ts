@@ -5,12 +5,12 @@ import {
   splitTopLevel,
   findKeywordIndex,
   splitSelectClauses,
+  splitSetOperations,
   parseWithClauses,
   trimTrailingSemicolon
 } from '../utils/index';
 import { scanStringAware } from '../../../utils/string-scan';
 import { formatFromClause } from './from';
-import { formatSelectSetOperations } from './select-set';
 import { formatBooleanClause } from './conditions';
 import { formatCaseExpression } from './case';
 
@@ -113,107 +113,145 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
     return lines;
   }
 
-  const setLines = formatSelectSetOperations(remainder, baseIndent, nestedIndent, formatSelect);
-  if (setLines) {
-    lines.push(...setLines);
-    return lines;
-  }
+  const formatSelectClauses = (clauseText: string, finalize: boolean): string[] => {
+    const clauseLines: string[] = [];
+    const clauses = splitSelectClauses(clauseText);
+    for (let i = 0; i < clauses.length; i++) {
+      const clause = normalizeSqlWhitespace(clauses[i]);
+      const match = clause.match(
+        /^(FROM|WHERE CURRENT OF|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE|FOR READ ONLY|FOR FETCH ONLY|WITH)\b/i
+      );
+      if (!match) continue;
+      const keyword = match[1].toLowerCase();
+      const restClause = clause.slice(match[0].length).trimStart();
+      const isLast = i === clauses.length - 1;
+      const suffix = finalize && isLast ? ';' : '';
 
-  const clauses = splitSelectClauses(remainder);
-  for (let i = 0; i < clauses.length; i++) {
-    const clause = normalizeSqlWhitespace(clauses[i]);
-    const match = clause.match(
-      /^(FROM|WHERE CURRENT OF|WHERE|GROUP BY|HAVING|ORDER BY|OFFSET|FETCH|FOR UPDATE|FOR READ ONLY|FOR FETCH ONLY|WITH)\b/i
-    );
-    if (!match) continue;
-    const keyword = match[1].toLowerCase();
-    const restClause = clause.slice(match[0].length).trimStart();
-    const isLast = i === clauses.length - 1;
-    const suffix = isLast ? ';' : '';
-
-    if (keyword === 'group by' || keyword === 'order by') {
-      const items = splitTopLevel(restClause, ',').map(normalizeSqlExpression);
-      lines.push(baseIndent + keyword);
-      for (let j = 0; j < items.length; j++) {
-        const itemSuffix = j < items.length - 1 ? ',' : '';
-        lines.push(nestedIndent + items[j] + itemSuffix);
-      }
-      if (isLast) {
-        lines[lines.length - 1] = lines[lines.length - 1] + ';';
-      }
-      continue;
-    }
-
-    if (keyword === 'where current of') {
-      lines.push(baseIndent + `where current of ${normalizeSqlWhitespace(restClause)}` + suffix);
-      continue;
-    }
-
-    if (keyword === 'where' || keyword === 'having') {
-      const clauseLines = formatBooleanClause(keyword as 'where' | 'having', restClause, baseIndent, nestedIndent);
-      if (isLast) {
-        clauseLines[clauseLines.length - 1] = clauseLines[clauseLines.length - 1] + ';';
-      }
-      lines.push(...clauseLines);
-      continue;
-    }
-
-    if (keyword === 'from') {
-      const fromLines = formatFromClause(restClause, baseIndent);
-      lines.push(...fromLines);
-      if (isLast && fromLines.length > 0) {
-        lines[lines.length - 1] = lines[lines.length - 1] + ';';
-        return lines;
-      }
-      continue;
-    }
-
-    if (keyword === 'fetch') {
-      lines.push(baseIndent + `fetch ${normalizeSqlWhitespace(restClause)}` + suffix);
-      continue;
-    }
-
-    if (keyword === 'offset') {
-      lines.push(baseIndent + `offset ${normalizeSqlWhitespace(restClause)}` + suffix);
-      continue;
-    }
-
-    if (keyword === 'for update') {
-      const restUpper = restClause.toUpperCase();
-      if (restUpper.startsWith('OF ')) {
-        const columnsText = restClause.slice(3).trimStart();
-        const columns = splitTopLevel(columnsText, ',').map(normalizeSqlExpression);
-        lines.push(baseIndent + 'for update of');
-        for (let j = 0; j < columns.length; j++) {
-          const colSuffix = j < columns.length - 1 ? ',' : '';
-          lines.push(nestedIndent + columns[j] + colSuffix);
+      if (keyword === 'group by' || keyword === 'order by') {
+        const items = splitTopLevel(restClause, ',').map(normalizeSqlExpression);
+        clauseLines.push(baseIndent + keyword);
+        for (let j = 0; j < items.length; j++) {
+          const itemSuffix = j < items.length - 1 ? ',' : '';
+          clauseLines.push(nestedIndent + items[j] + itemSuffix);
         }
-        if (isLast) {
-          lines[lines.length - 1] = lines[lines.length - 1] + ';';
+        if (finalize && isLast) {
+          clauseLines[clauseLines.length - 1] = clauseLines[clauseLines.length - 1] + ';';
         }
         continue;
       }
-      lines.push(baseIndent + 'for update' + (restClause ? ` ${normalizeSqlWhitespace(restClause)}` : '') + suffix);
-      continue;
-    }
-    if (keyword === 'for read only') {
-      const withHint = restClause.toUpperCase().startsWith('WITH ')
-        ? ` ${normalizeSqlWhitespace(restClause)}`
-        : '';
-      lines.push(baseIndent + `for read only${withHint}` + suffix);
-      continue;
-    }
-    if (keyword === 'for fetch only') {
-      lines.push(baseIndent + 'fetch only' + suffix);
-      continue;
-    }
-    if (keyword === 'with') {
-      lines.push(baseIndent + `with ${normalizeSqlWhitespace(restClause)}` + suffix);
-      continue;
-    }
 
-    lines.push(baseIndent + [keyword, normalizeSqlExpression(restClause)].filter(Boolean).join(' ') + suffix);
+      if (keyword === 'where current of') {
+        clauseLines.push(
+          baseIndent + `where current of ${normalizeSqlWhitespace(restClause)}` + suffix
+        );
+        continue;
+      }
+
+      if (keyword === 'where' || keyword === 'having') {
+        const whereLines = formatBooleanClause(
+          keyword as 'where' | 'having',
+          restClause,
+          baseIndent,
+          nestedIndent
+        );
+        if (finalize && isLast) {
+          whereLines[whereLines.length - 1] = whereLines[whereLines.length - 1] + ';';
+        }
+        clauseLines.push(...whereLines);
+        continue;
+      }
+
+      if (keyword === 'from') {
+        const fromLines = formatFromClause(restClause, baseIndent, nestedIndent, formatSelect);
+        clauseLines.push(...fromLines);
+        if (finalize && isLast && fromLines.length > 0) {
+          clauseLines[clauseLines.length - 1] = clauseLines[clauseLines.length - 1] + ';';
+        }
+        continue;
+      }
+
+      if (keyword === 'fetch') {
+        clauseLines.push(baseIndent + `fetch ${normalizeSqlWhitespace(restClause)}` + suffix);
+        continue;
+      }
+
+      if (keyword === 'offset') {
+        clauseLines.push(baseIndent + `offset ${normalizeSqlWhitespace(restClause)}` + suffix);
+        continue;
+      }
+
+      if (keyword === 'for update') {
+        const restUpper = restClause.toUpperCase();
+        if (restUpper.startsWith('OF ')) {
+          const columnsText = restClause.slice(3).trimStart();
+          const columns = splitTopLevel(columnsText, ',').map(normalizeSqlExpression);
+          clauseLines.push(baseIndent + 'for update of');
+          for (let j = 0; j < columns.length; j++) {
+            const colSuffix = j < columns.length - 1 ? ',' : '';
+            clauseLines.push(nestedIndent + columns[j] + colSuffix);
+          }
+          if (finalize && isLast) {
+            clauseLines[clauseLines.length - 1] = clauseLines[clauseLines.length - 1] + ';';
+          }
+          continue;
+        }
+        clauseLines.push(
+          baseIndent +
+            'for update' +
+            (restClause ? ` ${normalizeSqlWhitespace(restClause)}` : '') +
+            suffix
+        );
+        continue;
+      }
+      if (keyword === 'for read only') {
+        const withHint = restClause.toUpperCase().startsWith('WITH ')
+          ? ` ${normalizeSqlWhitespace(restClause)}`
+          : '';
+        clauseLines.push(baseIndent + `for read only${withHint}` + suffix);
+        continue;
+      }
+      if (keyword === 'for fetch only') {
+        clauseLines.push(baseIndent + 'fetch only' + suffix);
+        continue;
+      }
+      if (keyword === 'with') {
+        clauseLines.push(baseIndent + `with ${normalizeSqlWhitespace(restClause)}` + suffix);
+        continue;
+      }
+
+      clauseLines.push(
+        baseIndent + [keyword, normalizeSqlExpression(restClause)].filter(Boolean).join(' ') + suffix
+      );
+    }
+    return clauseLines;
+  };
+
+  const setParts = splitSetOperations(remainder);
+  if (setParts.length > 1) {
+    const firstPart = setParts[0];
+    lines.push(...formatSelectClauses(firstPart, false));
+    for (let i = 1; i < setParts.length; i++) {
+      const part = setParts[i];
+      const upperPart = part.toUpperCase();
+      if (
+        upperPart === 'UNION' ||
+        upperPart === 'UNION ALL' ||
+        upperPart === 'INTERSECT' ||
+        upperPart === 'EXCEPT'
+      ) {
+        lines.push(baseIndent + part.toLowerCase());
+        continue;
+      }
+      const sub = formatSelect(part, baseIndent, nestedIndent);
+      if (i < setParts.length - 1) {
+        trimTrailingSemicolon(sub);
+      }
+      lines.push(...sub);
+    }
+    return lines;
   }
+
+  lines.push(...formatSelectClauses(remainder, true));
 
   return lines;
 };

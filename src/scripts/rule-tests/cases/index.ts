@@ -2,6 +2,7 @@ import type { Case } from '../types';
 import joinAsteriskInDecl from './join-asterisk-in-decl';
 import percentBuiltins from './percent-builtins';
 import ctlOptParentheses from './ctl-opt-parentheses';
+import ctlOptContinuationIndent from './ctl-opt-continuation-indent';
 import operatorSpacingBasic from './operator-spacing-basic';
 import specialValuesJoin from './special-values-join';
 import onErrorSpecialValue from './on-error-special-value';
@@ -143,6 +144,7 @@ export const cases: Case[] = [
   joinAsteriskInDecl,
   percentBuiltins,
   ctlOptParentheses,
+  ctlOptContinuationIndent,
   operatorSpacingBasic,
   specialValuesJoin,
   onErrorSpecialValue,

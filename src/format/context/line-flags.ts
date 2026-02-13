@@ -83,6 +83,44 @@ const getLastSignificantToken = (
   return null;
 };
 
+const getStatementContinuationOffset = (info: LineInfo): number | null => {
+  if (info.isCommentOnly) return null;
+  const trimmedStart = info.original.trimStart();
+  if (trimmedStart.length === 0 || trimmedStart.startsWith('//')) return null;
+
+  const tokens = info.tokens;
+  let index = 0;
+  while (index < tokens.length) {
+    const token = tokens[index];
+    if (token.type !== 'whitespace' && token.type !== 'comment') break;
+    index++;
+  }
+  if (index >= tokens.length) return null;
+  let keywordToken = tokens[index];
+  if (keywordToken.type !== 'word') return null;
+
+  let nextIndex = index + 1;
+  while (nextIndex < tokens.length && tokens[nextIndex].type === 'whitespace') {
+    nextIndex++;
+  }
+  if (
+    nextIndex < tokens.length &&
+    tokens[nextIndex].type === 'punctuation' &&
+    tokens[nextIndex].value === ':'
+  ) {
+    nextIndex++;
+    while (nextIndex < tokens.length && tokens[nextIndex].type === 'whitespace') {
+      nextIndex++;
+    }
+    if (nextIndex >= tokens.length) return null;
+    const afterLabel = tokens[nextIndex];
+    if (afterLabel.type !== 'word') return null;
+    keywordToken = afterLabel;
+  }
+
+  return keywordToken.value.length + 1;
+};
+
 // Derive structural flags (openers/closers/mids) from tokenized line info.
 export function getLineFlags(info: LineInfo): LineFlags {
   const upper = info.upper;
@@ -109,6 +147,7 @@ export function getLineFlags(info: LineInfo): LineFlags {
   const endsWithAssignment =
     !info.isCommentOnly &&
     Boolean(lastToken && lastToken.type === 'operator' && lastToken.value === '=');
+  const statementContinuationOffset = getStatementContinuationOffset(info);
 
   return {
     isCloser,
@@ -123,6 +162,7 @@ export function getLineFlags(info: LineInfo): LineFlags {
     hasInlineCloser,
     isCommentOnly: info.isCommentOnly,
     endsStatement,
-    endsWithAssignment
+    endsWithAssignment,
+    statementContinuationOffset
   };
 }

@@ -6,6 +6,7 @@ import {
   updateContextAfterLine,
   updateContextBeforeLine
 } from '../context';
+import { getLeadingOperator } from '../operators';
 import { countLeadingSpaces } from '../utils';
 import { findCommentIndexOutsideStrings, scanOutsideStrings } from '../utils/string-scan';
 import { PreprocessResult } from '../preprocess';
@@ -115,8 +116,19 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
     const ctx = ctxBefore[index];
     const currentIndent = countLeadingSpaces(info.original);
     const trimmedStart = info.original.trimStart();
+    const baseTarget = cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent;
     const continuationOffset = ctx.pendingAssignmentContinuation ? cfg.blockIndent : 0;
-    const target = cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent + continuationOffset;
+    const hasLeadingOperator = getLeadingOperator(info.original) !== null;
+    const statementContinuationOffset =
+      !ctx.pendingAssignmentContinuation &&
+      ctx.pendingStatementContinuationOffset !== null &&
+      paramContinuationDepth[index] === 0 &&
+      !hasLeadingOperator &&
+      !lineFlags[index].isMultilineStringContinuation &&
+      ctx.execSqlDepth === 0
+        ? ctx.pendingStatementContinuationOffset
+        : 0;
+    const target = baseTarget + continuationOffset + statementContinuationOffset;
     if (ctx.execSqlDepth > 0 && !trimmedStart.startsWith('//')) {
       const execSqlBase = execSqlIndentBase[index] ?? currentIndent;
       const relativeIndent = currentIndent >= execSqlBase ? currentIndent - execSqlBase : 0;

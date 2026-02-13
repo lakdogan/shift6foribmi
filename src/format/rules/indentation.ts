@@ -1,4 +1,5 @@
 import { Shift6Config } from '../../config';
+import { getLeadingOperator } from '../operators';
 import { countLeadingSpaces } from '../utils';
 import { Rule, RuleResult } from './types';
 
@@ -9,10 +10,21 @@ export const indentationRule: Rule = {
     const currentIndent = countLeadingSpaces(state.current);
     const trimmedStart = state.current.trimStart();
     const isCommentLine = trimmedStart.startsWith('//');
+    const baseTarget = cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent;
     const continuationOffset = ctx.pendingAssignmentContinuation ? cfg.blockIndent : 0;
+    const hasLeadingOperator = getLeadingOperator(state.current) !== null;
+    const statementContinuationOffset =
+      !ctx.pendingAssignmentContinuation &&
+      ctx.pendingStatementContinuationOffset !== null &&
+      state.paramContinuationDepth === 0 &&
+      !hasLeadingOperator &&
+      !flags.isMultilineStringContinuation &&
+      ctx.execSqlDepth === 0
+        ? ctx.pendingStatementContinuationOffset
+        : 0;
     const target = isCommentLine
       ? state.commentIndentOverride ?? cfg.targetBaseIndent
-      : cfg.targetBaseIndent + ctx.indentLevel * cfg.blockIndent + continuationOffset;
+      : baseTarget + continuationOffset + statementContinuationOffset;
     const preserveIndent =
       !cfg.alignProcedureCallParameters &&
       state.paramContinuationDepth > 0 &&

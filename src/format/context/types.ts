@@ -12,6 +12,7 @@ export interface LineFlags {
   isCommentOnly: boolean;
   endsStatement: boolean;
   endsWithAssignment: boolean;
+  statementContinuationOffset: number | null;
 }
 
 export interface ParamAlignState {
@@ -26,5 +27,6 @@ export interface FormatContext {
   execSqlBlockDepth: number;
   continuationOperatorColumn: number | null;
   pendingAssignmentContinuation: boolean;
+  pendingStatementContinuationOffset: number | null;
   paramAlignStack: ParamAlignState[];
 }

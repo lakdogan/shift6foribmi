@@ -9,6 +9,7 @@ export function initFormatContext(): FormatContext {
     execSqlBlockDepth: 0,
     continuationOperatorColumn: null,
     pendingAssignmentContinuation: false,
+    pendingStatementContinuationOffset: null,
     paramAlignStack: []
   };
 }
@@ -51,6 +52,7 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
   let indentLevel = ctx.indentLevel;
   let procDepth = ctx.procDepth;
   let pendingAssignmentContinuation = ctx.pendingAssignmentContinuation;
+  let pendingStatementContinuationOffset = ctx.pendingStatementContinuationOffset;
   let execSqlDepth = ctx.execSqlDepth;
   let execSqlBlockDepth = ctx.execSqlBlockDepth;
 
@@ -99,6 +101,13 @@ export function updateContextAfterLine(ctx: FormatContext, flags: LineFlags): Fo
       ? false
       : flags.endsWithAssignment
         ? true
-        : pendingAssignmentContinuation
+        : pendingAssignmentContinuation,
+    pendingStatementContinuationOffset: flags.endsStatement || flags.isExecSqlStart
+      ? null
+      : flags.endsWithAssignment
+        ? pendingStatementContinuationOffset
+        : pendingStatementContinuationOffset === null
+          ? flags.statementContinuationOffset ?? null
+          : pendingStatementContinuationOffset
   };
 }

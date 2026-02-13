@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
-## [0.2.7] - 2026-02-10
+## [0.2.7] - 2026-02-13
 - Kept large derived-table subqueries in exec sql FROM/JOIN clauses formatted across multiple lines instead of collapsing into a single line.
 - Split exec sql derived-table FROM clauses so WHERE conditions are formatted on their own line (including set-operations).
 - Aligned continuation lines of multi-line statements under the leading keyword (e.g., `ctl-opt` continuations).

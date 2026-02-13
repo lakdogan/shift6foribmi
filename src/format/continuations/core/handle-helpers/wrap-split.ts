@@ -3,6 +3,7 @@ import type { ContinuationState } from '../../support/types';
 import type { SplitAttempt } from './types';
 import { trySplitByOperator } from './split';
 import { tryWrapConcatenation } from './wrap';
+import { lineEndsStatement } from '../../../utils/string-scan';
 
 export type WrapSplitResult = SplitAttempt | 'wrapped' | 'none';
 
@@ -15,6 +16,9 @@ export const tryWrapOrSplit = (
   targetIndent: number,
   producedLines: string[]
 ): WrapSplitResult => {
+  if (cfg.concatStyle === 'fill' && !lineEndsStatement(recombined)) {
+    return 'none';
+  }
   if (
     tryWrapConcatenation(
       recombined,

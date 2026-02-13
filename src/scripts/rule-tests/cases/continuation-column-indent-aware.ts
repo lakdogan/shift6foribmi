@@ -9,7 +9,7 @@ const testCase: Case = {
     "  msg = 'A' + 'B' + 'C' + 'D' + 'E' + 'F';",
     'end-proc;'
   ].join('\n'),
-  mustInclude: ["msg = 'A' + 'B' + 'C'", "+ 'D' + 'E' + 'F';"],
+  mustInclude: ["msg = 'A' + 'BCDEF';"],
   config: {
     continuationColumn: 50,
     wrapLongStrings: false

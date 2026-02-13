@@ -4,6 +4,7 @@ import { getEffectiveColumnLimit } from '../../support/column-limit';
 import { wrapConcatenatedLine } from '../../support/concat-wrap';
 import {
   hasTrailingPlusOutsideStrings,
+  lineEndsWithStringLiteral,
   lineEndsStatement,
   lineHasStringConcat
 } from '../../../utils/string-scan';
@@ -39,10 +40,20 @@ export const flushPending = (
 export const tryStartPending = (
   seg: string,
   state: ContinuationState,
-  targetIndent: number
+  targetIndent: number,
+  cfg: Shift6Config
 ): boolean => {
   if (seg.trimStart().startsWith('//')) {
     return false;
+  }
+  if (
+    cfg.concatStyle === 'fill' &&
+    !lineEndsStatement(seg) &&
+    !getLeadingOperator(seg.trim()) &&
+    lineEndsWithStringLiteral(seg)
+  ) {
+    setPendingFromSegment(state, seg, targetIndent);
+    return true;
   }
   if (
     !lineEndsStatement(seg) &&

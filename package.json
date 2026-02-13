@@ -81,10 +81,11 @@
           "type": "string",
           "enum": [
             "compact",
-            "one-per-line"
+            "one-per-line",
+            "fill"
           ],
           "default": "compact",
-          "description": "Control how string concatenations are wrapped across lines."
+          "description": "Control how string concatenations are wrapped across lines (compact, one-per-line, fill)."
         }
       }
     },

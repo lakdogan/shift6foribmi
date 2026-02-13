@@ -30,7 +30,7 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
   - *Mehrwert:* Direkt auf dem Host formatieren, ohne den Member herunterladen zu muessen.
 - **Whitespace-Normalisierung:** Mehrfach-Spaces zwischen Tokens werden auf eines reduziert (z.B. `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) und Spaces in string-only Klammern werden getrimmt `(   'error'  )` -> `('error')`.  
   - *Mehrwert:* Konsistente Lesbarkeit und kleinere Diffs, ohne String-Inhalte anzutasten.
-- **String-Konkatenation:** Optionales Wrapping langer Literale und konfigurierbares Layout (`compact` oder `one-per-line`) plus Normalisierung von Multi-Line-String-Literalen in explizite Konkatenationen.  
+- **String-Konkatenation:** Optionales Wrapping langer Literale und konfigurierbares Layout (`compact`, `one-per-line` oder `fill`) plus Normalisierung von Multi-Line-String-Literalen in explizite Konkatenationen.  
   - *Mehrwert:* Vorhersehbare Strings, ohne RPG-Semantik zu brechen.
 - **Exec SQL Formatierung:** Strukturierte Layouts fuer `exec sql` Bloecke (DML/DDL, Cursor, Dynamic SQL, Diagnostics, DB2-i Hints, PSM/Trigger Bodies).
   - *Mehrwert:* Gut lesbares Embedded SQL ohne RPG-Struktur zu zerstoeren.
@@ -47,7 +47,7 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
 - `shift6.joinAsteriskTokensInDecl` (Standard: `true`): Verbindet Tokens nach `*` in `DCL-PI`/`DCL-PR`/`DCL-PROC`/`CTL-OPT`-Zeilen (z.B. `*n`, `*no`, `*new`).
 - `shift6.wrapLongStrings` (Standard: `false`): Lange String-Literale in Konkatenationen umbrechen (nur an Leerzeichen).
 - `shift6.fixMultilineStringLiterals` (Standard: `true`): Multi-Line-String-Literale (mit einfachen Quotes) in explizite Konkatenationen umwandeln.
-- `shift6.concatStyle` (Standard: `compact`): Style fuer String-Konkatenationen (`compact` oder `one-per-line`).
+- `shift6.concatStyle` (Standard: `compact`): Style fuer String-Konkatenationen (`compact`, `one-per-line` oder `fill` fuer Blocksatz-Reflow von Literalen).
 
 **C. Git Hook (optional)**
 

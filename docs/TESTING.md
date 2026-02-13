@@ -25,6 +25,7 @@
 - Toggle `shift6.wrapLongStrings` and confirm long string literals split only at spaces.
 - Toggle `shift6.fixMultilineStringLiterals` and confirm unclosed single-quote literals are normalized into concatenations.
 - Set `shift6.concatStyle` to `one-per-line` and confirm each `+` segment is on its own line.
+- Set `shift6.concatStyle` to `fill` and confirm literal-only concatenations are reflowed into block-style lines.
 
 ## Rule Tests (fast)
 - Run `npm run test:rules` to validate core formatting cases without launching VS Code.

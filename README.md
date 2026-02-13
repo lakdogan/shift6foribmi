@@ -39,7 +39,7 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
     -   *Developer Value:* **Remote-first Ready:** Format members directly on the host without downloading to the workstation.
 -   **Whitespace Normalization:** Collapses multiple spaces between tokens to one (e.g., `dcl-pi    *n;` -> `dcl-pi *n;`, `if   flag = 0;` -> `if flag = 0;`) and trims spaces inside string-only parentheses `(   'error'  )` -> `('error')`.
     -   *Developer Value:* **Cleaner Diffs:** Consistent spacing without touching string contents preserves readability and minimizes churn.
--   **String Concatenation Control:** Optional wrapping of long literals and configurable concat layout (`compact` or `one-per-line`), plus normalization of multi-line single-quote literals into explicit concatenations.
+-   **String Concatenation Control:** Optional wrapping of long literals and configurable concat layout (`compact`, `one-per-line`, or `fill`), plus normalization of multi-line single-quote literals into explicit concatenations.
     -   *Developer Value:* **Predictable Strings:** Keeps long text readable without breaking RPG string semantics.
 -   **Exec SQL Formatting:** Structured layout for `exec sql` blocks (DML/DDL, cursors, dynamic SQL, diagnostics, DB2-i hints, and PSM/trigger bodies).
     -   *Developer Value:* **Readable SQL:** Keeps complex embedded SQL readable without breaking RPG structure.
@@ -56,7 +56,7 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
 - `shift6.joinAsteriskTokensInDecl` (default: `true`): Joins `*` tokens in `DCL-PI`/`DCL-PR`/`DCL-PROC`/`CTL-OPT` lines (e.g., `*n`, `*no`, `*new`).
 - `shift6.wrapLongStrings` (default: `false`): Wrap long string literals inside concatenations, splitting only on spaces.
 - `shift6.fixMultilineStringLiterals` (default: `true`): Normalize multi-line single-quote literals into explicit concatenated strings.
-- `shift6.concatStyle` (default: `compact`): String concatenation wrapping style (`compact` or `one-per-line`).
+- `shift6.concatStyle` (default: `compact`): String concatenation wrapping style (`compact`, `one-per-line`, or `fill` for block-style literal reflow).
 
 **C. Git Hook (optional)**
 

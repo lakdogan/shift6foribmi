@@ -5,6 +5,6 @@ export {
   removeTrailingPlusOutsideStrings,
   splitBySpacedPlusOutsideStrings
 } from './plus';
-export { parseStringLiteralSegment, splitLiteralContentToFit } from './literal';
+export { lineEndsWithStringLiteral, parseStringLiteralSegment, splitLiteralContentToFit } from './literal';
 export { splitStringBySpaces } from './split';
 export { findLastNonWhitespaceOutsideStrings, scanOutsideStrings, scanStringAware } from './scan';

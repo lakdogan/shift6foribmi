@@ -34,7 +34,7 @@
 - `shift6.joinAsteriskTokensInDecl` joins `*` tokens in declaration lines (e.g., `*n`).
 - `shift6.wrapLongStrings` enables optional long string literal wrapping in concatenations.
 - `shift6.fixMultilineStringLiterals` normalizes multi-line single-quote literals into concatenations.
-- `shift6.concatStyle` controls concat layout (`compact` vs `one-per-line`).
+- `shift6.concatStyle` controls concat layout (`compact`, `one-per-line`, or `fill`).
 
 ## Release Checklist
 - README links use local assets (no GitHub rewrite).

@@ -59,7 +59,11 @@ export function normalizeConfig(input: Shift6ConfigInput): Shift6Config {
   const concatStyleInput = (input.concatStyle ?? SHIFT6_DEFAULTS.concatStyle) as string;
   const concatStyleNormalized = String(concatStyleInput).toLowerCase();
   const concatStyle =
-    concatStyleNormalized === 'one-per-line' ? 'one-per-line' : 'compact';
+    concatStyleNormalized === 'one-per-line'
+      ? 'one-per-line'
+      : concatStyleNormalized === 'fill'
+        ? 'fill'
+        : 'compact';
 
   return {
     spaces,

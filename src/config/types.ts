@@ -11,5 +11,5 @@ export interface Shift6Config {
   joinAsteriskTokensInDecl: boolean;
   wrapLongStrings: boolean;
   fixMultilineStringLiterals: boolean;
-  concatStyle: 'compact' | 'one-per-line';
+  concatStyle: 'compact' | 'one-per-line' | 'fill';
 }

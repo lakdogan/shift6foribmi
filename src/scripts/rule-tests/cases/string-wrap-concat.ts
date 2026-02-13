@@ -9,10 +9,9 @@ const testCase: Case = {
   ].join('\n'),
   mustInclude: [
     "msg = 'User=' + %trim(user) + ';Action=' + %trim(action)",
-    "+ ';Details=' + 'Some",
-    "+ 'detail text that should show how continuation lines get",
-    "+ 'aligned and made readable by the formatter in a",
-    "+ 'consistent way';"
+    "+ %char(%timestamp()) + ';Details=Some very long detail '",
+    "+ 'text that should show how continuation lines get aligned '",
+    "+ 'and made readable by the formatter in a consistent way';"
   ],
   config: {
     wrapLongStrings: true

@@ -6,7 +6,11 @@ const testCase: Case = {
     '**free',
     "msg = 'A' + 'B' + 'This is a very long literal that should split when it starts a new line due to column limits.';"
   ].join('\n'),
-  mustInclude: ["+ 'literal that should split"],
+  mustInclude: [
+    "msg = 'A' + 'BThis is a very long literal '",
+    "+ 'that should split when it starts a new '",
+    "+ 'line due to column limits.';"
+  ],
   config: {
     wrapLongStrings: true,
     continuationColumn: 50

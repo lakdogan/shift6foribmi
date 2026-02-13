@@ -6,14 +6,16 @@ type CaseToken = {
   index: number;
 };
 
+type CaseParse = {
+  headerExpr: string;
+  whenThen: Array<{ whenText: string; thenText: string }>;
+  elseText: string;
+  endTail: string;
+};
+
 const isWordChar = (ch: string): boolean => /[A-Za-z0-9_]/.test(ch);
 
-// Format CASE expressions into multi-line layout. Returns null if not a CASE expression.
-export const formatCaseExpression = (
-  text: string,
-  baseIndent: string,
-  nestedIndent: string
-): string[] | null => {
+const parseCaseExpression = (text: string): CaseParse | null => {
   const normalized = normalizeSqlWhitespace(text);
   const upper = normalized.toUpperCase();
   if (!upper.startsWith('CASE')) return null;
@@ -62,8 +64,8 @@ export const formatCaseExpression = (
   const headerExpr = normalizeSqlExpression(
     normalized.slice(caseStart + 4, firstWhen.index).trim()
   );
-  const lines: string[] = [];
-  lines.push(baseIndent + (headerExpr ? `case ${headerExpr}` : 'case'));
+  const whenThen: Array<{ whenText: string; thenText: string }> = [];
+  let elseText = '';
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
@@ -94,22 +96,69 @@ export const formatCaseExpression = (
       const thenText = normalizeSqlExpression(
         normalized.slice(thenToken.index + 4, nextIndex).trim()
       );
-      lines.push(nestedIndent + `when ${whenText} then ${thenText}`);
+      whenThen.push({ whenText, thenText });
       i = thenIndex;
       continue;
     }
     if (token.keyword === 'ELSE') {
-      const elseText = normalizeSqlExpression(
+      elseText = normalizeSqlExpression(
         normalized.slice(token.index + 4, endToken.index).trim()
       );
-      if (elseText.length > 0) {
-        lines.push(nestedIndent + `else ${elseText}`);
-      }
       break;
     }
   }
 
   const endTail = normalizeSqlWhitespace(normalized.slice(endToken.index + 3).trim());
-  lines.push(baseIndent + (endTail ? `end ${endTail}` : 'end'));
+
+  return {
+    headerExpr,
+    whenThen,
+    elseText,
+    endTail
+  };
+};
+
+// Format CASE expressions into multi-line layout. Returns null if not a CASE expression.
+export const formatCaseExpression = (
+  text: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] | null => {
+  const parsed = parseCaseExpression(text);
+  if (!parsed) return null;
+
+  const lines: string[] = [];
+  lines.push(baseIndent + (parsed.headerExpr ? `case ${parsed.headerExpr}` : 'case'));
+
+  for (const pair of parsed.whenThen) {
+    lines.push(nestedIndent + `when ${pair.whenText} then ${pair.thenText}`);
+  }
+
+  if (parsed.elseText.length > 0) {
+    lines.push(nestedIndent + `else ${parsed.elseText}`);
+  }
+
+  lines.push(baseIndent + (parsed.endTail ? `end ${parsed.endTail}` : 'end'));
+  return lines;
+};
+
+// Format CASE expressions with WHEN/THEN on separate lines (no indentation).
+export const formatCaseExpressionStacked = (text: string): string[] | null => {
+  const parsed = parseCaseExpression(text);
+  if (!parsed) return null;
+
+  const lines: string[] = [];
+  lines.push(parsed.headerExpr ? `case ${parsed.headerExpr}` : 'case');
+
+  for (const pair of parsed.whenThen) {
+    lines.push(`when ${pair.whenText}`);
+    lines.push(`then ${pair.thenText}`);
+  }
+
+  if (parsed.elseText.length > 0) {
+    lines.push(`else ${parsed.elseText}`);
+  }
+
+  lines.push(parsed.endTail ? `end ${parsed.endTail}` : 'end');
   return lines;
 };

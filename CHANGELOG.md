@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Prevented exec sql select multiline column indentation from drifting across repeated formats.
 - Normalized CASE continuation indentation inside exec sql select columns even when input is already over-indented.
 - Added rule-test coverage for exec sql multiline CASE indentation correction.
+- Formatted exec sql UPDATE SET assignments with stacked CASE blocks and aligned SET/WHERE indentation.
 
 ## [0.2.6] - 2026-02-05
 - Fixed percent-builtin normalization to avoid inserting extra ')' when a built-in call is split across lines, preventing doubled closing parens after formatting.

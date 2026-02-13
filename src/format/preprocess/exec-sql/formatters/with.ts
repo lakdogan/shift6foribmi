@@ -8,16 +8,17 @@ export const formatWithStatement = (
   baseIndent: string,
   nestedIndent: string
 ): string[] => {
-  const cleaned = normalizeSqlWhitespace(text);
+  const cleaned = text.trimEnd();
   const upper = cleaned.toUpperCase();
-  if (!upper.startsWith('WITH ')) {
-    return [baseIndent + cleaned + ';'];
+  if (!/^WITH\b/.test(upper)) {
+    return [baseIndent + normalizeSqlWhitespace(text) + ';'];
   }
 
   const withPart = cleaned.slice(4).trimStart();
   const { ctes, remainder } = parseWithClauses(withPart);
   if (ctes.length === 0) {
-    return [baseIndent + `with ${withPart};`];
+    const normalizedPart = normalizeSqlWhitespace(withPart);
+    return [baseIndent + `with ${normalizedPart};`];
   }
 
   const lines: string[] = [];
@@ -36,20 +37,21 @@ export const formatWithStatement = (
     return lines;
   }
 
-  const upperRemainder = remainder.toUpperCase();
+  const remainderTrimmed = remainder.trimStart();
+  const upperRemainder = remainderTrimmed.toUpperCase();
   let formatted: string[];
-  if (upperRemainder.startsWith('SELECT ')) {
-    formatted = formatSelect(remainder, baseIndent, nestedIndent);
+  if (upperRemainder.startsWith('SELECT')) {
+    formatted = formatSelect(remainderTrimmed, baseIndent, nestedIndent);
   } else if (upperRemainder.startsWith('INSERT ')) {
-    formatted = formatInsert(remainder, baseIndent, nestedIndent);
+    formatted = formatInsert(normalizeSqlWhitespace(remainderTrimmed), baseIndent, nestedIndent);
   } else if (upperRemainder.startsWith('UPDATE ')) {
-    formatted = formatUpdate(remainder, baseIndent, nestedIndent);
+    formatted = formatUpdate(normalizeSqlWhitespace(remainderTrimmed), baseIndent, nestedIndent);
   } else if (upperRemainder.startsWith('DELETE ')) {
-    formatted = formatDelete(remainder, baseIndent, nestedIndent);
+    formatted = formatDelete(normalizeSqlWhitespace(remainderTrimmed), baseIndent, nestedIndent);
   } else if (upperRemainder.startsWith('MERGE ')) {
-    formatted = formatMerge(remainder, baseIndent, nestedIndent);
+    formatted = formatMerge(normalizeSqlWhitespace(remainderTrimmed), baseIndent, nestedIndent);
   } else {
-    formatted = [baseIndent + `${remainder.trimEnd()};`];
+    formatted = [baseIndent + `${normalizeSqlWhitespace(remainderTrimmed)};`];
   }
 
   lines.push(...formatted);

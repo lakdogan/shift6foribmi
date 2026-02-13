@@ -25,17 +25,18 @@ import { formatWithStatement } from './with';
 export const formatSqlStatement = (text: string, indentStep: number): string[] => {
   const baseIndent = ' '.repeat(indentStep);
   const nestedIndent = ' '.repeat(indentStep * 2);
+  const trimmedUpper = text.trimStart().toUpperCase();
   const normalized = normalizeSqlWhitespace(text);
   const upper = normalized.toUpperCase();
 
+  if (trimmedUpper.startsWith('WITH')) {
+    return formatWithStatement(text, baseIndent, nestedIndent);
+  }
+  if (trimmedUpper.startsWith('SELECT')) {
+    return formatSelect(text, baseIndent, nestedIndent);
+  }
   if (upper.startsWith('INSERT ')) {
     return formatInsert(normalized, baseIndent, nestedIndent);
-  }
-  if (upper.startsWith('WITH ')) {
-    return formatWithStatement(normalized, baseIndent, nestedIndent);
-  }
-  if (upper.startsWith('SELECT ')) {
-    return formatSelect(normalized, baseIndent, nestedIndent);
   }
   if (upper.startsWith('UPDATE ')) {
     return formatUpdate(normalized, baseIndent, nestedIndent);

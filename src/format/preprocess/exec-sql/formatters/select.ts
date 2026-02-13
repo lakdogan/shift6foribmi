@@ -19,7 +19,7 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
   const cleaned = stripTrailingSemicolon(text);
   const upper = cleaned.toUpperCase();
 
-  if (upper.startsWith('WITH ')) {
+  if (/^WITH\b/.test(upper)) {
     const withPart = cleaned.slice(4).trimStart();
     const { ctes, remainder } = parseWithClauses(withPart);
     if (ctes.length === 0) {
@@ -49,12 +49,12 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
     return lines;
   }
 
-  const selectMatch = upper.match(/^SELECT\s+(DISTINCT\s+)?/);
+  const selectMatch = upper.match(/^SELECT(?:\s+DISTINCT)?/);
   if (!selectMatch) {
     return [baseIndent + cleaned + ';'];
   }
 
-  const distinct = Boolean(selectMatch[1]);
+  const distinct = /^SELECT\s+DISTINCT\b/.test(upper);
   const afterSelect = cleaned.slice(selectMatch[0].length);
 
   const fromIndex = (() => {
@@ -78,19 +78,93 @@ export const formatSelect = (text: string, baseIndent: string, nestedIndent: str
     return index;
   })();
 
-  const columnsText = fromIndex >= 0 ? afterSelect.slice(0, fromIndex).trim() : afterSelect.trim();
-  const intoIndex = findKeywordIndex(columnsText, 'INTO');
-  const selectColumnsText =
-    intoIndex >= 0 ? columnsText.slice(0, intoIndex).trim() : columnsText;
-  const intoText = intoIndex >= 0 ? columnsText.slice(intoIndex + 4).trimStart() : '';
+  const columnsTextRaw = fromIndex >= 0 ? afterSelect.slice(0, fromIndex) : afterSelect;
+  const intoIndexRaw = findKeywordIndex(columnsTextRaw, 'INTO');
+  const selectColumnsTextRaw =
+    intoIndexRaw >= 0 ? columnsTextRaw.slice(0, intoIndexRaw) : columnsTextRaw;
+  const intoText =
+    intoIndexRaw >= 0 ? columnsTextRaw.slice(intoIndexRaw + 4).trimStart() : '';
   const remainder = fromIndex >= 0 ? afterSelect.slice(fromIndex).trim() : '';
 
-  const columns = splitTopLevel(selectColumnsText, ',').map(normalizeSqlExpression);
+  const splitTopLevelPreserve = (input: string, delimiter: string): string[] => {
+    const parts: string[] = [];
+    let depth = 0;
+    let start = 0;
+    scanStringAware(input, (ch, index) => {
+      if (ch === '(') {
+        depth++;
+        return;
+      }
+      if (ch === ')') {
+        depth = Math.max(0, depth - 1);
+        return;
+      }
+      if (ch === delimiter && depth === 0) {
+        parts.push(input.slice(start, index));
+        start = index + 1;
+      }
+    });
+    parts.push(input.slice(start));
+    return parts.filter((part) => part.trim().length > 0);
+  };
+
+  const rawColumns = splitTopLevelPreserve(selectColumnsTextRaw, ',');
+  const columns = rawColumns.map((raw) => normalizeSqlExpression(raw.trim()));
   const lines = [baseIndent + (distinct ? 'select distinct' : 'select')];
   const indentStep = Math.max(0, nestedIndent.length - baseIndent.length);
   const caseNestedIndent = nestedIndent + ' '.repeat(indentStep);
+  const formatMultilineColumn = (column: string): string[] => {
+    const rawLines = column.split(/\r?\n/);
+    const cleaned = rawLines
+      .map((line) => line.replace(/\s+$/u, ''))
+      .filter((line) => line.trim().length > 0);
+    if (cleaned.length === 0) return [];
+    const caseIndex = cleaned.findIndex((line) => /\bcase\b/i.test(line));
+    if (caseIndex === 0) {
+      const caseLine = cleaned[0].trimStart();
+      const lowerCaseLine = caseLine.toLowerCase();
+      const whenIndex = lowerCaseLine.indexOf('when ');
+      if (whenIndex >= 0) {
+        return cleaned.map((line, idx) => {
+          const trimmed = line.trimStart();
+          if (idx === 0) {
+            return nestedIndent + trimmed;
+          }
+          const lower = trimmed.toLowerCase();
+          let offset = whenIndex;
+          if (lower.startsWith('and ') || lower.startsWith('or ')) {
+            offset = whenIndex + 3;
+          } else if (lower.startsWith('then ') || lower.startsWith('else ') || lower === 'end') {
+            offset = whenIndex;
+          }
+          return nestedIndent + ' '.repeat(Math.max(0, offset)) + trimmed;
+        });
+      }
+    }
+    let minIndent = Number.POSITIVE_INFINITY;
+    const indents = cleaned.map((line) => {
+      const match = line.match(/^\s*/);
+      const count = match ? match[0].length : 0;
+      if (count < minIndent) minIndent = count;
+      return count;
+    });
+    if (!Number.isFinite(minIndent)) minIndent = 0;
+    return cleaned.map((line) => {
+      const trimmed = line.slice(minIndent);
+      return nestedIndent + trimmed;
+    });
+  };
   for (let i = 0; i < columns.length; i++) {
     const suffix = i < columns.length - 1 ? ',' : '';
+    const rawColumn = rawColumns[i] ?? columns[i];
+    if (rawColumn.includes('\n')) {
+      const columnLines = formatMultilineColumn(rawColumn);
+      if (columnLines.length > 0) {
+        columnLines[columnLines.length - 1] = columnLines[columnLines.length - 1] + suffix;
+        lines.push(...columnLines);
+        continue;
+      }
+    }
     const caseLines = formatCaseExpression(columns[i], nestedIndent, caseNestedIndent);
     if (caseLines) {
       caseLines[caseLines.length - 1] = caseLines[caseLines.length - 1] + suffix;

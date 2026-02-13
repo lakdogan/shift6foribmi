@@ -119,6 +119,8 @@ import execSqlFunctions from './exec-sql-functions';
 import concatMergeAdjacentLiterals from './concat-merge-adjacent-literals';
 import concatFillLiterals from './concat-fill-literals';
 import concatFillMixedPreserve from './concat-fill-mixed-preserve';
+import execSqlSelectCaseMultiline from './exec-sql-select-case-multiline';
+import execSqlSelectCaseMultilineDrift from './exec-sql-select-case-multiline-drift';
 import execSqlPsmBlocks from './exec-sql-psm-blocks';
 import execSqlPsmOrReplace from './exec-sql-psm-or-replace';
 import execSqlTriggerBody from './exec-sql-trigger-body';
@@ -266,6 +268,8 @@ export const cases: Case[] = [
   concatMergeAdjacentLiterals,
   concatFillLiterals,
   concatFillMixedPreserve,
+  execSqlSelectCaseMultiline,
+  execSqlSelectCaseMultilineDrift,
   execSqlPsmBlocks,
   execSqlPsmOrReplace,
   execSqlTriggerBody,

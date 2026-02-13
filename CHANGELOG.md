@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `fill` concat style to reflow literal-only concatenations into block-style lines.
 - Avoided extra indentation after single-line `dcl-ds` templates (e.g., `likeds`), keeping `end-proc` aligned.
 - Preserved mixed concat line breaks in `fill` mode when non-literal segments are present.
+- Kept multi-line select expressions inside exec sql (e.g., CASE blocks) instead of collapsing them.
+- Prevented exec sql select multiline column indentation from drifting across repeated formats.
+- Normalized CASE continuation indentation inside exec sql select columns even when input is already over-indented.
+- Added rule-test coverage for exec sql multiline CASE indentation correction.
 
 ## [0.2.6] - 2026-02-05
 - Fixed percent-builtin normalization to avoid inserting extra ')' when a built-in call is split across lines, preventing doubled closing parens after formatting.

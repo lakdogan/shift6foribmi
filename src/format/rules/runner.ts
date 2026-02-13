@@ -76,7 +76,8 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
   };
 
   for (let i = 0; i < lineInfos.length; i++) {
-    const inExecSql = ctxBefore[i].execSqlDepth > 0;
+    const flags = lineFlags[i];
+    const inExecSql = ctxBefore[i].execSqlDepth > 0 || flags.isExecSqlStart;
     if (!inExecSql) {
       finalizeExecSqlBlock();
       continue;
@@ -86,7 +87,6 @@ export function runRules(pre: PreprocessResult, cfg: Shift6Config, rules: Rule[]
       activeExecSqlMin = Number.POSITIVE_INFINITY;
     }
     activeExecSqlIndices.push(i);
-    const flags = lineFlags[i];
     if (!flags.isCommentOnly && !flags.isMultilineStringContinuation && !multilineStringStart[i]) {
       const indent = countLeadingSpaces(lineInfos[i].original);
       if (indent < activeExecSqlMin) {

@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Kept large derived-table subqueries in exec sql FROM/JOIN clauses formatted across multiple lines instead of collapsing into a single line.
 - Split exec sql derived-table FROM clauses so WHERE conditions are formatted on their own line (including set-operations).
 - Aligned continuation lines of multi-line statements under the leading keyword (e.g., `ctl-opt` continuations).
+- Preserved exec sql indentation relative to the `exec sql` line for multi-line SQL blocks.
 
 ## [0.2.6] - 2026-02-05
 - Fixed percent-builtin normalization to avoid inserting extra ')' when a built-in call is split across lines, preventing doubled closing parens after formatting.

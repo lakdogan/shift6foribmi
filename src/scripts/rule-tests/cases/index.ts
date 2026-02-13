@@ -113,6 +113,7 @@ import execSqlSelectAdvanced from './exec-sql-select-advanced';
 import execSqlDmlSpecials from './exec-sql-dml-specials';
 import execSqlDiagnosticsSession from './exec-sql-diagnostics-session';
 import execSqlCursorDescriptor from './exec-sql-cursor-descriptor';
+import execSqlIndent from './exec-sql-indent';
 import execSqlFunctions from './exec-sql-functions';
 import execSqlPsmBlocks from './exec-sql-psm-blocks';
 import execSqlPsmOrReplace from './exec-sql-psm-or-replace';
@@ -255,6 +256,7 @@ export const cases: Case[] = [
   execSqlDmlSpecials,
   execSqlDiagnosticsSession,
   execSqlCursorDescriptor,
+  execSqlIndent,
   execSqlFunctions,
   execSqlPsmBlocks,
   execSqlPsmOrReplace,

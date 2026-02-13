@@ -132,7 +132,7 @@ export function getLineFlags(info: LineInfo): LineFlags {
     (leading.length > 0 && CLOSERS.includes(leading)) || startsWithKeyword(upper, CLOSERS);
   const isMid =
     (leading.length > 0 && MID_KEYWORDS.includes(leading)) || startsWithKeyword(upper, MID_KEYWORDS);
-  const isOpener =
+  let isOpener =
     (leading.length > 0 && OPENERS.includes(leading)) || startsWithKeyword(upper, OPENERS);
   const isProcStart = upper.startsWith('DCL-PROC');
   const isProcEnd = upper.startsWith('END-PROC') || upper.startsWith('ENDPROC');
@@ -147,6 +147,16 @@ export function getLineFlags(info: LineInfo): LineFlags {
   const endsWithAssignment =
     !info.isCommentOnly &&
     Boolean(lastToken && lastToken.type === 'operator' && lastToken.value === '=');
+  const isDclDsStart = trimmedUpper.startsWith('DCL-DS');
+  const hasEndDsToken = /\bEND-DS\b|\bENDDS\b/.test(upperNoComment);
+  const hasTemplateKeyword =
+    /\b(LIKEDS|LIKEREC|LIKEDF|EXTNAME|EXTFILE|EXTFLD)\b/.test(upperNoComment);
+  const isSingleLineDclDsTemplate =
+    isDclDsStart && endsStatement && !hasEndDsToken && hasTemplateKeyword;
+  if (isSingleLineDclDsTemplate) {
+    isOpener = false;
+  }
+
   const statementContinuationOffset = getStatementContinuationOffset(info);
 
   return {

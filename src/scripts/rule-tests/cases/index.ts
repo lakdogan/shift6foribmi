@@ -10,6 +10,7 @@ import continuationAlignment from './continuation-alignment';
 import procedureCallParamAlignment from './procedure-call-param-alignment';
 import declJoinAsteriskProto from './decl-join-asterisk-proto';
 import dclDsInline from './dcl-ds-inline';
+import dclDsLikedsNoBlock from './dcl-ds-likeds-no-block';
 import ctlOptOptionsCollapse from './ctl-opt-options-collapse';
 import inlineStatementSplit from './inline-statement-split';
 import dclPrInline from './dcl-pr-inline';
@@ -155,6 +156,7 @@ export const cases: Case[] = [
   procedureCallParamAlignment,
   declJoinAsteriskProto,
   dclDsInline,
+  dclDsLikedsNoBlock,
   ctlOptOptionsCollapse,
   inlineStatementSplit,
   dclPrInline,

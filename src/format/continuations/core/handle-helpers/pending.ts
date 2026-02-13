@@ -4,7 +4,7 @@ import { getEffectiveColumnLimit } from '../../support/column-limit';
 import { wrapConcatenatedLine } from '../../support/concat-wrap';
 import {
   hasTrailingPlusOutsideStrings,
-  lineEndsWithStringLiteral,
+  isLiteralOnlyConcatLine,
   lineEndsStatement,
   lineHasStringConcat
 } from '../../../utils/string-scan';
@@ -46,24 +46,19 @@ export const tryStartPending = (
   if (seg.trimStart().startsWith('//')) {
     return false;
   }
-  if (
-    cfg.concatStyle === 'fill' &&
-    !lineEndsStatement(seg) &&
-    !getLeadingOperator(seg.trim()) &&
-    lineEndsWithStringLiteral(seg)
-  ) {
-    setPendingFromSegment(state, seg, targetIndent);
-    return true;
+  const leadingOp = getLeadingOperator(seg.trim());
+  if (!lineEndsStatement(seg) && !leadingOp) {
+    if (cfg.concatStyle === 'fill') {
+      if (isLiteralOnlyConcatLine(seg)) {
+        setPendingFromSegment(state, seg, targetIndent);
+        return true;
+      }
+    } else if (lineHasStringConcat(seg)) {
+      setPendingFromSegment(state, seg, targetIndent);
+      return true;
+    }
   }
-  if (
-    !lineEndsStatement(seg) &&
-    !getLeadingOperator(seg.trim()) &&
-    lineHasStringConcat(seg)
-  ) {
-    setPendingFromSegment(state, seg, targetIndent);
-    return true;
-  }
-  if (hasTrailingPlusOutsideStrings(seg)) {
+  if (!leadingOp && hasTrailingPlusOutsideStrings(seg)) {
     setPendingFromSegment(state, seg, targetIndent);
     return true;
   }

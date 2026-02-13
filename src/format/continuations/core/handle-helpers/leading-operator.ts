@@ -9,6 +9,7 @@ import type { ContinuationState } from '../../support/types';
 import type { SplitAttempt } from './types';
 import { clearPending } from './state';
 import { tryWrapOrSplit } from './wrap-split';
+import { isLiteralOnlyConcatLine } from '../../../utils/string-scan';
 
 // Handle a pending line followed by a leading operator segment.
 export const handleLeadingOperatorSegment = (
@@ -26,6 +27,9 @@ export const handleLeadingOperatorSegment = (
   if (!leadingOp) return 'none';
   const merged: string = pending + ' ' + leadingOp + ' ' + trimmedSeg.substring(1).trimStart();
   const recombined = normalizeOperatorSpacing(merged, cfg);
+  if (cfg.concatStyle === 'fill' && !isLiteralOnlyConcatLine(recombined)) {
+    return 'none';
+  }
   const continuationColumnLimit = getEffectiveColumnLimit(recombined, targetIndent, cfg);
 
   const wrapSplitResult = tryWrapOrSplit(

@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Preserved exec sql indentation relative to the `exec sql` line for multi-line SQL blocks.
 - Added `fill` concat style to reflow literal-only concatenations into block-style lines.
 - Avoided extra indentation after single-line `dcl-ds` templates (e.g., `likeds`), keeping `end-proc` aligned.
+- Preserved mixed concat line breaks in `fill` mode when non-literal segments are present.
 
 ## [0.2.6] - 2026-02-05
 - Fixed percent-builtin normalization to avoid inserting extra ')' when a built-in call is split across lines, preventing doubled closing parens after formatting.

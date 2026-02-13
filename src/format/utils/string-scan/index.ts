@@ -1,5 +1,5 @@
 export { findCommentIndexOutsideStrings, lineEndsStatement } from './comments';
-export { lineHasStringConcat } from './concat-detect';
+export { isLiteralOnlyConcatLine, lineHasStringConcat } from './concat-detect';
 export {
   hasTrailingPlusOutsideStrings,
   removeTrailingPlusOutsideStrings,

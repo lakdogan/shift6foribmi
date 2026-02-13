@@ -3,6 +3,7 @@ import { normalizeOperatorSpacing } from '../../../operators';
 import { getEffectiveColumnLimit } from '../../support/column-limit';
 import {
   hasTrailingPlusOutsideStrings,
+  isLiteralOnlyConcatLine,
   lineEndsStatement,
   lineHasStringConcat,
   removeTrailingPlusOutsideStrings
@@ -32,6 +33,9 @@ export const handleStringLiteralSegment = (
     const base = removeTrailingPlusOutsideStrings(pending);
     const merged = base + ' + ' + trimmedSeg;
     const recombined = normalizeOperatorSpacing(merged, cfg);
+    if (cfg.concatStyle === 'fill' && !isLiteralOnlyConcatLine(recombined)) {
+      return 'none';
+    }
     const pendingTargetIndent = state.pendingTargetIndent ?? targetIndent;
     const continuationColumnLimit = getEffectiveColumnLimit(
       recombined,
@@ -62,6 +66,9 @@ export const handleStringLiteralSegment = (
   if (!lineEndsStatement(pending) && lineHasStringConcat(pending)) {
     const merged = pending + ' + ' + trimmedSeg;
     const recombined = normalizeOperatorSpacing(merged, cfg);
+    if (cfg.concatStyle === 'fill' && !isLiteralOnlyConcatLine(recombined)) {
+      return 'none';
+    }
     const pendingTargetIndent = state.pendingTargetIndent ?? targetIndent;
     const continuationColumnLimit = getEffectiveColumnLimit(
       recombined,

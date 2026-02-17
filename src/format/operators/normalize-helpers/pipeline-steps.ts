@@ -10,6 +10,7 @@ import {
   applyNonDeclAsteriskSpacing,
   applyPercentBuiltinArgs,
   applyPercentBuiltinNames,
+  applySqlStatusIdentifierCase,
   applySpecialValueContext
 } from './pipeline';
 import {
@@ -43,6 +44,7 @@ export const buildNormalizeSteps = (ctx: NormalizeStepContext): NormalizeStep[] 
   steps.push((text) => normalizeSpecialValueSpacing(text));
   steps.push((text, stepCtx) => applyNonDeclAsteriskSpacing(text, stepCtx.isDeclLine));
   steps.push((text, stepCtx) => applySpecialValueContext(text, stepCtx.contextPattern));
+  steps.push((text, stepCtx) => applySqlStatusIdentifierCase(text, stepCtx.cfg.execSqlKeywordCase));
   steps.push((text, stepCtx) => applyCtlOptAsteriskSpacing(text, stepCtx.isCtlOptLine));
   steps.push((text) => applyOperatorSpacingReplacements(text));
   steps.push(applyIf(ctx.cfg.collapseTokenSpaces, (text) => collapseExtraSpacesOutsideStrings(text)));

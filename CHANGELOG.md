@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.3.0] - 2026-02-17
+- Added `shift6.execSqlKeywordCase` setting to switch exec sql keyword output between lowercase and uppercase.
+- Applied keyword-case conversion to `exec sql` blocks, including the `exec sql` / `EXEC SQL` prefix.
+- Added casing normalization for SQL status identifiers in RPG lines (`SQLCODE`, `SQLSTATE`, `SQLCA`) based on the selected keyword-case mode.
+- Expanded SQL keyword/function coverage for case conversion (including DDL/data-type/special-register tokens such as `generated`, `identity`, `key`, `foreign`, `references`, `column`, `current_timestamp`, `grant`, `revoke`, `refresh`, `signal`, and related tokens).
+- Added rule-test coverage for upper/lower keyword-case behavior and DDL-focused casing scenarios.
+
 ## [0.2.7] - 2026-02-13
 - Kept large derived-table subqueries in exec sql FROM/JOIN clauses formatted across multiple lines instead of collapsing into a single line.
 - Split exec sql derived-table FROM clauses so WHERE conditions are formatted on their own line (including set-operations).

@@ -19,6 +19,7 @@ export function getConfig(): Shift6Config {
     joinAsteriskTokensInDecl: cfg.get<boolean>(CONFIG_KEYS.joinAsteriskTokensInDecl),
     wrapLongStrings: cfg.get<boolean>(CONFIG_KEYS.wrapLongStrings),
     fixMultilineStringLiterals: cfg.get<boolean>(CONFIG_KEYS.fixMultilineStringLiterals),
-    concatStyle: cfg.get<string>(CONFIG_KEYS.concatStyle)
+    concatStyle: cfg.get<string>(CONFIG_KEYS.concatStyle),
+    execSqlKeywordCase: cfg.get<string>(CONFIG_KEYS.execSqlKeywordCase)
   });
 }

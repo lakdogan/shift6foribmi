@@ -18,3 +18,4 @@ export { findMatchingParenIndex, findKeywordIndex, findLastKeywordIndex } from '
 export { parseWithClauses } from './cte';
 export { splitSetOperations, splitSelectClauses } from './select';
 export { JOIN_KEYWORDS, splitJoinSegments } from './join';
+export { SQL_KEYWORDS, applySqlKeywordCasing, getExecSqlPrefix } from './keyword-case';

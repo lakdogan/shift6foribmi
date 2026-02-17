@@ -57,6 +57,7 @@ The Shift6 Formatter is engineered for efficiency and code integrity, providing 
 - `shift6.wrapLongStrings` (default: `false`): Wrap long string literals inside concatenations, splitting only on spaces.
 - `shift6.fixMultilineStringLiterals` (default: `true`): Normalize multi-line single-quote literals into explicit concatenated strings.
 - `shift6.concatStyle` (default: `compact`): String concatenation wrapping style (`compact`, `one-per-line`, or `fill` for block-style literal reflow).
+- `shift6.execSqlKeywordCase` (default: `lower`): Controls SQL keyword casing in `exec sql` blocks (`lower` or `upper`).
 
 **C. Git Hook (optional)**
 

@@ -15,7 +15,7 @@ const testCase: Case = {
   ].join('\n'),
   mustInclude: [
     'connect to LOCAL;',
-    'set connection CURRENT;',
+    'set connection current;',
     'disconnect current;',
     'release;'
   ]

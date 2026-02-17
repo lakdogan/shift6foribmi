@@ -48,6 +48,7 @@ Der **Shift6 Formatter** richtet RPG-Free-Code in VS Code automatisch so ein, wi
 - `shift6.wrapLongStrings` (Standard: `false`): Lange String-Literale in Konkatenationen umbrechen (nur an Leerzeichen).
 - `shift6.fixMultilineStringLiterals` (Standard: `true`): Multi-Line-String-Literale (mit einfachen Quotes) in explizite Konkatenationen umwandeln.
 - `shift6.concatStyle` (Standard: `compact`): Style fuer String-Konkatenationen (`compact`, `one-per-line` oder `fill` fuer Blocksatz-Reflow von Literalen).
+- `shift6.execSqlKeywordCase` (Standard: `lower`): Steuert die Gross-/Kleinschreibung von SQL-Keywords in `exec sql`-Bloecken (`lower` oder `upper`).
 
 **C. Git Hook (optional)**
 

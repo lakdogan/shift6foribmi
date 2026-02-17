@@ -10,7 +10,7 @@ const testCase: Case = {
     'end-exec;'
   ].join('\n'),
   mustInclude: [
-    'set current date = CURRENT_DATE;',
+    'set current date = current_date;',
     'set current schema = MYLIB;'
   ]
 };

@@ -24,9 +24,9 @@ const testCase: Case = {
     'include sqlca;',
     'whenever sqlerror goto ErrLabel;',
     'connect to LOCAL user :u using :p;',
-    'set connection CURRENT;',
-    'disconnect ALL;',
-    'release CURRENT;'
+    'set connection current;',
+    'disconnect all;',
+    'release current;'
   ]
 };
 

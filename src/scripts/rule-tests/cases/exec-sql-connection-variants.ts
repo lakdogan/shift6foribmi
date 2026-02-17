@@ -13,8 +13,8 @@ const testCase: Case = {
   ].join('\n'),
   mustInclude: [
     'connect to LOCAL user :u using :p;',
-    'disconnect ALL;',
-    'release CURRENT;'
+    'disconnect all;',
+    'release current;'
   ]
 };
 

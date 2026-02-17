@@ -9,5 +9,6 @@ export const CONFIG_KEYS = {
   joinAsteriskTokensInDecl: 'shift6.joinAsteriskTokensInDecl',
   wrapLongStrings: 'shift6.wrapLongStrings',
   fixMultilineStringLiterals: 'shift6.fixMultilineStringLiterals',
-  concatStyle: 'shift6.concatStyle'
+  concatStyle: 'shift6.concatStyle',
+  execSqlKeywordCase: 'shift6.execSqlKeywordCase'
 } as const;

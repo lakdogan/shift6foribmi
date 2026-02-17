@@ -32,6 +32,10 @@ import wrapLongLiteralNewLine from './wrap-long-literal-new-line';
 import booleanAssignmentWrap from './boolean-assignment-wrap';
 import avoidSplitInsideParens from './avoid-split-inside-parens';
 import execSqlFormatting from './exec-sql-formatting';
+import execSqlKeywordCaseDdlLower from './exec-sql-keyword-case-ddl-lower';
+import execSqlKeywordCaseUpper from './exec-sql-keyword-case-upper';
+import sqlStatusIdentifiersLower from './sql-status-identifiers-lower';
+import sqlStatusIdentifiersUpper from './sql-status-identifiers-upper';
 import execSqlFreeformMultiline from './exec-sql-freeform-multiline';
 import execSqlUpdateDelete from './exec-sql-update-delete';
 import execSqlCallSetCommit from './exec-sql-call-set-commit';
@@ -182,6 +186,10 @@ export const cases: Case[] = [
   booleanAssignmentWrap,
   avoidSplitInsideParens,
   execSqlFormatting,
+  execSqlKeywordCaseDdlLower,
+  execSqlKeywordCaseUpper,
+  sqlStatusIdentifiersLower,
+  sqlStatusIdentifiersUpper,
   execSqlFreeformMultiline,
   execSqlUpdateDelete,
   execSqlCallSetCommit,

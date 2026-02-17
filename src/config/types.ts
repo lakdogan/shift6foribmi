@@ -1,3 +1,5 @@
+export type ExecSqlKeywordCase = 'lower' | 'upper';
+
 export interface Shift6Config {
   spaces: number;
   targetBaseIndent: number;
@@ -12,4 +14,5 @@ export interface Shift6Config {
   wrapLongStrings: boolean;
   fixMultilineStringLiterals: boolean;
   concatStyle: 'compact' | 'one-per-line' | 'fill';
+  execSqlKeywordCase: ExecSqlKeywordCase;
 }

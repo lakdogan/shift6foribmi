@@ -1,6 +1,13 @@
 import type { Shift6Config } from '../../../config';
 import { formatSqlStatement } from './formatters/index';
-import { END_EXEC, EXEC_SQL_START, endsWithTopLevelSemicolon, splitSqlStatements } from './utils/index';
+import {
+  END_EXEC,
+  EXEC_SQL_START,
+  applySqlKeywordCasing,
+  endsWithTopLevelSemicolon,
+  getExecSqlPrefix,
+  splitSqlStatements
+} from './utils/index';
 
 interface ExecSqlNormalizeResult {
   lines: string[];
@@ -13,6 +20,7 @@ export const normalizeExecSqlBlocks = (
   cfg: Shift6Config
 ): ExecSqlNormalizeResult => {
   const out: string[] = [];
+  const execSqlPrefix = getExecSqlPrefix(cfg.execSqlKeywordCase);
   let changed = false;
   let inExecSql = false;
   let sqlBuffer: string[] = [];
@@ -20,25 +28,26 @@ export const normalizeExecSqlBlocks = (
 
   const emitStatement = (statement: string, usePending: boolean) => {
     const formatted = formatSqlStatement(statement, cfg.blockIndent);
-    const sqlLine = formatted.length === 1 ? formatted[0].trimStart() : '';
+    const cased = applySqlKeywordCasing(formatted, cfg.execSqlKeywordCase);
+    const sqlLine = cased.length === 1 ? cased[0].trimStart() : '';
 
     if (usePending && pendingExecSqlLineIndex !== null) {
-      if (formatted.length === 1) {
-        out[pendingExecSqlLineIndex] = `exec sql ${sqlLine}`.trimEnd();
+      if (cased.length === 1) {
+        out[pendingExecSqlLineIndex] = `${execSqlPrefix} ${sqlLine}`.trimEnd();
       } else {
-        out.push(...formatted);
+        out.push(...cased);
       }
       pendingExecSqlLineIndex = null;
       return;
     }
 
-    if (formatted.length === 1) {
-      out.push(`exec sql ${sqlLine}`.trimEnd());
+    if (cased.length === 1) {
+      out.push(`${execSqlPrefix} ${sqlLine}`.trimEnd());
       return;
     }
 
-    out.push('exec sql');
-    out.push(...formatted);
+    out.push(execSqlPrefix);
+    out.push(...cased);
   };
 
   const flushBuffer = () => {
@@ -85,7 +94,7 @@ export const normalizeExecSqlBlocks = (
 
           inExecSql = true;
           pendingExecSqlLineIndex = out.length;
-          out.push('exec sql');
+          out.push(execSqlPrefix);
           if (sqlPart.length > 0) {
             sqlBuffer.push(sqlPart);
           }
@@ -94,7 +103,7 @@ export const normalizeExecSqlBlocks = (
 
         inExecSql = true;
         pendingExecSqlLineIndex = out.length;
-        out.push('exec sql');
+        out.push(execSqlPrefix);
         continue;
       }
       if (isEndExecLine) {

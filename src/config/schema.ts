@@ -12,6 +12,7 @@ export interface Shift6ConfigInput {
   wrapLongStrings?: boolean;
   fixMultilineStringLiterals?: boolean;
   concatStyle?: string;
+  execSqlKeywordCase?: string;
 }
 
 export const SHIFT6_DEFAULTS: Shift6ConfigInput = {
@@ -25,7 +26,8 @@ export const SHIFT6_DEFAULTS: Shift6ConfigInput = {
   joinAsteriskTokensInDecl: true,
   wrapLongStrings: false,
   fixMultilineStringLiterals: true,
-  concatStyle: 'compact'
+  concatStyle: 'compact',
+  execSqlKeywordCase: 'lower'
 };
 
 // Apply defaults and sanitize config inputs into a stable config object.
@@ -64,6 +66,10 @@ export function normalizeConfig(input: Shift6ConfigInput): Shift6Config {
       : concatStyleNormalized === 'fill'
         ? 'fill'
         : 'compact';
+  const execSqlKeywordCaseInput = String(
+    input.execSqlKeywordCase ?? SHIFT6_DEFAULTS.execSqlKeywordCase
+  ).toLowerCase();
+  const execSqlKeywordCase = execSqlKeywordCaseInput === 'upper' ? 'upper' : 'lower';
 
   return {
     spaces,
@@ -78,6 +84,7 @@ export function normalizeConfig(input: Shift6ConfigInput): Shift6Config {
     joinAsteriskTokensInDecl,
     wrapLongStrings,
     fixMultilineStringLiterals,
-    concatStyle
+    concatStyle,
+    execSqlKeywordCase
   };
 }

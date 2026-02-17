@@ -8,6 +8,8 @@ import { normalizePercentBuiltinArgs, normalizePercentBuiltinNames } from './per
 import { trimSpaceBeforeSemicolon } from './semicolon-spacing';
 import { applySpecialValueContextSpacing } from './special-value-context';
 
+const SQL_STATUS_IDENTIFIERS = new Set(['SQLCODE', 'SQLSTATE', 'SQLCA']);
+
 const applyOutside = (text: string, transform: (segment: string) => string): string => {
   return transformSegmentsOutsideStrings(text, transform);
 };
@@ -55,4 +57,28 @@ export const applyPercentBuiltinNames = (text: string): string => {
 
 export const applyPercentBuiltinArgs = (text: string): string => {
   return applyOutside(text, normalizePercentBuiltinArgs);
+};
+
+const normalizeSqlStatusIdentifierCase = (
+  text: string,
+  keywordCase: Shift6Config['execSqlKeywordCase']
+): string => {
+  return text.replace(/\b[A-Za-z_][A-Za-z0-9_]*\b/g, (token, offset, source) => {
+    const upper = token.toUpperCase();
+    if (!SQL_STATUS_IDENTIFIERS.has(upper)) {
+      return token;
+    }
+    const prev = offset > 0 ? source[offset - 1] : '';
+    if (prev === ':' || prev === '.' || prev === '/') {
+      return token;
+    }
+    return keywordCase === 'upper' ? upper : upper.toLowerCase();
+  });
+};
+
+export const applySqlStatusIdentifierCase = (
+  text: string,
+  keywordCase: Shift6Config['execSqlKeywordCase']
+): string => {
+  return applyOutside(text, (segment) => normalizeSqlStatusIdentifierCase(segment, keywordCase));
 };

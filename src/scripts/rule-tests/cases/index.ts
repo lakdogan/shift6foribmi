@@ -34,6 +34,7 @@ import avoidSplitInsideParens from './avoid-split-inside-parens';
 import execSqlFormatting from './exec-sql-formatting';
 import execSqlKeywordCaseDdlLower from './exec-sql-keyword-case-ddl-lower';
 import execSqlKeywordCaseUpper from './exec-sql-keyword-case-upper';
+import execSqlFunctionReturnSelect from './exec-sql-function-return-select';
 import sqlStatusIdentifiersLower from './sql-status-identifiers-lower';
 import sqlStatusIdentifiersUpper from './sql-status-identifiers-upper';
 import execSqlFreeformMultiline from './exec-sql-freeform-multiline';
@@ -188,6 +189,7 @@ export const cases: Case[] = [
   execSqlFormatting,
   execSqlKeywordCaseDdlLower,
   execSqlKeywordCaseUpper,
+  execSqlFunctionReturnSelect,
   sqlStatusIdentifiersLower,
   sqlStatusIdentifiersUpper,
   execSqlFreeformMultiline,

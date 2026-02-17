@@ -1,5 +1,6 @@
 import {
   normalizeSqlWhitespace,
+  normalizeSqlExpression,
   stripTrailingSemicolon,
   findKeywordIndex,
   findLastKeywordIndex,
@@ -7,6 +8,7 @@ import {
   splitTopLevel
 } from '../utils/index';
 import { formatPsmBeginEndBlock } from './psm';
+import { formatSelect } from './select';
 
 // Format DDL statements as normalized single lines.
 export const formatDdlStatement = (text: string, baseIndent: string): string[] => {
@@ -31,6 +33,11 @@ export const formatDdlStatement = (text: string, baseIndent: string): string[] =
       }
       lines.push(...formatPsmBeginEndBlock(bodyText, baseIndent, nestedIndent));
       return lines;
+    }
+
+    const functionReturnLines = formatSqlFunctionReturnStatement(normalized, baseIndent, nestedIndent);
+    if (functionReturnLines) {
+      return functionReturnLines;
     }
   }
 
@@ -77,17 +84,25 @@ const formatRoutineHeader = (
   const paramsText = normalized.slice(parenIndex + 1, closingIndex).trim();
   const suffixRaw = normalized.slice(closingIndex + 1).trim();
   const suffix = suffixRaw.length > 0 ? normalizeSqlWhitespace(suffixRaw) : '';
+  const appendSuffix = (headLines: string[]): string[] => {
+    if (suffix.length === 0) return headLines;
+    const expandedSuffix = formatRoutineReturnsTableSuffix(suffix, baseIndent, nestedIndent);
+    if (expandedSuffix) {
+      return [...headLines, ...expandedSuffix];
+    }
+    const out = [...headLines];
+    out[out.length - 1] = `${out[out.length - 1]} ${suffix}`.trimEnd();
+    return out;
+  };
 
   if (paramsText.length === 0) {
-    const line = `${prefix}()${suffix ? ` ${suffix}` : ''}`;
-    return [baseIndent + line];
+    return appendSuffix([baseIndent + `${prefix}()`]);
   }
 
   const params = splitTopLevel(paramsText, ',').map(normalizeSqlWhitespace);
   if (params.length <= 1) {
     const paramsJoined = params.join(', ');
-    const line = `${prefix} (${paramsJoined})${suffix ? ` ${suffix}` : ''}`;
-    return [baseIndent + line.trimEnd()];
+    return appendSuffix([baseIndent + `${prefix} (${paramsJoined})`.trimEnd()]);
   }
 
   const lines: string[] = [];
@@ -97,9 +112,74 @@ const formatRoutineHeader = (
     lines.push(nestedIndent + params[i] + suffixComma);
   }
   lines.push(baseIndent + ')');
-  if (suffix.length > 0) {
-    lines.push(baseIndent + suffix);
+  return appendSuffix(lines);
+};
+
+const formatRoutineReturnsTableSuffix = (
+  suffix: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] | null => {
+  const normalizedSuffix = normalizeSqlWhitespace(suffix);
+  const upper = normalizedSuffix.toUpperCase();
+  if (!upper.startsWith('RETURNS TABLE')) {
+    return null;
   }
+
+  const tableTokenIndex = upper.indexOf('TABLE');
+  if (tableTokenIndex < 0) return null;
+  const openParenIndex = normalizedSuffix.indexOf('(', tableTokenIndex);
+  if (openParenIndex < 0) return null;
+  const closeParenIndex = findMatchingParenIndex(normalizedSuffix, openParenIndex);
+  if (closeParenIndex === null) return null;
+
+  const columnsText = normalizedSuffix.slice(openParenIndex + 1, closeParenIndex).trim();
+  const tail = normalizeSqlWhitespace(normalizedSuffix.slice(closeParenIndex + 1).trim());
+  const columns = splitTopLevel(columnsText, ',').map(normalizeSqlWhitespace);
+
+  const lines: string[] = [];
+  lines.push(baseIndent + 'returns table (');
+  for (let i = 0; i < columns.length; i++) {
+    const suffixComma = i < columns.length - 1 ? ',' : '';
+    lines.push(nestedIndent + columns[i] + suffixComma);
+  }
+  lines.push(baseIndent + ')');
+  if (tail.length > 0) {
+    lines.push(baseIndent + tail);
+  }
+  return lines;
+};
+
+const formatSqlFunctionReturnStatement = (
+  normalized: string,
+  baseIndent: string,
+  nestedIndent: string
+): string[] | null => {
+  const upper = normalized.toUpperCase();
+  if (!/^CREATE(\s+OR\s+REPLACE)?\s+FUNCTION\b/.test(upper)) {
+    return null;
+  }
+
+  const returnIndex = findKeywordIndex(normalized, 'RETURN');
+  if (returnIndex < 0) return null;
+
+  const header = normalized.slice(0, returnIndex).trim();
+  const returnBody = normalized.slice(returnIndex + 'RETURN'.length).trimStart();
+  if (header.length === 0 || returnBody.length === 0) {
+    return null;
+  }
+
+  const lines: string[] = [...formatRoutineHeader(header, baseIndent, nestedIndent)];
+  lines.push(baseIndent + 'return');
+
+  const returnUpper = returnBody.toUpperCase();
+  const deeperIndent = ' '.repeat(nestedIndent.length + (nestedIndent.length - baseIndent.length));
+  if (returnUpper.startsWith('SELECT') || returnUpper.startsWith('WITH')) {
+    lines.push(...formatSelect(returnBody, nestedIndent, deeperIndent));
+    return lines;
+  }
+
+  lines.push(nestedIndent + `${normalizeSqlExpression(returnBody)};`);
   return lines;
 };
 

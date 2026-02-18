@@ -6,6 +6,69 @@ import {
   splitLiteralContentToFit
 } from '../../utils/string-scan';
 
+const CTL_OPT_CALL_KEYWORDS = new Set([
+  'ACTGRP',
+  'ALIAS',
+  'ALWNULL',
+  'BNDDIR',
+  'CCSID',
+  'CCSIDCVT',
+  'CNVTDAT',
+  'COPYNEST',
+  'COPYRIGHT',
+  'CURSYM',
+  'CVTOPT',
+  'DATFMT',
+  'DATEDIT',
+  'DATEYY',
+  'DCLOPT',
+  'DEBUG',
+  'DBGVIEW',
+  'DECEDIT',
+  'DECPREC',
+  'DFTACTGRP',
+  'DFTNAME',
+  'ENBPFRCOL',
+  'EXPROPTS',
+  'EXTDESC',
+  'EXTBININT',
+  'FIXNBR',
+  'FLTDIV',
+  'FORMSALIGN',
+  'FTRANS',
+  'GENLVL',
+  'INDENT',
+  'INTPREC',
+  'MAIN',
+  'NOMAIN',
+  'OPENOPT',
+  'OPTION',
+  'OPTIMIZE',
+  'PGMINFO',
+  'PRFDTA',
+  'REQPREXP',
+  'SRTSEQ',
+  'STGMDL',
+  'TEXT',
+  'THREAD',
+  'TIMFMT',
+  'TRUNCNBR',
+  'USRPRF',
+  'VALIDATE'
+]);
+
+const extractTrailingCallKeyword = (prefix: string): string | null => {
+  const match = prefix.trim().match(/([A-Za-z][A-Za-z0-9_-]*)\s*\($/);
+  if (!match) return null;
+  return match[1].toUpperCase();
+};
+
+const isCtlOptOptionCallPrefix = (prefix: string): boolean => {
+  const keyword = extractTrailingCallKeyword(prefix);
+  if (!keyword) return false;
+  return CTL_OPT_CALL_KEYWORDS.has(keyword);
+};
+
 // Wrap a string literal into continuation lines, keeping suffix on the last chunk.
 const splitBareLiteralIntoLines = (
   quoteChar: string,
@@ -89,6 +152,9 @@ export function wrapConcatenatedLine(
 
     const firstInfo = parseLiteralSegmentWithAffixes(rawSegments[0]);
     if (!firstInfo) return null;
+    if (isCtlOptOptionCallPrefix(firstInfo.prefix)) {
+      return null;
+    }
     const quoteChar = firstInfo.quoteChar;
     const contents: string[] = [firstInfo.content];
     const prefix = firstInfo.prefix;

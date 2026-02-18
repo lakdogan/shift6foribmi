@@ -3,6 +3,7 @@ import joinAsteriskInDecl from './join-asterisk-in-decl';
 import percentBuiltins from './percent-builtins';
 import ctlOptParentheses from './ctl-opt-parentheses';
 import ctlOptContinuationIndent from './ctl-opt-continuation-indent';
+import ctlOptLiteralOptionsNoConcat from './ctl-opt-literal-options-no-concat';
 import operatorSpacingBasic from './operator-spacing-basic';
 import specialValuesJoin from './special-values-join';
 import onErrorSpecialValue from './on-error-special-value';
@@ -160,6 +161,7 @@ export const cases: Case[] = [
   percentBuiltins,
   ctlOptParentheses,
   ctlOptContinuationIndent,
+  ctlOptLiteralOptionsNoConcat,
   operatorSpacingBasic,
   specialValuesJoin,
   onErrorSpecialValue,

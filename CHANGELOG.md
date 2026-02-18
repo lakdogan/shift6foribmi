@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed a formatter regression where declarations like `dcl-s warnMsg varchar(128) inz('');` could be dropped during preprocessing.
 - Added preprocessing safety guards to preserve non-empty declaration/code lines in edge cases instead of silently removing them.
 - Added rule-test coverage for empty-string `inz('')` declaration preservation.
+- Prevented `ctl-opt` option calls with literal parameters (e.g., `copyright('...')`, `text('...')`) from being split into `+` concatenation lines in `concatStyle=fill` with long-string wrapping enabled.
+- Added rule-test coverage to keep `ctl-opt` literal option values intact without forced concat wrapping.
 
 ## [0.3.0] - 2026-02-17
 - Added `shift6.execSqlKeywordCase` setting to switch exec sql keyword output between lowercase and uppercase.

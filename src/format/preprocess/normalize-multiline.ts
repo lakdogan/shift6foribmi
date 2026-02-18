@@ -54,6 +54,15 @@ export function normalizeMultilineStringLiterals(
 
   for (const line of lines) {
     if (inMultiline) {
+      const trimmedStart = line.trimStart();
+      const isEmptyStringDeclLine =
+        /^dcl-s\b/i.test(trimmedStart) && /\binz\s*\(\s*''\s*\)\s*;\s*$/i.test(trimmedStart);
+      if (isEmptyStringDeclLine) {
+        out.push(line);
+        inMultiline = false;
+        continue;
+      }
+
       const closingIndex = findClosingQuote(line);
       if (closingIndex === null) {
         out.push(baseIndent + '+ \'' + line + '\'');

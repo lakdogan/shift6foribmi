@@ -51,5 +51,13 @@ export function splitStatements(line: string): string[] {
     segments[last] += spacer + commentPart;
   }
 
+  // Safety net: never drop a meaningful code line if splitting produced no segments.
+  if (segments.length === 0) {
+    const hasMeaningfulCode = /[A-Za-z0-9_%*'"]/u.test(codePart);
+    if (hasMeaningfulCode) {
+      return [line];
+    }
+  }
+
   return segments.length <= 1 ? segments : segments;
 }

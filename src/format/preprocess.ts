@@ -16,6 +16,73 @@ export interface PreprocessResult {
   lineCount: number;
 }
 
+interface IndexedLine {
+  index: number;
+  line: string;
+  normalized: string;
+}
+
+const isEmptyStringDecl = (line: string): boolean =>
+  /^\s*dcl-s\b.*\binz\s*\(\s*''\s*\)\s*;\s*(?:\/\/.*)?$/i.test(line);
+
+const normalizeComparableLine = (line: string): string => line.trim().replace(/\s+/g, ' ').toLowerCase();
+
+const restoreDroppedEmptyStringDecls = (
+  sourceLines: string[],
+  outputLines: string[]
+): { lines: string[]; restored: boolean } => {
+  const indexed: IndexedLine[] = sourceLines.map((line, index) => ({
+    index,
+    line,
+    normalized: normalizeComparableLine(line)
+  }));
+  const candidates = indexed.filter((entry) => isEmptyStringDecl(entry.line));
+  if (candidates.length === 0) return { lines: outputLines, restored: false };
+
+  const out = [...outputLines];
+  const outNorm = out.map(normalizeComparableLine);
+  const findOutIndex = (normalized: string): number => outNorm.findIndex((value) => value === normalized);
+  let restored = false;
+
+  for (const candidate of candidates) {
+    if (findOutIndex(candidate.normalized) >= 0) continue;
+
+    let insertAt = -1;
+
+    for (let i = candidate.index + 1; i < indexed.length; i++) {
+      const next = indexed[i];
+      if (next.normalized.length === 0) continue;
+      const outIndex = findOutIndex(next.normalized);
+      if (outIndex >= 0) {
+        insertAt = outIndex;
+        break;
+      }
+    }
+
+    if (insertAt < 0) {
+      for (let i = candidate.index - 1; i >= 0; i--) {
+        const prev = indexed[i];
+        if (prev.normalized.length === 0) continue;
+        const outIndex = findOutIndex(prev.normalized);
+        if (outIndex >= 0) {
+          insertAt = outIndex + 1;
+          break;
+        }
+      }
+    }
+
+    if (insertAt < 0) {
+      insertAt = out.length > 0 && out[0].trim().toLowerCase() === '**free' ? 1 : 0;
+    }
+
+    out.splice(insertAt, 0, candidate.line);
+    outNorm.splice(insertAt, 0, candidate.normalized);
+    restored = true;
+  }
+
+  return { lines: out, restored };
+};
+
 const splitProcedureParameterClosing = (seg: string): string[] => {
   const trimmedStart = seg.trimStart();
   if (!trimmedStart.startsWith(':')) return [seg];
@@ -220,8 +287,13 @@ export function preprocessDocument(lines: string[], cfg: Shift6Config): Preproce
     linesToProcess.push(continuationState.pendingContinuation);
   }
 
+  const restoredDecls = restoreDroppedEmptyStringDecls(workingLines, linesToProcess);
+  if (restoredDecls.restored) {
+    localSplitOccurred = true;
+  }
+
   return {
-    linesToProcess,
+    linesToProcess: restoredDecls.lines,
     freeNeedsTrim,
     splitOccurred: splitOccurred || localSplitOccurred,
     firstLineText,

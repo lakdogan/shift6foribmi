@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.3.1] - 2026-02-18
+- Fixed a formatter regression where declarations like `dcl-s warnMsg varchar(128) inz('');` could be dropped during preprocessing.
+- Added preprocessing safety guards to preserve non-empty declaration/code lines in edge cases instead of silently removing them.
+- Added rule-test coverage for empty-string `inz('')` declaration preservation.
+
 ## [0.3.0] - 2026-02-17
 - Added `shift6.execSqlKeywordCase` setting to switch exec sql keyword output between lowercase and uppercase.
 - Applied keyword-case conversion to `exec sql` blocks, including the `exec sql` / `EXEC SQL` prefix.

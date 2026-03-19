@@ -1,7 +1,7 @@
 import { normalizeConfig } from '../config/schema';
 import { formatCore } from '../format/format-core';
 import { postProcessBlankLines } from '../format/postprocess';
-import { preprocessDocument } from '../format/preprocess';
+import { preprocessDocument, restoreDroppedEmptyStringInitLines } from '../format/preprocess';
 import { cases } from './rule-tests/cases';
 import type { Case } from './rule-tests/types';
 
@@ -38,6 +38,66 @@ function assertExcludes(name: string, output: string, forbidden: string): void {
   }
 }
 
+function assertRestoreKeepsDuplicateDeclBlocksStable(): void {
+  const sourceLines = [
+    '**free',
+    'dcl-ds Request qualified inz;',
+    "  User varchar(200) ccsid(*utf8) inz('');",
+    'end-ds;',
+    '',
+    'dcl-ds ReportRow qualified inz;',
+    "  Variant varchar(100) ccsid(*utf8) inz('');",
+    '  ReportOrder int(10) inz(0);',
+    "  DisplayName varchar(100) ccsid(*utf8) inz('');",
+    "  DisplayText varchar(100) ccsid(*utf8) inz('');",
+    'end-ds;',
+    '',
+    'dcl-ds SelectorRow qualified inz;',
+    "  Variant varchar(100) ccsid(*utf8) inz('');",
+    "  Name varchar(200) ccsid(*utf8) inz('');",
+    'end-ds;'
+  ];
+
+  const droppedOutputLines = [
+    'dcl-ds Request qualified inz;',
+    "  User varchar(200) ccsid(*utf8) inz('');",
+    'end-ds;',
+    '',
+    'dcl-ds ReportRow qualified inz;',
+    "  Variant varchar(100) ccsid(*utf8) inz('');",
+    '  ReportOrder int(10) inz(0);',
+    'end-ds;',
+    '',
+    'dcl-ds SelectorRow qualified inz;',
+    "  Variant varchar(100) ccsid(*utf8) inz('');",
+    'end-ds;'
+  ];
+
+  const restored = restoreDroppedEmptyStringInitLines(sourceLines, droppedOutputLines);
+  const expected = [
+    'dcl-ds Request qualified inz;',
+    "  User varchar(200) ccsid(*utf8) inz('');",
+    'end-ds;',
+    '',
+    'dcl-ds ReportRow qualified inz;',
+    "  Variant varchar(100) ccsid(*utf8) inz('');",
+    '  ReportOrder int(10) inz(0);',
+    "  DisplayName varchar(100) ccsid(*utf8) inz('');",
+    "  DisplayText varchar(100) ccsid(*utf8) inz('');",
+    'end-ds;',
+    '',
+    'dcl-ds SelectorRow qualified inz;',
+    "  Variant varchar(100) ccsid(*utf8) inz('');",
+    "  Name varchar(200) ccsid(*utf8) inz('');",
+    'end-ds;'
+  ].join('\n');
+
+  const actual = restored.lines.join('\n');
+  if (actual !== expected) {
+    throw new Error('Direct restore regression: duplicate declaration lines were reinserted into the wrong block');
+  }
+}
+
 let failed = false;
 for (const testCase of cases) {
   try {
@@ -54,6 +114,13 @@ for (const testCase of cases) {
     failed = true;
     console.error(String(error));
   }
+}
+
+try {
+  assertRestoreKeepsDuplicateDeclBlocksStable();
+} catch (error) {
+  failed = true;
+  console.error(String(error));
 }
 
 if (failed) {

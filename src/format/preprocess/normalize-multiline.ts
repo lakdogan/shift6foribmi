@@ -1,5 +1,25 @@
 import { END_EXEC, EXEC_SQL_START, endsWithTopLevelSemicolon } from './exec-sql/utils';
 
+const LIKELY_MEMBER_DECLARATION_LINE =
+  /^\s*[A-Za-z_@$#%][\w@$#%]*\s+(?:char|varchar|nchar|graphic|vargraphic|ucs2|varucs2|int|ind|packed|zoned|date|time|timestamp|float|pointer|object|uns|unsigned|dec|decimal|bin|binary|like(?:ds|rec|df|file)?|like|sqltype)\b.*;\s*(?:\/\/.*)?$/i;
+
+const isLikelyCodeLineInsideMalformedMultiline = (line: string): boolean => {
+  const trimmedStart = line.trimStart();
+  if (trimmedStart.length === 0 || trimmedStart.startsWith('//')) {
+    return false;
+  }
+  if (/^dcl-[a-z-]+\b/i.test(trimmedStart)) {
+    return true;
+  }
+  if (/^(end-[a-z-]+|end[a-z]+|\/if|\/endif|\/else|\/elseif)\b/i.test(trimmedStart)) {
+    return true;
+  }
+  if (/\binz\s*\(\s*''\s*\)\s*;\s*(?:\/\/.*)?$/i.test(trimmedStart) && !trimmedStart.includes('=')) {
+    return true;
+  }
+  return LIKELY_MEMBER_DECLARATION_LINE.test(trimmedStart);
+};
+
 // Normalize multi-line string literals into explicit concatenations.
 export function normalizeMultilineStringLiterals(
   lines: string[]
@@ -54,10 +74,7 @@ export function normalizeMultilineStringLiterals(
 
   for (const line of lines) {
     if (inMultiline) {
-      const trimmedStart = line.trimStart();
-      const isEmptyStringDeclLine =
-        /^dcl-s\b/i.test(trimmedStart) && /\binz\s*\(\s*''\s*\)\s*;\s*$/i.test(trimmedStart);
-      if (isEmptyStringDeclLine) {
+      if (isLikelyCodeLineInsideMalformedMultiline(line)) {
         out.push(line);
         inMultiline = false;
         continue;

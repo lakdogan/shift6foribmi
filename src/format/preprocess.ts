@@ -22,12 +22,63 @@ interface IndexedLine {
   normalized: string;
 }
 
-const isEmptyStringDecl = (line: string): boolean =>
-  /^\s*dcl-s\b.*\binz\s*\(\s*''\s*\)\s*;\s*(?:\/\/.*)?$/i.test(line);
+interface MappedOutputLine {
+  sourceIndex: number | null;
+  line: string;
+  normalized: string;
+}
+
+const isEmptyStringInitLine = (line: string): boolean =>
+  /^\s*(?!\/\/)(?:dcl-[a-z-]+\b|[A-Za-z_@$#%][\w@$#%]*)\b[^=]*\binz\s*\(\s*''\s*\)\s*;\s*(?:\/\/.*)?$/i.test(
+    line
+  );
 
 const normalizeComparableLine = (line: string): string => line.trim().replace(/\s+/g, ' ').toLowerCase();
 
-const restoreDroppedEmptyStringDecls = (
+const mapOutputLinesToSource = (
+  sourceLines: IndexedLine[],
+  outputLines: string[]
+): MappedOutputLine[] => {
+  const usedSourceIndices = new Set<number>();
+  const mapped: MappedOutputLine[] = [];
+  let sourceCursor = 0;
+
+  for (const line of outputLines) {
+    const normalized = normalizeComparableLine(line);
+    let matchedSourceIndex: number | null = null;
+
+    for (let i = sourceCursor; i < sourceLines.length; i++) {
+      if (usedSourceIndices.has(i)) continue;
+      if (sourceLines[i].normalized !== normalized) continue;
+      matchedSourceIndex = i;
+      sourceCursor = i + 1;
+      break;
+    }
+
+    if (matchedSourceIndex === null) {
+      for (let i = 0; i < sourceCursor; i++) {
+        if (usedSourceIndices.has(i)) continue;
+        if (sourceLines[i].normalized !== normalized) continue;
+        matchedSourceIndex = i;
+        break;
+      }
+    }
+
+    if (matchedSourceIndex !== null) {
+      usedSourceIndices.add(matchedSourceIndex);
+    }
+
+    mapped.push({
+      sourceIndex: matchedSourceIndex,
+      line,
+      normalized
+    });
+  }
+
+  return mapped;
+};
+
+export const restoreDroppedEmptyStringInitLines = (
   sourceLines: string[],
   outputLines: string[]
 ): { lines: string[]; restored: boolean } => {
@@ -36,23 +87,23 @@ const restoreDroppedEmptyStringDecls = (
     line,
     normalized: normalizeComparableLine(line)
   }));
-  const candidates = indexed.filter((entry) => isEmptyStringDecl(entry.line));
+  const candidates = indexed.filter((entry) => isEmptyStringInitLine(entry.line));
   if (candidates.length === 0) return { lines: outputLines, restored: false };
 
-  const out = [...outputLines];
-  const outNorm = out.map(normalizeComparableLine);
-  const findOutIndex = (normalized: string): number => outNorm.findIndex((value) => value === normalized);
+  const out = mapOutputLinesToSource(indexed, outputLines);
+  const findOutIndexBySource = (sourceIndex: number): number =>
+    out.findIndex((entry) => entry.sourceIndex === sourceIndex);
   let restored = false;
 
   for (const candidate of candidates) {
-    if (findOutIndex(candidate.normalized) >= 0) continue;
+    if (findOutIndexBySource(candidate.index) >= 0) continue;
 
     let insertAt = -1;
 
     for (let i = candidate.index + 1; i < indexed.length; i++) {
       const next = indexed[i];
       if (next.normalized.length === 0) continue;
-      const outIndex = findOutIndex(next.normalized);
+      const outIndex = findOutIndexBySource(next.index);
       if (outIndex >= 0) {
         insertAt = outIndex;
         break;
@@ -63,7 +114,7 @@ const restoreDroppedEmptyStringDecls = (
       for (let i = candidate.index - 1; i >= 0; i--) {
         const prev = indexed[i];
         if (prev.normalized.length === 0) continue;
-        const outIndex = findOutIndex(prev.normalized);
+        const outIndex = findOutIndexBySource(prev.index);
         if (outIndex >= 0) {
           insertAt = outIndex + 1;
           break;
@@ -72,15 +123,18 @@ const restoreDroppedEmptyStringDecls = (
     }
 
     if (insertAt < 0) {
-      insertAt = out.length > 0 && out[0].trim().toLowerCase() === '**free' ? 1 : 0;
+      insertAt = out.length > 0 && out[0].line.trim().toLowerCase() === '**free' ? 1 : 0;
     }
 
-    out.splice(insertAt, 0, candidate.line);
-    outNorm.splice(insertAt, 0, candidate.normalized);
+    out.splice(insertAt, 0, {
+      sourceIndex: candidate.index,
+      line: candidate.line,
+      normalized: candidate.normalized
+    });
     restored = true;
   }
 
-  return { lines: out, restored };
+  return { lines: out.map((entry) => entry.line), restored };
 };
 
 const splitProcedureParameterClosing = (seg: string): string[] => {
@@ -287,7 +341,7 @@ export function preprocessDocument(lines: string[], cfg: Shift6Config): Preproce
     linesToProcess.push(continuationState.pendingContinuation);
   }
 
-  const restoredDecls = restoreDroppedEmptyStringDecls(workingLines, linesToProcess);
+  const restoredDecls = restoreDroppedEmptyStringInitLines(workingLines, linesToProcess);
   if (restoredDecls.restored) {
     localSplitOccurred = true;
   }

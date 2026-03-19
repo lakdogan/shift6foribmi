@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
+## [0.3.2] - 2026-03-19
+- Fixed a formatter regression where restored empty-string init lines could be reinserted into the wrong `dcl-ds` block when similar member declarations appeared multiple times.
+- Matched restored preprocessing lines back to their original source positions instead of anchoring them to the first text match.
+- Prevented malformed multi-line string recovery from swallowing obvious declaration lines inside `dcl-ds` blocks.
+- Added regression coverage for duplicate declaration/member restoration and malformed string edge cases.
+
 ## [0.3.1] - 2026-02-18
 - Fixed a formatter regression where declarations like `dcl-s warnMsg varchar(128) inz('');` could be dropped during preprocessing.
 - Added preprocessing safety guards to preserve non-empty declaration/code lines in edge cases instead of silently removing them.

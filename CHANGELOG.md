@@ -6,10 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Released]
 
-## [0.3.2] - 2026-03-19
+## [0.3.3] - 2026-03-19
 - Fixed a formatter regression where restored empty-string init lines could be reinserted into the wrong `dcl-ds` block when similar member declarations appeared multiple times.
 - Matched restored preprocessing lines back to their original source positions instead of anchoring them to the first text match.
 - Prevented malformed multi-line string recovery from swallowing obvious declaration lines inside `dcl-ds` blocks.
+- Fixed a `concatStyle=fill` / `wrapLongStrings=true` regression where lines ending with empty string literals like `= ''` could be dropped during preprocessing.
+- Prevented empty string literal wrapping from returning an empty result and deleting logical condition lines.
+- Added regression coverage for multiline `if` / `or` chains that compare against `''`.
 - Added regression coverage for duplicate declaration/member restoration and malformed string edge cases.
 
 ## [0.3.1] - 2026-02-18

@@ -156,6 +156,7 @@ import procedureCallParenContinuationIndent from './procedure-call-paren-continu
 import noDropEmptyStringDecl from './no-drop-empty-string-decl';
 import noDropEmptyStringDeclAfterUnclosed from './no-drop-empty-string-decl-after-unclosed';
 import noDropEmptyStringMemberAfterUnclosed from './no-drop-empty-string-member-after-unclosed';
+import multilineIfOrChain from './multiline-if-or-chain';
 
 export const cases: Case[] = [
   joinAsteriskInDecl,
@@ -314,5 +315,6 @@ export const cases: Case[] = [
   procedureCallParenContinuationIndent,
   noDropEmptyStringDecl,
   noDropEmptyStringDeclAfterUnclosed,
-  noDropEmptyStringMemberAfterUnclosed
+  noDropEmptyStringMemberAfterUnclosed,
+  multilineIfOrChain
 ];

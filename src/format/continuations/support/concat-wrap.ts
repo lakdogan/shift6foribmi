@@ -78,6 +78,11 @@ const splitBareLiteralIntoLines = (
   columnLimit: number,
   suffix: string
 ): string[] | null => {
+  if (content.length === 0) {
+    const literalLine = firstPrefix + quoteChar + quoteChar + suffix;
+    return literalLine.length <= columnLimit ? [literalLine] : null;
+  }
+
   const lines: string[] = [];
   let remaining = content;
   let prefix = firstPrefix;

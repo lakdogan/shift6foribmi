@@ -153,3 +153,8 @@ Nachher (Basis 6, Block 2):
         endif;
       end-proc;
 ```
+
+#### Contributors & Supporters
+
+- Levent Akdogan (Lakdogan) – Architecture and Maintenance  
+- [PORTOLAN Commerce Solutions GmbH](https://www.portolancs.com) – Industry collaboration and support

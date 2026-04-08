@@ -172,3 +172,12 @@ After (base 6, block 2):
         endif;
       end-proc;
 ```
+
+---
+
+## VIII. Partners & Collaboration
+
+This project is supported through collaboration with  
+[PORTOLAN Commerce Solutions GmbH](https://www.portolancs.com).
+
+Their support and industry involvement help promote practical IBM i development workflows and tools.
